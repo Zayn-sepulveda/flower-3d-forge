@@ -1,0 +1,54 @@
+# ==============================================================================
+# PLANTILLA BASE - TAXONOMÍA DE ANGIOSPERMAS CON REGISTRO FOTOGRÁFICO
+# ==============================================================================
+
+colecta:
+  id_muestra: "COL-001"
+  familia: "Fabaceae"
+  genero: "Crotalaria"
+  especie: "Crotalaria sp."
+  localidad: "Palmira, Valle del Cauca"
+  fecha: "2026-11-03"
+  foto_campo: "images/crotalaria_sp.jpg" # Ruta local o URL de la foto real
+
+arquitectura_floral:
+  simetria: "zigomorfa"            # "actinomorfa" o "zigomorfa"
+  tipo_inflorescencia: "racimo"
+  disposicion: "erecta"
+
+perianto:
+  verticilos: "diclamidea"
+  caliz:
+    sepalos_numero: 5
+    fusion: "gamosepalo"
+    longitud_tubo_mm: 6.0
+    color_hex: "#4F772D"
+  corola:
+    petalos_numero: 5
+    fusion: "dialipetala"
+    longitud_tubo_mm: 0.0
+    longitud_limbo_mm: 18.0
+    ancho_petalo_mm: 10.0
+    diferenciacion_dorsoventral:
+      factor_tamano_dorsal: 1.6
+      factor_tamano_ventral: 0.8
+      curvatura_dorsal_grados: 40.0
+    grosor_pared_mm: 0.6
+    color_garganta_hex: "#FEE440"
+    color_limbo_hex: "#FFB703"
+
+androceo:
+  estambres_numero: 10
+  fusion_filamentos: "monadelfos"
+  filamento_longitud_mm: 12.0
+  filamento_grosor_mm: 0.5
+  antera_longitud_mm: 2.0
+  color_filamento_hex: "#F4F1DE"
+  color_antera_hex: "#BC4749"
+
+gineceo:
+  posicion_ovario: "supero"
+  estilo_longitud_mm: 14.0
+  curvatura_estilo_grados: 25.0
+  estigmas_numero: 1
+  color_estilo_hex: "#D8F3DC"
