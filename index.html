@@ -85,7 +85,7 @@
         }
         .card-img {
             width: 100%;
-            height: 200px;
+            height: 220px;
             object-fit: cover;
             background-color: #21262d;
             border-bottom: 1px solid var(--border-color);
@@ -160,7 +160,7 @@
 
             <!-- Ficha: Anthurium sanjorgense -->
             <div class="card" data-search="anthurium sanjorgense araceae tolima colombia espadice">
-                <img class="card-img" src="images/anthurium_sanjorgense.jpg" alt="Anthurium sanjorgense" onerror="this.src='https://images.unsplash.com/photo-1597848212624-a19eb35e2651?auto=format&fit=crop&w=600&q=80'">
+                <img class="card-img" src="images/anthurium_sanjorgense.jpg" alt="Anthurium sanjorgense">
                 <div class="card-body">
                     <span class="card-tag">Araceae</span>
                     <h2 class="card-title">Anthurium sanjorgense</h2>
@@ -173,7 +173,6 @@
                 </div>
             </div>
 
-          
         </div>
     </div>
 
@@ -191,6 +190,18 @@
                 card.style.display = (searchData.includes(query) || title.includes(query)) ? "flex" : "none";
             });
         }
+
+        // Sincroniza automáticamente la foto cargada en el recuadro del visor 3D con la portada
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.card').forEach(card => {
+                const link = card.querySelector('.btn-view').getAttribute('href');
+                const speciesKey = 'herbarium_photo_' + link.replace('models/', '').replace('.html', '');
+                const savedPhoto = localStorage.getItem(speciesKey);
+                if (savedPhoto) {
+                    card.querySelector('.card-img').src = savedPhoto;
+                }
+            });
+        });
     </script>
 </body>
 </html>
