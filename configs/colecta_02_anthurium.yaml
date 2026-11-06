@@ -1,11 +1,11 @@
 colecta:
-  id_muestra: "COL-TOL-001"
+  id_muestra: "COL-NAR-002"
   familia: "Araceae"
   genero: "Anthurium"
   especie: "Anthurium andraeanum"
-  localidad: "Nariño, Colombia"
-  fecha: "2008-11-15"
-  foto_campo: "images/anthurium_sanjorgense.jpg"
+  localidad: "Reserva Natural Río Ñambí, Barbacoas, Nariño, Colombia"
+  fecha: "2026-11-06"
+  foto_campo: "images/anthurium_andraeanum.jpg"
 
 arquitectura_floral:
   simetria: "zigomorfa"
@@ -18,35 +18,34 @@ perianto:
     sepalos_numero: 0
     fusion: "dialisepalo"
     longitud_tubo_mm: 0.0
-    color_hex: "#8C7D38"           # Color del pedúnculo (tallo basal)
+    color_hex: "#5C7A29"               # Verde del pedúnculo terete
   corola:
-    petalos_numero: 1              # Espata cuculada (capucha abierta)
+    petalos_numero: 1                  # Espata cordada abierta y bullada (ampollada)
     fusion: "dialipetala"
-    longitud_tubo_mm: 15.0         # Longitud del ápice acuminado (punta fina)
-    longitud_limbo_mm: 65.0        # Longitud de la lámina de la espata
-    ancho_petalo_mm: 38.0          # Ancho máximo de la capucha
+    longitud_tubo_mm: 8.0              # Mucrón/ápice acuminado corto en la punta
+    longitud_limbo_mm: 115.0           # Largo de la lámina de la espata (10-12 cm)
+    ancho_petalo_mm: 95.0              # Ancho amplio acorazonado con lóbulos basales
     diferenciacion_dorsoventral:
-      factor_tamano_dorsal: 1.8
-      factor_tamano_ventral: 0.45  # Nivel de transición del moteado rojo/verde
-      curvatura_dorsal_grados: 42.0
-    grosor_pared_mm: 1.2
-    color_garganta_hex: "#8A1822"  # Rojo vino/carmín basal interno
-    color_limbo_hex: "#7A9F2E"     # Verde oliva/lima en mitad superior y acumen
+      factor_tamano_dorsal: 1.35       # Expansión de los lóbulos cordados
+      factor_tamano_ventral: 0.85      # Cobertura uniforme del color rojo escarlata
+      curvatura_dorsal_grados: 15.0    # Espata patente/abierta (no cuculada en capucha)
+    grosor_pared_mm: 1.8               # Textura coriácea/cerosa gruesa
+    color_garganta_hex: "#B80F1A"      # Rojo carmín intenso en la base e inserción
+    color_limbo_hex: "#E6192E"         # Rojo escarlata brillante en toda la lámina
 
 androceo:
-  estambres_numero: 1              # Representa el estípite que sostiene el espádice
+  estambres_numero: 1                  # Estípite muy corto que sostiene el espádice
   fusion_filamentos: "libre"
-  filamento_longitud_mm: 14.0      # Largo del estípite arqueado
-  filamento_grosor_mm: 2.2         # Grosor del estípite
+  filamento_longitud_mm: 6.0           # En A. andraeanum el espádice es casi sésil
+  filamento_grosor_mm: 3.5
   antera_longitud_mm: 0.0
-  color_filamento_hex: "#C85242"   # Rojo terracota/salmón del estípite
-  color_antera_hex: "#C85242"
+  color_filamento_hex: "#FFFDF5"       # Blanco marfil de la base del espádice
+  color_antera_hex: "#FFFDF5"
 
 gineceo:
   posicion_ovario: "supero"
-  estilo_longitud_mm: 70.0         # Longitud del espádice péndulo
-  diametro_espadice_mm: 9.5        # Calibre basal del espádice
-  curvatura_estilo_grados: 8.0
-  estigmas_numero: 1
-  color_estilo_hex: "#B8D844"      # Verde lima/amarillento del espádice
-  color_apice_hex: "#D49442"       # Tono ocre suave en la punta inferior
+  estilo_longitud_mm: 75.0             # Longitud del espádice cilíndrico (7-8 cm)
+  estilo_grosor_mm: 7.5                # Espádice robusto que se adelgaza hacia el ápice
+  estigma_lobulos: 1
+  color_ovario_hex: "#FFFCE6"          # Mitad basal blanco-crema (flores femeninas)
+  color_estilo_hex: "#FFD000"          # Mitad apical amarillo intenso (como en tu foto)
