@@ -592,58 +592,69 @@ def build_asteraceae_capitulum(cfg):
     return obj_data
 
 def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
-    sp_name = cfg['colecta']['especie']
+    sp_name = cfg['colecta'].get('especie', 'Flor Desconocida')
+    fam = cfg['colecta'].get('familia', 'Indeterminada')
+    id_m = cfg['colecta'].get('id_muestra', 'COL-000')
+    loc = cfg['colecta'].get('localidad', 'Colombia')
+    fecha = cfg['colecta'].get('fecha', 'N/A')
+    
     foto_campo = cfg['colecta'].get('foto_campo', '')
-    if foto_campo and not foto_campo.startswith('../'):
-        foto_campo = '../' + foto_campo
+    if foto_campo and not foto_campo.startswith('../') and not foto_campo.startswith(('http://', 'https://')):
+        foto_campo = '../' + foto_campo.lstrip('/')
 
     html_content = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visor 3D - {sp_name}</title>
     <style>
-        body {{ margin: 0; overflow: hidden; background: radial-gradient(circle at center, #1e2430 0%, #0f1218 100%); font-family: 'Segoe UI', sans-serif; }}
+        body {{ margin: 0; overflow: hidden; background: radial-gradient(circle at center, #1e2430 0%, #0f1218 100%); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }}
         .hud-panel {{
             position: absolute; top: 18px; left: 18px;
             background: rgba(15, 20, 28, 0.88); color: #e2e8f0;
             padding: 16px 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);
             z-index: 10; font-size: 0.88rem; line-height: 1.6;
+            backdrop-filter: blur(8px); max-width: 320px;
         }}
-        .hud-panel h2 {{ margin: 0 0 8px 0; font-style: italic; color: #63b3ed; font-size: 1.35rem; }}
-        .hud-hint {{ color: #63b3ed; font-size: 0.78rem; margin-top: 8px; }}
+        .hud-panel h2 {{ margin: 0 0 8px 0; font-style: italic; color: #58a6ff; font-size: 1.35rem; }}
+        .hud-hint {{ color: #58a6ff; font-size: 0.78rem; margin-top: 8px; }}
         .photo-panel {{
             position: absolute; bottom: 20px; right: 20px;
-            width: 190px; background: #0b0e14;
-            border: 2px solid #3182ce; border-radius: 10px;
+            width: 210px; background: rgba(15, 20, 28, 0.92);
+            border: 2px solid #58a6ff; border-radius: 10px;
             overflow: hidden; z-index: 10; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
         }}
-        .photo-panel img {{ width: 100%; height: 155px; object-fit: cover; display: block; }}
+        .photo-panel img {{ width: 100%; height: 165px; object-fit: cover; display: block; }}
         .photo-label {{
-            background: #1a202c; color: #cbd5e0; text-align: center;
+            background: #161b22; color: #cbd5e0; text-align: center;
             font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; padding: 7px 0;
+            text-transform: uppercase;
         }}
         .back-btn {{
             position: absolute; bottom: 20px; left: 20px;
-            background: #2f855a; color: #fff; text-decoration: none;
-            padding: 9px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; z-index: 10;
+            background: #238636; color: #ffffff; text-decoration: none;
+            padding: 10px 18px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+            z-index: 10; display: inline-flex; align-items: center; gap: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4); transition: background 0.2s;
         }}
+        .back-btn:hover {{ background: #2ea043; }}
     </style>
 </head>
 <body>
     <div class="hud-panel">
         <h2>{sp_name}</h2>
-        <div><strong>Familia:</strong> {cfg['colecta']['familia']}</div>
-        <div><strong>Muestra:</strong> {cfg['colecta']['id_muestra']}</div>
-        <div><strong>Localidad:</strong> {cfg['colecta']['localidad']}</div>
-        <div><strong>Fecha:</strong> {cfg['colecta'].get('fecha', '2026-11-06')}</div>
+        <div><strong>Familia:</strong> {fam}</div>
+        <div><strong>Muestra:</strong> {id_m}</div>
+        <div><strong>Localidad:</strong> {loc}</div>
+        <div><strong>Fecha:</strong> {fecha}</div>
         <div class="hud-hint">• Rotar: Clic izquierdo | Zoom: Rueda | Mover: Clic derecho</div>
     </div>
 
     <a href="../index.html" class="back-btn">⬅ Volver al catálogo</a>
 
     <div class="photo-panel">
-        <img src="{foto_campo}" alt="{sp_name}">
+        <img src="{foto_campo}" alt="{sp_name}" onerror="this.parentElement.style.display='none';">
         <div class="photo-label">REGISTRO DE CAMPO</div>
     </div>
 
@@ -665,11 +676,11 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.75));
         const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.85);
         dirLight1.position.set(80, 140, 100);
         scene.add(dirLight1);
-        const dirLight2 = new THREE.DirectionalLight(0x90cdf4, 0.42);
+        const dirLight2 = new THREE.DirectionalLight(0x90cdf4, 0.4);
         dirLight2.position.set(-80, -60, -80);
         scene.add(dirLight2);
 
@@ -677,8 +688,8 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
         const groups = {{}};
         let currentMat = "Mat_CorolaLimbo";
 
-        objRaw.split('\\n').forEach(line => {{
-            const parts = line.trim().split(/\\s+/);
+        objRaw.split('\n').forEach(line => {{
+            const parts = line.trim().split(/\s+/);
             if (parts[0] === 'v') {{
                 vertices.push([parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])]);
             }} else if (parts[0] === 'usemtl') {{
@@ -727,6 +738,7 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
 </html>"""
     with open(html_filepath, 'w', encoding='utf-8') as f:
         f.write(html_content)
+
 
 def generate_flower_3d(cfg):
     specie_filename = cfg['colecta']['especie'].lower().replace(" ", "_")
