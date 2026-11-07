@@ -261,8 +261,10 @@ def add_tube(pts, r0, r1, sides, v_offset):
     return "".join(out), v_offset + n * sides
 
 def build_araceae_inflorescence(cfg):
+    especie = cfg['colecta'].get('especie', '').lower()
     disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'erecta').lower()
-    if disposicion == "pendula":
+    
+    if "sanjorgense" in especie or disposicion == "pendula":
         return build_sanjorgense_original_obj(cfg)
 
     obj_data = ""
@@ -274,12 +276,12 @@ def build_araceae_inflorescence(cfg):
     fd = float(ddv.get('factor_tamano_dorsal', 1.2))
     fv = float(ddv.get('factor_tamano_ventral', 0.9))
 
-    obj_data += "usemtl Mat_Caliz" + NL
+    obj_data += "usemtl Mat_Caliz\n"
     ped_pts = [(0, -90 + i*9, -8 + math.sin(i*0.15)*3) for i in range(11)]
     seg_obj, v_offset = add_tube(ped_pts, 4.2, 3.8, 12, v_offset)
     obj_data += seg_obj
 
-    obj_data += "usemtl Mat_CorolaLimbo" + NL
+    obj_data += "usemtl Mat_CorolaLimbo\n"
     res_u, res_v = 24, 24
     for i in range(res_u + 1):
         u = i / res_u
@@ -313,7 +315,7 @@ def build_araceae_inflorescence(cfg):
     w_espadice = float(gineceo.get('estilo_grosor_mm', 8.0)) / 2.0
     estipite_l = float(androceo.get('filamento_longitud_mm', 8.0))
 
-    obj_data += "usemtl Mat_Estilo" + NL
+    obj_data += "usemtl Mat_Estilo\n"
     sp_pts = [(0, estipite_l + l_espadice * (i / 24.0), (i / 24.0) * 18.0) for i in range(25)]
     seg_obj, v_offset = add_tube(sp_pts, w_espadice, w_espadice * 0.55, 16, v_offset)
     obj_data += seg_obj

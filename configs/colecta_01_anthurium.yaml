@@ -18,35 +18,35 @@ perianto:
     sepalos_numero: 0
     fusion: "dialisepalo"
     longitud_tubo_mm: 0.0
-    color_hex: "#8C7D38"           # Color del pedúnculo (tallo basal)
+    color_hex: "#8C7D38"
   corola:
-    petalos_numero: 1              # Espata cuculada (capucha abierta)
+    petalos_numero: 1
     fusion: "dialipetala"
-    longitud_tubo_mm: 15.0         # Longitud del ápice acuminado (punta fina)
-    longitud_limbo_mm: 65.0        # Longitud de la lámina de la espata
-    ancho_petalo_mm: 38.0          # Ancho máximo de la capucha
+    longitud_tubo_mm: 15.0
+    longitud_limbo_mm: 65.0
+    ancho_petalo_mm: 38.0
     diferenciacion_dorsoventral:
       factor_tamano_dorsal: 1.8
-      factor_tamano_ventral: 0.45  # Nivel de transición del moteado rojo/verde
+      factor_tamano_ventral: 0.45
       curvatura_dorsal_grados: 42.0
     grosor_pared_mm: 1.2
-    color_garganta_hex: "#8A1822"  # Rojo vino/carmín basal interno
-    color_limbo_hex: "#7A9F2E"     # Verde oliva/lima en mitad superior y acumen
+    color_garganta_hex: "#8A1822"
+    color_limbo_hex: "#7A9F2E"
 
 androceo:
-  estambres_numero: 1              # Representa el estípite que sostiene el espádice
+  estambres_numero: 1
   fusion_filamentos: "libre"
-  filamento_longitud_mm: 14.0      # Largo del estípite arqueado
-  filamento_grosor_mm: 2.2         # Grosor del estípite
+  filamento_longitud_mm: 14.0
+  filamento_grosor_mm: 2.2
   antera_longitud_mm: 0.0
-  color_filamento_hex: "#C85242"   # Rojo terracota/salmón del estípite
+  color_filamento_hex: "#C85242"
   color_antera_hex: "#C85242"
 
 gineceo:
   posicion_ovario: "supero"
-  estilo_longitud_mm: 70.0         # Longitud del espádice péndulo
-  diametro_espadice_mm: 9.5        # Calibre basal del espádice
+  estilo_longitud_mm: 70.0
+  diametro_espadice_mm: 9.5
   curvatura_estilo_grados: 8.0
   estigmas_numero: 1
-  color_estilo_hex: "#B8D844"      # Verde lima/amarillento del espádice
-  color_apice_hex: "#D49442"       # Tono ocre suave en la punta inferior
+  color_estilo_hex: "#B8D844"
+  color_apice_hex: "#D49442"
