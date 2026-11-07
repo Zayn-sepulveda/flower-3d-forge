@@ -29,8 +29,8 @@ def create_material_mtl(cfg, mtl_filepath):
         "Mat_CorolaLimbo": hex_to_rgb(perianto.get('corola', {}).get('color_limbo_hex', '#FFFFFF')),
         "Mat_Filamento": hex_to_rgb(androceo['color_filamento_hex']),
         "Mat_Antera": hex_to_rgb(androceo['color_antera_hex']),
-        "Mat_Ovario": hex_to_rgb(gineceo['color_ovario_hex']),
-        "Mat_Estilo": hex_to_rgb(gineceo['color_estilo_hex']),
+        "Mat_Ovario": hex_to_rgb(gineceo.get('color_ovario_hex', '#606C38')),
+        "Mat_Estilo": hex_to_rgb(gineceo.get('color_estilo_hex', '#F2CC8F')),
         "Mat_Blanco": (0.98, 0.98, 1.0)
     }
     with open(mtl_filepath, 'w', encoding='utf-8') as f:
