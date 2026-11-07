@@ -188,7 +188,7 @@
                 </div>
             </div>
 
-            <!-- Ficha: Passiflora vitifolia (Colecta 03) -->
+            <!-- Ficha: Passiflora vitifolia -->
             <div class="card" data-search="passiflora vitifolia passifloraceae buenaventura bajo calima valle colombia corona roja">
                 <img class="card-img" src="images/passiflora_vitifolia.jpg" alt="Passiflora vitifolia">
                 <div class="card-body">
@@ -203,7 +203,7 @@
                 </div>
             </div>
 
-            <!-- Ficha: Passiflora incarnata (Colecta 04) -->
+            <!-- Ficha: Passiflora incarnata -->
             <div class="card" data-search="passiflora incarnata passifloraceae palmira valle colombia corona purpura lavanda">
                 <img class="card-img" src="images/passiflora_incarnata.jpg" alt="Passiflora incarnata">
                 <div class="card-body">
@@ -215,6 +215,21 @@
                         <div><strong>Inflorescencia:</strong> Corona bandeada púrpura-blanca con filamentos rizados</div>
                     </div>
                     <a href="models/passiflora_incarnata.html" class="btn-view">Explorar en 3D ➔</a>
+                </div>
+            </div>
+
+            <!-- Ficha: Helianthus annuus (Girasol) -->
+            <div class="card" data-search="helianthus annuus asteraceae palmira valle colombia capitulo girasol">
+                <img class="card-img" src="images/helianthus_annuus.jpg" alt="Helianthus annuus">
+                <div class="card-body">
+                    <span class="card-tag">Asteraceae</span>
+                    <h2 class="card-title">Helianthus annuus</h2>
+                    <div class="card-meta">
+                        <div><strong>Localidad:</strong> Palmira, Valle del Cauca (CIAT)</div>
+                        <div><strong>Muestra:</strong> COL-VAL-005</div>
+                        <div><strong>Inflorescencia:</strong> Capítulo radiado con espiral de Vogel (flósculos y lígulas)</div>
+                    </div>
+                    <a href="models/helianthus_annuus.html" class="btn-view">Explorar en 3D ➔</a>
                 </div>
             </div>
 
@@ -236,7 +251,6 @@
             });
         }
 
-        // Sincroniza automáticamente la foto cargada en el recuadro del visor 3D con la portada
         window.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.card').forEach(card => {
                 const link = card.querySelector('.btn-view').getAttribute('href');
