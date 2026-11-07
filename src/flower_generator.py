@@ -9,7 +9,7 @@ def load_config(filepath):
         return yaml.safe_load(f)
 
 def build_vertex(x, y, z):
-    return f"v {x:.4f} {y:.4f} {z:.4f}\n"
+    return f"v {x:.2f} {y:.2f} {z:.2f}\n"
 
 def build_face(v1, v2, v3):
     return f"f {v1} {v2} {v3}\n"
@@ -37,7 +37,7 @@ def create_material_mtl(cfg, mtl_filepath):
         f.write("# Materiales generados automaticamente\n")
         for mat_name, rgb in colors.items():
             f.write(f"\nnewmtl {mat_name}\n")
-            f.write(f"Kd {rgb[0]:.4f} {rgb[1]:.4f} {rgb[2]:.4f}\n")
+            f.write(f"Kd {rgb[0]:.2f} {rgb[1]:.2f} {rgb[2]:.2f}\n")
             f.write("Ka 0.2 0.2 0.2\nKs 0.15 0.15 0.15\nNs 12\n")
     return {k: '#' + ''.join(f'{int(c*255):02x}' for c in v) for k, v in colors.items()}
 
@@ -457,7 +457,7 @@ def build_asteraceae_capitulum(cfg):
 
     # 5. Flósculos del disco mediante la fórmula filotáctica de Vogel:
     # theta_n = n * 137.50776 grados, r_n = c * sqrt(n)
-    n_total_flosculos = 500
+    n_total_flosculos = 260
     golden_angle = math.radians(137.50776)
     c_vogel = (r_disco * 0.94) / math.sqrt(n_total_flosculos)
 
