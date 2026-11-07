@@ -18,34 +18,34 @@ perianto:
     sepalos_numero: 0
     fusion: "dialisepalo"
     longitud_tubo_mm: 0.0
-    color_hex: "#5C7A29"               # Verde del pedúnculo terete
+    color_hex: "#5C7A29"
   corola:
-    petalos_numero: 1                  # Espata cordada abierta y bullada (ampollada)
+    petalos_numero: 1
     fusion: "dialipetala"
-    longitud_tubo_mm: 8.0              # Mucrón/ápice acuminado corto en la punta
-    longitud_limbo_mm: 115.0           # Largo de la lámina de la espata (10-12 cm)
-    ancho_petalo_mm: 95.0              # Ancho amplio acorazonado con lóbulos basales
+    longitud_tubo_mm: 8.0
+    longitud_limbo_mm: 115.0
+    ancho_petalo_mm: 95.0
     diferenciacion_dorsoventral:
-      factor_tamano_dorsal: 1.35       # Expansión de los lóbulos cordados
-      factor_tamano_ventral: 0.85      # Cobertura uniforme del color rojo escarlata
-      curvatura_dorsal_grados: 15.0    # Espata patente/abierta (no cuculada en capucha)
-    grosor_pared_mm: 1.8               # Textura coriácea/cerosa gruesa
-    color_garganta_hex: "#B80F1A"      # Rojo carmín intenso en la base e inserción
-    color_limbo_hex: "#E6192E"         # Rojo escarlata brillante en toda la lámina
+      factor_tamano_dorsal: 1.35
+      factor_tamano_ventral: 0.85
+      curvatura_dorsal_grados: 15.0
+    grosor_pared_mm: 1.8
+    color_garganta_hex: "#B80F1A"
+    color_limbo_hex: "#E6192E"
 
 androceo:
-  estambres_numero: 1                  # Estípite muy corto que sostiene el espádice
+  estambres_numero: 1
   fusion_filamentos: "libre"
-  filamento_longitud_mm: 6.0           # En A. andraeanum el espádice es casi sésil
+  filamento_longitud_mm: 6.0
   filamento_grosor_mm: 3.5
   antera_longitud_mm: 0.0
-  color_filamento_hex: "#FFFDF5"       # Blanco marfil de la base del espádice
+  color_filamento_hex: "#FFFDF5"
   color_antera_hex: "#FFFDF5"
 
 gineceo:
   posicion_ovario: "supero"
-  estilo_longitud_mm: 75.0             # Longitud del espádice cilíndrico (7-8 cm)
-  estilo_grosor_mm: 7.5                # Espádice robusto que se adelgaza hacia el ápice
+  estilo_longitud_mm: 75.0
+  estilo_grosor_mm: 7.5
   estigma_lobulos: 1
-  color_ovario_hex: "#FFFCE6"          # Mitad basal blanco-crema (flores femeninas)
-  color_estilo_hex: "#FFD000"          # Mitad apical amarillo intenso (como en tu foto)
+  color_ovario_hex: "#FFFCE6"
+  color_estilo_hex: "#FFD000"
