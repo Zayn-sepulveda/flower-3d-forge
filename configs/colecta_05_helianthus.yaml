@@ -1,0 +1,53 @@
+cat << 'EOF' > configs/colecta_05_helianthus.yaml
+colecta:
+  id_muestra: "COL-VAL-005"
+  familia: "Asteraceae"
+  genero: "Helianthus"
+  especie: "Helianthus annuus"
+  localidad: "Palmira, Valle del Cauca, Colombia"
+  fecha: "2026-11-06"
+  foto_campo: "images/helianthus_annuus.jpg"
+
+arquitectura_floral:
+  simetria: "actinomorfa"
+  tipo_inflorescencia: "capitulo"
+  disposicion: "horizontal"
+
+perianto:
+  verticilos: "diclamidea"
+  caliz:
+    sepalos_numero: 34                 # Filarias (brácteas involucrales en la base del receptáculo)
+    fusion: "dialisepalo"
+    longitud_tubo_mm: 25.0
+    color_hex: "#3B6E22"
+  corola:
+    petalos_numero: 34                 # Flores liguladas periféricas (número de Fibonacci)
+    fusion: "gamopetala"
+    longitud_tubo_mm: 6.0              # Tubo corto basal de la flor ligulada
+    longitud_limbo_mm: 70.0            # Lígula radiante amarillo oro
+    ancho_petalo_mm: 22.0
+    diferenciacion_dorsoventral:
+      factor_tamano_dorsal: 1.0
+      factor_tamano_ventral: 1.0
+      curvatura_dorsal_grados: 88.0    # Disposición radial extendida alrededor del disco
+    grosor_pared_mm: 0.9
+    color_garganta_hex: "#E67E22"      # Base naranja intenso cerca del disco
+    color_limbo_hex: "#FFC300"         # Amarillo intenso de las lígulas
+
+androceo:
+  estambres_numero: 5                  # Por cada flósculo tubular del disco (singenésicos)
+  fusion_filamentos: "singenesico"     # Anteras fusionadas en tubo cilíndrico
+  filamento_longitud_mm: 4.0
+  filamento_grosor_mm: 0.6
+  antera_longitud_mm: 4.5
+  color_filamento_hex: "#5D4037"
+  color_antera_hex: "#2C1810"          # Pardo-negruzco del disco central
+
+gineceo:
+  posicion_ovario: "infero"
+  estilo_longitud_mm: 9.5              # Estilo emergiendo por dentro del tubo de anteras
+  estilo_grosor_mm: 0.8
+  estigma_lobulos: 2                   # Ramas estigmáticas recurvadas
+  color_ovario_hex: "#4A2311"          # Cipsela/aquenio en desarrollo en el receptáculo
+  color_estilo_hex: "#F1C40F"
+EOF

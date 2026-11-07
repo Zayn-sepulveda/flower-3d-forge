@@ -22,7 +22,7 @@ def create_material_mtl(cfg, mtl_filepath):
     perianto = cfg['perianto']
     androceo = cfg['androceo']
     gineceo = cfg['gineceo']
-    
+   
     colors = {
         "Mat_Caliz": hex_to_rgb(perianto['caliz']['color_hex']),
         "Mat_CorolaGarganta": hex_to_rgb(perianto.get('corola', {}).get('color_garganta_hex', '#FFFFFF')),
@@ -207,7 +207,6 @@ def build_passiflora_flower(cfg):
             u = j / (steps - 1)
             d_theta, d_y = 0.0, 0.0
             if is_incarnata and u > 0.42:
-                # Ondulación sinusoidal distal característica de P. incarnata
                 d_theta = 0.18 * ((u - 0.42) ** 1.3) * math.sin(6.5 * math.pi * u + (i % 5) * 0.7)
                 d_y = 2.6 * ((u - 0.42) ** 1.4) * math.cos(5.5 * math.pi * u + (i % 3) * 0.9)
             ang = angle + d_theta
@@ -259,7 +258,6 @@ def build_passiflora_flower(cfg):
         seg_arm, v_offset = add_tube(arm_pts, 0.85, 0.65, 6, v_offset)
         obj_data += seg_arm
 
-        # Antera transversal versátil en el extremo del filamento
         tx, tz = -sa, ca
         ant_pts = [
             (9.5 * ca - (l_antera / 2.0) * tx, l_androg - 1.3, 9.5 * sa - (l_antera / 2.0) * tz),
@@ -296,7 +294,6 @@ def build_passiflora_flower(cfg):
         seg_st, v_offset = add_tube(st_pts, 0.75, 1.25, 8, v_offset)
         obj_data += seg_st
 
-        # Estigma capitado-reniforme en la punta
         stig_pts = [
             (l_estilo * ca - 1.2 * sa, l_androg + 6.3, l_estilo * sa + 1.2 * ca),
             (l_estilo * ca + 1.2 * sa, l_androg + 6.3, l_estilo * sa - 1.2 * ca)
@@ -304,6 +301,224 @@ def build_passiflora_flower(cfg):
         obj_data += "usemtl Mat_Antera\n" if is_incarnata else "usemtl Mat_Ovario\n"
         seg_sg, v_offset = add_tube(stig_pts, 1.6, 1.6, 8, v_offset)
         obj_data += seg_sg
+
+    return obj_data
+
+def build_asteraceae_capitulum(cfg):
+    obj_data = ""
+    v_offset = 1
+
+    caliz_cfg = cfg['perianto']['caliz']
+    corola_cfg = cfg['perianto']['corola']
+    and_cfg = cfg['androceo']
+    gin_cfg = cfg['gineceo']
+
+    # Escala armónica para encuadrar el capítulo de ~200 mm en la cámara del visor
+    scale = 0.62
+    r_disco = 47.5 * scale
+    n_filarias = int(caliz_cfg.get('sepalos_numero', 34))
+    l_filaria = float(caliz_cfg.get('longitud_tubo_mm', 25.0)) * scale
+    n_ligulas = int(corola_cfg.get('petalos_numero', 34))
+    l_tubo_lig = float(corola_cfg.get('longitud_tubo_mm', 6.0)) * scale
+    l_ligula = float(corola_cfg.get('longitud_limbo_mm', 70.0)) * scale
+    w_ligula = float(corola_cfg.get('ancho_petalo_mm', 22.0)) * scale
+
+    # Inclinación heliotrópica (32° hacia el observador para lucir la espiral de Vogel y el involucro)
+    tilt_rad = math.radians(32.0)
+    ct, st = math.cos(tilt_rad), math.sin(tilt_rad)
+
+    def tilt_pt(x, y, z):
+        return (x, y * ct - z * st, y * st + z * ct)
+
+    # 1. Pedúnculo robusto arqueado y receptáculo basal (involucro)
+    obj_data += "usemtl Mat_Caliz\n"
+    ped_pts = []
+    for i in range(12):
+        t = i / 11.0
+        py = -75.0 * (1.0 - t) - 6.0 * t
+        pz = -18.0 * ((1.0 - t) ** 1.6)
+        ped_pts.append(tilt_pt(0.0, py, pz))
+    seg_ped, v_offset = add_tube(ped_pts, 4.8, 7.5, 14, v_offset)
+    obj_data += seg_ped
+
+    # Copa involucral bajo el receptáculo
+    inv_pts = [
+        tilt_pt(0.0, -7.5, 0.0),
+        tilt_pt(0.0, -4.0, 0.0),
+        tilt_pt(0.0, -0.5, 0.0)
+    ]
+    seg_inv, v_offset = add_tube(inv_pts, 7.5, r_disco * 0.96, 24, v_offset)
+    obj_data += seg_inv
+
+    # 2. Filarias (brácteas involucrales ovado-acuminadas en 2 series imbricadas)
+    obj_data += "usemtl Mat_Caliz\n"
+    ru_f, rv_f = 7, 4
+    for k in range(n_filarias):
+        ring = k % 2
+        ang = k * (2.0 * math.pi / n_filarias) + ring * (math.pi / n_filarias)
+        ca, sa = math.cos(ang), math.sin(ang)
+        r_base = r_disco * (0.88 if ring == 0 else 0.96)
+        y_base = -3.2 if ring == 0 else -1.2
+        w_bract = 4.6
+
+        for i in range(ru_f + 1):
+            u = i / ru_f
+            r_curr = r_base + l_filaria * u * (0.92 if ring == 0 else 1.0)
+            y_curr = y_base + (2.5 * u - 5.5 * (u ** 1.8))
+            w_loc = w_bract * math.sin(math.pi * (u ** 0.55)) * (1.0 - 0.5 * u)
+            for j in range(rv_f + 1):
+                v = (j / rv_f) - 0.5
+                lat = v * 2.0 * w_loc
+                px = r_curr * ca - lat * sa
+                pz = r_curr * sa + lat * ca
+                py = y_curr - 0.8 * (v * v)
+                tx, ty, tz = tilt_pt(px, py, pz)
+                obj_data += build_vertex(tx, ty, tz)
+
+        for i in range(ru_f):
+            for j in range(rv_f):
+                p1 = v_offset + i * (rv_f + 1) + j
+                p2 = p1 + 1
+                p3 = p1 + (rv_f + 1)
+                p4 = p3 + 1
+                obj_data += build_face(p1, p2, p3)
+                obj_data += build_face(p2, p4, p3)
+        v_offset += (ru_f + 1) * (rv_f + 1)
+
+    # 3. Domo del receptáculo discoide plano-convexo
+    obj_data += "usemtl Mat_Ovario\n"
+    ru_d, rv_d = 10, 28
+    for i in range(ru_d + 1):
+        u = i / ru_d
+        r_curr = r_disco * u
+        y_curr = 4.2 * (1.0 - (u ** 2))
+        for j in range(rv_d + 1):
+            ang = j * (2.0 * math.pi / rv_d)
+            px = r_curr * math.cos(ang)
+            pz = r_curr * math.sin(ang)
+            tx, ty, tz = tilt_pt(px, y_curr, pz)
+            obj_data += build_vertex(tx, ty, tz)
+    for i in range(ru_d):
+        for j in range(rv_d):
+            p1 = v_offset + i * (rv_d + 1) + j
+            p2 = p1 + 1
+            p3 = p1 + (rv_d + 1)
+            p4 = p3 + 1
+            obj_data += build_face(p1, p2, p3)
+            obj_data += build_face(p2, p4, p3)
+    v_offset += (ru_d + 1) * (rv_d + 1)
+
+    # 4. Flores liguladas periféricas (34 lígulas en parastiquia de Fibonacci)
+    # 4a. Tubo corto basal naranja de cada lígula
+    obj_data += "usemtl Mat_CorolaGarganta\n"
+    for k in range(n_ligulas):
+        ang = k * (2.0 * math.pi / n_ligulas)
+        ca, sa = math.cos(ang), math.sin(ang)
+        pts_t = [
+            tilt_pt((r_disco - 1.0) * ca, 0.2, (r_disco - 1.0) * sa),
+            tilt_pt((r_disco + l_tubo_lig) * ca, 1.4, (r_disco + l_tubo_lig) * sa)
+        ]
+        seg_t, v_offset = add_tube(pts_t, 1.1, 1.5, 5, v_offset)
+        obj_data += seg_t
+
+    # 4b. Lámina radiante amarillo oro (70 x 22 mm a escala)
+    obj_data += "usemtl Mat_CorolaLimbo\n"
+    ru_l, rv_l = 12, 6
+    for k in range(n_ligulas):
+        ring_offset = (k % 2) * 0.9
+        ang = k * (2.0 * math.pi / n_ligulas)
+        ca, sa = math.cos(ang), math.sin(ang)
+        for i in range(ru_l + 1):
+            u = i / ru_l
+            r_curr = r_disco + l_tubo_lig * 0.8 + l_ligula * u
+            # Perfil ovado-lanceolado acuminado con suave arqueamiento natural
+            w_loc = (w_ligula / 2.0) * math.sin(math.pi * (u ** 0.65)) * (1.0 - 0.18 * (u ** 2))
+            y_arch = 1.2 + ring_offset + 3.2 * math.sin(math.pi * u) - 4.5 * (u ** 2.2)
+            for j in range(rv_l + 1):
+                v = (j / rv_l) - 0.5
+                lat = v * 2.0 * w_loc
+                # Pliegues longitudinales (venación de la lígula)
+                groove = 0.45 * math.cos(v * math.pi * 3.0) * math.sin(math.pi * u) - 0.9 * (v * v)
+                px = r_curr * ca - lat * sa
+                pz = r_curr * sa + lat * ca
+                py = y_arch + groove
+                tx, ty, tz = tilt_pt(px, py, pz)
+                obj_data += build_vertex(tx, ty, tz)
+
+        for i in range(ru_l):
+            for j in range(rv_l):
+                p1 = v_offset + i * (rv_l + 1) + j
+                p2 = p1 + 1
+                p3 = p1 + (rv_l + 1)
+                p4 = p3 + 1
+                obj_data += build_face(p1, p2, p3)
+                obj_data += build_face(p2, p4, p3)
+        v_offset += (ru_l + 1) * (rv_l + 1)
+
+    # 5. Flósculos del disco mediante la fórmula filotáctica de Vogel:
+    # theta_n = n * 137.50776 grados, r_n = c * sqrt(n)
+    n_total_flosculos = 500
+    golden_angle = math.radians(137.50776)
+    c_vogel = (r_disco * 0.94) / math.sqrt(n_total_flosculos)
+
+    flosculos_centro = []
+    flosculos_periferia_tubo = []
+    flosculos_periferia_antera = []
+    flosculos_periferia_estilo = []
+
+    for n in range(1, n_total_flosculos + 1):
+        theta_n = n * golden_angle
+        r_n = c_vogel * math.sqrt(n)
+        frac = r_n / r_disco
+        px = r_n * math.cos(theta_n)
+        pz = r_n * math.sin(theta_n)
+        py_base = 4.2 * (1.0 - (frac ** 2))
+
+        if frac < 0.52:
+            # Botones florales centrales cerrados (pardo-purpúreo oscuro)
+            pts_f = [
+                tilt_pt(px, py_base, pz),
+                tilt_pt(px, py_base + 3.4, pz)
+            ]
+            flosculos_centro.append(pts_f)
+        else:
+            # Flósculos periféricos en antesis (corola tubular + cilindro de anteras + estilo bífido amarillo)
+            pts_cor = [
+                tilt_pt(px, py_base, pz),
+                tilt_pt(px, py_base + 3.2, pz)
+            ]
+            pts_ant = [
+                tilt_pt(px, py_base + 3.0, pz),
+                tilt_pt(px, py_base + 5.2, pz)
+            ]
+            pts_est = [
+                tilt_pt(px, py_base + 5.0, pz),
+                tilt_pt(px * 1.015, py_base + 6.4, pz * 1.015)
+            ]
+            flosculos_periferia_tubo.append(pts_cor)
+            flosculos_periferia_antera.append(pts_ant)
+            flosculos_periferia_estilo.append(pts_est)
+
+    # Renderizado agrupado por material para máxima velocidad en Three.js
+    obj_data += "usemtl Mat_Antera\n"
+    for pts_f in flosculos_centro:
+        seg_f, v_offset = add_tube(pts_f, 0.78, 0.45, 5, v_offset)
+        obj_data += seg_f
+
+    obj_data += "usemtl Mat_CorolaGarganta\n"
+    for pts_cor in flosculos_periferia_tubo:
+        seg_c, v_offset = add_tube(pts_cor, 0.72, 0.92, 5, v_offset)
+        obj_data += seg_c
+
+    obj_data += "usemtl Mat_Filamento\n"
+    for pts_ant in flosculos_periferia_antera:
+        seg_a, v_offset = add_tube(pts_ant, 0.52, 0.48, 5, v_offset)
+        obj_data += seg_a
+
+    obj_data += "usemtl Mat_Estilo\n"
+    for pts_est in flosculos_periferia_estilo:
+        seg_e, v_offset = add_tube(pts_est, 0.45, 0.75, 4, v_offset)
+        obj_data += seg_e
 
     return obj_data
 
@@ -452,8 +667,12 @@ def generate_flower_3d(cfg):
     html_filepath = os.path.join('models', f"{specie_filename}.html")
 
     color_map = create_material_mtl(cfg, mtl_filepath)
-    if cfg['colecta']['familia'] == "Araceae":
+    familia = cfg['colecta']['familia'].strip()
+
+    if familia == "Araceae":
         obj_data = build_araceae_inflorescence(cfg)
+    elif familia == "Asteraceae":
+        obj_data = build_asteraceae_capitulum(cfg)
     else:
         obj_data = build_passiflora_flower(cfg)
 
