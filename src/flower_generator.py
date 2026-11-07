@@ -71,7 +71,10 @@ def build_araceae_inflorescence(cfg):
 
     vertices, colors, faces = [], [], []
 
-    # 1. ESPATA CUCULADA (Capucha cóncava abierta con ápice acuminado y moteado)
+    # Leer disposición del archivo YAML desde el principio
+    disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'pendula').lower()
+
+    # 1. ESPATA (Cordada plana para 'erecta' o Cuculada para 'pendula')
     n_v, n_u = 95, 55
     v_vals = np.linspace(0.0, 1.0, n_v)
     u_vals = np.linspace(-1.0, 1.0, n_u)
@@ -89,15 +92,23 @@ def build_araceae_inflorescence(cfg):
             depth_profile = (1.0 - ta) * 2.5
 
         y_spine = v * total_spathe * 0.78
-        z_arch = np.sin(v * np.pi * 0.72) * 22.0 - (v ** 3) * 8.0
+        
+        # Aplanar la espata si es erecta (A. andraeanum)
+        if disposicion == 'erecta':
+            z_arch = np.sin(v * np.pi) * 3.0 - (v ** 2) * 4.0  # Mucho más plana
+            depth_multiplier = 0.15  # Quita la forma de cuenco/capucha
+            w_profile = w_profile * 1.3 # Ensancha la forma de corazón
+        else:
+            z_arch = np.sin(v * np.pi * 0.72) * 22.0 - (v ** 3) * 8.0 # Capucha original
+            depth_multiplier = 1.0
 
         for u in u_vals:
             x = u * spathe_w * w_profile
-            hood_curve = (1.0 - (u ** 2)) * depth_profile
+            hood_curve = (1.0 - (u ** 2)) * depth_profile * depth_multiplier
             y = y_spine + (u ** 2) * 2.5
             z = z_arch - hood_curve
 
-            # Moteado orgánico entre la base rojo vino y el ápice verde oliva
+            # Moteado orgánico
             mottle = (
                 0.09 * np.sin(38.0 * v + 17.0 * u) * np.cos(27.0 * v - 21.0 * u)
                 + 0.05 * np.sin(75.0 * v + 43.0 * u)
@@ -106,7 +117,6 @@ def build_araceae_inflorescence(cfg):
             mix = np.clip((v - trans_center + mottle) / 0.16, 0.0, 1.0)
 
             base_col = (1.0 - min(v * 2.5, 1.0)) * c_dark_wine + min(v * 2.5, 1.0) * c_wine
-            # Borde exterior ligeramente más verde como en las fotos reales
             edge_green = np.clip((abs(u) - 0.78) / 0.22, 0.0, 1.0) * 0.55
             mix_final = np.clip(mix + edge_green, 0.0, 1.0)
             col = (1.0 - mix_final) * base_col + mix_final * c_green
@@ -128,11 +138,21 @@ def build_araceae_inflorescence(cfg):
     stipe_r = float(a_cfg.get('filamento_grosor_mm', 2.2))
     n_st = 20
     t_st = np.linspace(0, 1, n_st)
-    stipe_pts = np.column_stack([
-        np.zeros(n_st),
-        3.0 - t_st * 6.5,
-        -2.0 + np.sin(t_st * np.pi * 0.5) * stipe_len
-    ])
+    
+    if disposicion == 'erecta':
+        # Para A. andraeanum el estípite sale hacia adelante y arriba
+        stipe_pts = np.column_stack([
+            np.zeros(n_st),
+            3.0 + t_st * 4.0,
+            -2.0 + t_st * 8.0 
+        ])
+    else:
+        stipe_pts = np.column_stack([
+            np.zeros(n_st),
+            3.0 - t_st * 6.5,
+            -2.0 + np.sin(t_st * np.pi * 0.5) * stipe_len
+        ])
+        
     stipe_radii = np.linspace(stipe_r * 1.1, stipe_r * 0.95, n_st)
     stipe_cols = np.tile(c_stipe, (n_st, 1))
     add_tube_along_curve(stipe_pts, stipe_radii, stipe_cols, 24, vertices, colors, faces)
@@ -145,46 +165,20 @@ def build_araceae_inflorescence(cfg):
     s_vals = np.linspace(0, 1, n_sp)
     start_sp = stipe_pts[-1]
 
-    # Leer disposición del archivo YAML
-    disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'pendula').lower()
-
     if disposicion == 'erecta':
-        # ERECTO: Crece hacia arriba (+Y) y ligeramente hacia adelante (+Z)
+        # ERECTO: Ángulo diagonal fuerte hacia afuera y arriba
         spadix_pts = np.column_stack([
             np.zeros(n_sp),
-            start_sp[1] + s_vals * spadix_len * 0.95,
-            start_sp[2] + s_vals * spadix_len * 0.35 + np.sin(s_vals * np.pi) * 1.5
+            start_sp[1] + s_vals * spadix_len * 0.7,
+            start_sp[2] + s_vals * spadix_len * 0.7 + np.sin(s_vals * np.pi) * 1.5
         ])
     else:
-        # PÉNDULO: Cuelga hacia abajo (-Y) como en Anthurium sanjorgense
+        # PÉNDULO
         spadix_pts = np.column_stack([
             np.zeros(n_sp),
             start_sp[1] - s_vals * spadix_len,
             start_sp[2] + np.sin(s_vals * np.pi) * 2.2
         ])
-
-    radii_sp = np.zeros((n_sp, n_sl))
-    cols_sp = np.zeros((n_sp, n_sl, 3))
-    theta_sp = np.linspace(0, 2 * np.pi, n_sl, endpoint=False)
-
-    for i, s in enumerate(s_vals):
-        # Ahusamiento suave hacia la punta y cierre redondeado en el ápice
-        if s < 0.93:
-            taper = 1.0 - 0.38 * (s / 0.93)
-        else:
-            taper = 0.62 * np.sqrt(max(1.0 - (s - 0.93) / 0.07, 0.02))
-
-        r_mean = spadix_r_base * taper
-        tip_mix = np.clip((s - 0.80) / 0.20, 0.0, 1.0)
-        c_ring = (1.0 - tip_mix) * c_spadix + tip_mix * c_spadix_tip
-
-        for j, th in enumerate(theta_sp):
-            # Relieve papiloso/tuberculado de las flores del espádice
-            bump = (np.cos(13 * th + (i % 2) * 1.5) * np.sin(55 * s * np.pi)) ** 2
-            radii_sp[i, j] = r_mean + (0.48 * bump if s < 0.96 else 0.1)
-            cols_sp[i, j] = c_ring * (0.90 + 0.16 * bump)
-
-    add_tube_along_curve(spadix_pts, radii_sp, cols_sp, n_sl, vertices, colors, faces)
 
     # 4. PEDÚNCULO (TALLO BASAL)
     n_ped = 30
