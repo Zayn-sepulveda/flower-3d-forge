@@ -65,16 +65,15 @@ def build_araceae_inflorescence(cfg):
     c_dark_wine = c_wine * 0.65
     c_green = hex_to_rgb(c_cfg.get('color_limbo_hex', '#7A9F2E'))
     c_stipe = hex_to_rgb(a_cfg.get('color_filamento_hex', '#C85242'))
+    c_spadix_base = hex_to_rgb(g_cfg.get('color_ovario_hex', g_cfg.get('color_estilo_hex', '#FFFCE6')))
     c_spadix = hex_to_rgb(g_cfg.get('color_estilo_hex', '#B8D844'))
-    c_spadix_tip = hex_to_rgb(g_cfg.get('color_apice_hex', '#D49442'))
+    c_spadix_tip = hex_to_rgb(g_cfg.get('color_apice_hex', c_cfg.get('color_estilo_hex', '#FFD000')))
     c_peduncle = hex_to_rgb(cfg['perianto']['caliz'].get('color_hex', '#8C7D38'))
 
+    disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'pendula').lower()
     vertices, colors, faces = [], [], []
 
-    # Leer disposición del archivo YAML desde el principio
-    disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'pendula').lower()
-
-    # 1. ESPATA (Cordada plana para 'erecta' o Cuculada para 'pendula')
+    # 1. ESPATA (Cordada abierta/bullada si es 'erecta', Cuculada en capucha si es 'pendula')
     n_v, n_u = 95, 55
     v_vals = np.linspace(0.0, 1.0, n_v)
     u_vals = np.linspace(-1.0, 1.0, n_u)
@@ -84,42 +83,53 @@ def build_araceae_inflorescence(cfg):
     for v in v_vals:
         if v <= body_frac:
             tv = v / body_frac
-            w_profile = np.sin(np.pi * (tv ** 0.68))
+            w_profile = np.sin(np.pi * (tv ** 0.62))
             depth_profile = np.sin(np.pi * (tv ** 0.8)) * (spathe_w * 0.72)
         else:
-            ta = (v - body_frac) / (1.0 - body_frac)
+            ta = (v - body_frac) / max(1.0 - body_frac, 1e-5)
             w_profile = (1.0 - ta) ** 2.2 * 0.18
             depth_profile = (1.0 - ta) * 2.5
 
-        y_spine = v * total_spathe * 0.78
-        
-        # Aplanar la espata si es erecta (A. andraeanum)
-        if disposicion == 'erecta':
-            z_arch = np.sin(v * np.pi) * 3.0 - (v ** 2) * 4.0  # Mucho más plana
-            depth_multiplier = 0.15  # Quita la forma de cuenco/capucha
-            w_profile = w_profile * 1.3 # Ensancha la forma de corazón
-        else:
-            z_arch = np.sin(v * np.pi * 0.72) * 22.0 - (v ** 3) * 8.0 # Capucha original
-            depth_multiplier = 1.0
-
         for u in u_vals:
-            x = u * spathe_w * w_profile
-            hood_curve = (1.0 - (u ** 2)) * depth_profile * depth_multiplier
-            y = y_spine + (u ** 2) * 2.5
-            z = z_arch - hood_curve
+            if disposicion == 'erecta':
+                # Espata cordada (forma de corazón con lóbulos basales y relieve ampollado/bullado)
+                x = u * spathe_w * w_profile * 1.15
+                lobe_drop = np.exp(-((v - 0.12) / 0.18) ** 2) * (np.sin(abs(u) * np.pi) ** 1.3) * 22.0
+                center_notch = np.exp(-(v / 0.10) ** 2) * (1.0 - abs(u)) * 8.0
+                y_local = v * total_spathe * 0.72 - lobe_drop + center_notch
 
-            # Moteado orgánico
-            mottle = (
-                0.09 * np.sin(38.0 * v + 17.0 * u) * np.cos(27.0 * v - 21.0 * u)
-                + 0.05 * np.sin(75.0 * v + 43.0 * u)
-            )
-            trans_center = 0.44 + 0.08 * (1.0 - u ** 2)
-            mix = np.clip((v - trans_center + mottle) / 0.16, 0.0, 1.0)
+                # Textura bullada entre nervaduras
+                bullate = 1.8 * np.sin(v * 22.0) * np.sin(abs(u) * 12.0) * (1.0 - v * 0.5)
+                cup = (u ** 2) * 5.0
+                z_local = -cup + bullate
 
-            base_col = (1.0 - min(v * 2.5, 1.0)) * c_dark_wine + min(v * 2.5, 1.0) * c_wine
-            edge_green = np.clip((abs(u) - 0.78) / 0.22, 0.0, 1.0) * 0.55
-            mix_final = np.clip(mix + edge_green, 0.0, 1.0)
-            col = (1.0 - mix_final) * base_col + mix_final * c_green
+                # Inclinar la espata 55 grados hacia atrás para que quede abierta como en la foto de campo
+                tilt = np.radians(55.0)
+                y = y_local * np.cos(tilt) - z_local * np.sin(tilt)
+                z = -y_local * np.sin(tilt) + z_local * np.cos(tilt) - 2.0
+
+                # Color rojo escarlata brillante con venas carmín en la base
+                vein_mix = np.clip(v * 1.4 + 0.15 * np.sin(v * 22.0), 0.0, 1.0)
+                col = (1.0 - vein_mix) * c_wine + vein_mix * c_green
+            else:
+                # Espata cuculada original (Anthurium sanjorgense)
+                y_spine = v * total_spathe * 0.78
+                z_arch = np.sin(v * np.pi * 0.72) * 22.0 - (v ** 3) * 8.0
+                x = u * spathe_w * w_profile
+                hood_curve = (1.0 - (u ** 2)) * depth_profile
+                y = y_spine + (u ** 2) * 2.5
+                z = z_arch - hood_curve
+
+                mottle = (
+                    0.09 * np.sin(38.0 * v + 17.0 * u) * np.cos(27.0 * v - 21.0 * u)
+                    + 0.05 * np.sin(75.0 * v + 43.0 * u)
+                )
+                trans_center = 0.44 + 0.08 * (1.0 - u ** 2)
+                mix = np.clip((v - trans_center + mottle) / 0.16, 0.0, 1.0)
+                base_col = (1.0 - min(v * 2.5, 1.0)) * c_dark_wine + min(v * 2.5, 1.0) * c_wine
+                edge_green = np.clip((abs(u) - 0.78) / 0.22, 0.0, 1.0) * 0.55
+                mix_final = np.clip(mix + edge_green, 0.0, 1.0)
+                col = (1.0 - mix_final) * base_col + mix_final * c_green
 
             vertices.append([x, y, z])
             colors.append(col.tolist())
@@ -133,18 +143,17 @@ def build_araceae_inflorescence(cfg):
             faces.append((p1, p2, p3))
             faces.append((p1, p3, p4))
 
-    # 2. ESTÍPITE ROJIZO ARQUEADO
+    # 2. ESTÍPITE
     stipe_len = float(a_cfg.get('filamento_longitud_mm', 14.0))
     stipe_r = float(a_cfg.get('filamento_grosor_mm', 2.2))
     n_st = 20
     t_st = np.linspace(0, 1, n_st)
-    
+
     if disposicion == 'erecta':
-        # Para A. andraeanum el estípite sale hacia adelante y arriba
         stipe_pts = np.column_stack([
             np.zeros(n_st),
-            3.0 + t_st * 4.0,
-            -2.0 + t_st * 8.0 
+            2.0 + t_st * (stipe_len * 0.75),
+            -2.0 + t_st * (stipe_len * 0.65)
         ])
     else:
         stipe_pts = np.column_stack([
@@ -152,12 +161,12 @@ def build_araceae_inflorescence(cfg):
             3.0 - t_st * 6.5,
             -2.0 + np.sin(t_st * np.pi * 0.5) * stipe_len
         ])
-        
+
     stipe_radii = np.linspace(stipe_r * 1.1, stipe_r * 0.95, n_st)
     stipe_cols = np.tile(c_stipe, (n_st, 1))
     add_tube_along_curve(stipe_pts, stipe_radii, stipe_cols, 24, vertices, colors, faces)
 
-    # 3. ESPÁDICE (DISPOSICIÓN ERECTA O PÉNDULA SEGÚN TAXÓN)
+    # 3. ESPÁDICE COMPLETO (Con su malla 3D y gradiente blanco-amarillo)
     spadix_len = float(g_cfg.get('estilo_longitud_mm', 70.0))
     spadix_r_base = float(g_cfg.get('estilo_grosor_mm', g_cfg.get('diametro_espadice_mm', 9.5))) / 2.0
     n_sp = 90
@@ -166,19 +175,44 @@ def build_araceae_inflorescence(cfg):
     start_sp = stipe_pts[-1]
 
     if disposicion == 'erecta':
-        # ERECTO: Ángulo diagonal fuerte hacia afuera y arriba
+        # Espádice proyectado hacia arriba y adelante como en tu foto de Registro de Campo
         spadix_pts = np.column_stack([
             np.zeros(n_sp),
-            start_sp[1] + s_vals * spadix_len * 0.7,
-            start_sp[2] + s_vals * spadix_len * 0.7 + np.sin(s_vals * np.pi) * 1.5
+            start_sp[1] + s_vals * spadix_len * 0.78 + np.sin(s_vals * np.pi) * 3.0,
+            start_sp[2] + s_vals * spadix_len * 0.62
         ])
     else:
-        # PÉNDULO
         spadix_pts = np.column_stack([
             np.zeros(n_sp),
             start_sp[1] - s_vals * spadix_len,
             start_sp[2] + np.sin(s_vals * np.pi) * 2.2
         ])
+
+    radii_sp = np.zeros((n_sp, n_sl))
+    cols_sp = np.zeros((n_sp, n_sl, 3))
+    theta_sp = np.linspace(0, 2 * np.pi, n_sl, endpoint=False)
+
+    for i, s in enumerate(s_vals):
+        if s < 0.93:
+            taper = 1.0 - 0.38 * (s / 0.93)
+        else:
+            taper = 0.62 * np.sqrt(max(1.0 - (s - 0.93) / 0.07, 0.02))
+
+        r_mean = spadix_r_base * taper
+        if disposicion == 'erecta':
+            # Gradiente desde blanco crema en la base (color_ovario_hex) hasta amarillo en el ápice (color_estilo_hex)
+            mix_sp = np.clip(s * 1.35, 0.0, 1.0)
+            c_ring = (1.0 - mix_sp) * c_spadix_base + mix_sp * c_spadix
+        else:
+            tip_mix = np.clip((s - 0.80) / 0.20, 0.0, 1.0)
+            c_ring = (1.0 - tip_mix) * c_spadix + tip_mix * c_spadix_tip
+
+        for j, th in enumerate(theta_sp):
+            bump = (np.cos(13 * th + (i % 2) * 1.5) * np.sin(55 * s * np.pi)) ** 2
+            radii_sp[i, j] = r_mean + (0.48 * bump if s < 0.96 else 0.1)
+            cols_sp[i, j] = c_ring * (0.90 + 0.16 * bump)
+
+    add_tube_along_curve(spadix_pts, radii_sp, cols_sp, n_sl, vertices, colors, faces)
 
     # 4. PEDÚNCULO (TALLO BASAL)
     n_ped = 30
