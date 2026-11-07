@@ -1,0 +1,51 @@
+colecta:
+  id_muestra: "COL-VAL-003"
+  familia: "Passifloraceae"
+  genero: "Passiflora"
+  especie: "Passiflora vitifolia"
+  localidad: "Bajo Calima, Buenaventura, Valle del Cauca, Colombia"
+  fecha: "2026-11-06"
+  foto_campo: "images/passiflora_vitifolia.jpg"
+
+arquitectura_floral:
+  simetria: "actinomorfa"
+  tipo_inflorescencia: "solitaria"
+  disposicion: "horizontal"
+
+perianto:
+  verticilos: "diclamidea"
+  caliz:
+    sepalos_numero: 5
+    fusion: "dialisepalo"
+    longitud_tubo_mm: 15.0             # Hipanto cilíndrico basal
+    color_hex: "#D62828"               # Rojo carmín alterno a los pétalos
+  corola:
+    petalos_numero: 5
+    fusion: "dialipetala"
+    longitud_tubo_mm: 22.0             # Serie externa erguida de la corona
+    longitud_limbo_mm: 65.0            # Pétalos oblongo-lanceolados escarlata
+    ancho_petalo_mm: 18.0
+    diferenciacion_dorsoventral:
+      factor_tamano_dorsal: 1.0
+      factor_tamano_ventral: 1.0
+      curvatura_dorsal_grados: 90.0    # Estrella rotácea de 10 puntas
+    grosor_pared_mm: 1.2
+    color_garganta_hex: "#FFFFFF"      # Series internas blancas conniventes
+    color_limbo_hex: "#E6192E"         # Rojo escarlata brillante
+
+androceo:
+  estambres_numero: 5
+  fusion_filamentos: "monadelfo"
+  filamento_longitud_mm: 32.0          # Androginóforo largo muy exerto
+  filamento_grosor_mm: 3.5
+  antera_longitud_mm: 11.0
+  color_filamento_hex: "#F9EBEA"
+  color_antera_hex: "#C6C16D"          # Anteras verde-amarillentas
+
+gineceo:
+  posicion_ovario: "supero"
+  estilo_longitud_mm: 14.0
+  estilo_grosor_mm: 2.5
+  estigma_lobulos: 3
+  color_ovario_hex: "#F9EBEA"
+  color_estilo_hex: "#D62828"

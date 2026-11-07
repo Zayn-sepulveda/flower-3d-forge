@@ -1,3 +1,4 @@
+cat << 'EOF' > src/flower_generator.py
 import sys
 import os
 import yaml
@@ -67,7 +68,7 @@ def build_araceae_inflorescence(cfg):
     c_stipe = hex_to_rgb(a_cfg.get('color_filamento_hex', '#C85242'))
     c_spadix_base = hex_to_rgb(g_cfg.get('color_ovario_hex', g_cfg.get('color_estilo_hex', '#FFFCE6')))
     c_spadix = hex_to_rgb(g_cfg.get('color_estilo_hex', '#B8D844'))
-    c_spadix_tip = hex_to_rgb(g_cfg.get('color_apice_hex', c_cfg.get('color_estilo_hex', '#FFD000')))
+    c_spadix_tip = hex_to_rgb(g_cfg.get('color_apice_hex', g_cfg.get('color_estilo_hex', '#FFD000')))
     c_peduncle = hex_to_rgb(cfg['perianto']['caliz'].get('color_hex', '#8C7D38'))
 
     disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'pendula').lower()
@@ -92,27 +93,22 @@ def build_araceae_inflorescence(cfg):
 
         for u in u_vals:
             if disposicion == 'erecta':
-                # Espata cordada (forma de corazón con lóbulos basales y relieve ampollado/bullado)
                 x = u * spathe_w * w_profile * 1.15
                 lobe_drop = np.exp(-((v - 0.12) / 0.18) ** 2) * (np.sin(abs(u) * np.pi) ** 1.3) * 22.0
                 center_notch = np.exp(-(v / 0.10) ** 2) * (1.0 - abs(u)) * 8.0
                 y_local = v * total_spathe * 0.72 - lobe_drop + center_notch
 
-                # Textura bullada entre nervaduras
                 bullate = 1.8 * np.sin(v * 22.0) * np.sin(abs(u) * 12.0) * (1.0 - v * 0.5)
                 cup = (u ** 2) * 5.0
                 z_local = -cup + bullate
 
-                # Inclinar la espata 55 grados hacia atrás para que quede abierta como en la foto de campo
                 tilt = np.radians(55.0)
                 y = y_local * np.cos(tilt) - z_local * np.sin(tilt)
                 z = -y_local * np.sin(tilt) + z_local * np.cos(tilt) - 2.0
 
-                # Color rojo escarlata brillante con venas carmín en la base
                 vein_mix = np.clip(v * 1.4 + 0.15 * np.sin(v * 22.0), 0.0, 1.0)
                 col = (1.0 - vein_mix) * c_wine + vein_mix * c_green
             else:
-                # Espata cuculada original (Anthurium sanjorgense)
                 y_spine = v * total_spathe * 0.78
                 z_arch = np.sin(v * np.pi * 0.72) * 22.0 - (v ** 3) * 8.0
                 x = u * spathe_w * w_profile
@@ -166,7 +162,7 @@ def build_araceae_inflorescence(cfg):
     stipe_cols = np.tile(c_stipe, (n_st, 1))
     add_tube_along_curve(stipe_pts, stipe_radii, stipe_cols, 24, vertices, colors, faces)
 
-    # 3. ESPÁDICE COMPLETO (Con su malla 3D y gradiente blanco-amarillo)
+    # 3. ESPÁDICE COMPLETO
     spadix_len = float(g_cfg.get('estilo_longitud_mm', 70.0))
     spadix_r_base = float(g_cfg.get('estilo_grosor_mm', g_cfg.get('diametro_espadice_mm', 9.5))) / 2.0
     n_sp = 90
@@ -175,7 +171,6 @@ def build_araceae_inflorescence(cfg):
     start_sp = stipe_pts[-1]
 
     if disposicion == 'erecta':
-        # Espádice proyectado hacia arriba y adelante como en tu foto de Registro de Campo
         spadix_pts = np.column_stack([
             np.zeros(n_sp),
             start_sp[1] + s_vals * spadix_len * 0.78 + np.sin(s_vals * np.pi) * 3.0,
@@ -200,7 +195,6 @@ def build_araceae_inflorescence(cfg):
 
         r_mean = spadix_r_base * taper
         if disposicion == 'erecta':
-            # Gradiente desde blanco crema en la base (color_ovario_hex) hasta amarillo en el ápice (color_estilo_hex)
             mix_sp = np.clip(s * 1.35, 0.0, 1.0)
             c_ring = (1.0 - mix_sp) * c_spadix_base + mix_sp * c_spadix
         else:
@@ -472,3 +466,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+EOF
+
+python src/flower_generator.py configs/colecta_02_anthurium.yaml
+git add .
+git commit -m "fix: guardar flower_generator.py y regenerar modelo 3D de A. andraeanum"
+git push origin main
