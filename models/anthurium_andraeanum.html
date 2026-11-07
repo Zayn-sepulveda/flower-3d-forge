@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Herbario 3D - Anthurium andraeanum</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: radial-gradient(circle at center, #1b2028 0%, #0d1014 100%); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        #canvas-container { width: 100vw; height: 100vh; }
+        .info-card {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(22, 27, 34, 0.88); backdrop-filter: blur(8px);
+            color: #f0f6fc; padding: 16px 20px; border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12); max-width: 330px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5); pointer-events: none;
+        }
+        .info-card h2 { margin: 0 0 6px 0; font-size: 1.25rem; font-style: italic; color: #58a6ff; }
+        .info-card p { margin: 4px 0; font-size: 0.85rem; color: #8b949e; }
+        .info-card strong { color: #c9d1d9; }
+        .specimen-photo-box {
+            position: absolute; bottom: 24px; right: 24px; width: 230px;
+            background: rgba(22, 27, 34, 0.92); border: 2px solid #58a6ff;
+            border-radius: 12px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            transition: transform 0.3s ease, width 0.3s ease; z-index: 10;
+        }
+        .specimen-photo-box:hover { width: 340px; transform: scale(1.02); }
+        .specimen-photo-box img { width: 100%; height: auto; display: block; object-fit: cover; max-height: 280px; }
+        .photo-placeholder { padding: 24px 14px; text-align: center; font-size: 0.8rem; color: #8b949e; }
+        .upload-btn {
+            margin-top: 10px; display: inline-block; padding: 6px 12px;
+            background: #238636; color: #fff; border-radius: 6px;
+            font-size: 0.75rem; cursor: pointer; font-weight: 600;
+        }
+        .photo-label {
+            padding: 8px 12px; font-size: 0.75rem; font-weight: 600;
+            text-align: center; color: #f0f6fc; background: #161b22;
+            letter-spacing: 0.5px; text-transform: uppercase;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+</head>
+<body>
+    <div class="info-card">
+        <h2>Anthurium andraeanum</h2>
+        <p><strong>Familia:</strong> Araceae</p>
+        <p><strong>Muestra:</strong> COL-NAR-002</p>
+        <p><strong>Localidad:</strong> Reserva Natural Río Ñambí, Barbacoas, Nariño, Colombia</p>
+        <p><strong>Fecha:</strong> 2026-11-06</p>
+        <p style="margin-top: 10px; font-size: 0.75rem; color: #58a6ff;">● Rotar: Clic izquierdo | Zoom: Rueda | Mover: Clic derecho</p>
+    </div>
+
+    <div class="specimen-photo-box" id="photo-box">
+        <img id="field-img" src="../images/anthurium_andraeanum.jpg" alt="Espécimen real"
+             onerror="this.style.display='none'; document.getElementById('fallback-box').style.display='block';" />
+        <div id="fallback-box" class="photo-placeholder" style="display:none;">
+            📷 Guarda tu foto en <b>images/anthurium_andraeanum.jpg</b><br>o cárgala aquí directamente:<br>
+            <label class="upload-btn">Elegir foto real<input type="file" accept="image/*" style="display:none" onchange="loadLocalPhoto(event)"></label>
+        </div>
+        <div class="photo-label">Registro de Campo</div>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <script>
+        function loadLocalPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const img = document.getElementById('field-img');
+                img.src = URL.createObjectURL(file);
+                img.style.display = 'block';
+                document.getElementById('fallback-box').style.display = 'none';
+            }
+        }
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.06;
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+        const dirLight1 = new THREE.DirectionalLight(0xfff8e7, 0.75);
+        dirLight1.position.set(60, 80, 90);
+        scene.add(dirLight1);
+
+        const dirLight2 = new THREE.DirectionalLight(0x88bbff, 0.35);
+        dirLight2.position.set(-60, -40, -60);
+        scene.add(dirLight2);
+
+        const loader = new THREE.OBJLoader();
+        loader.load('anthurium_andraeanum.obj?t=' + new Date().getTime(), function (object) {
+            object.traverse(function (child) {
+                if (child.isMesh) {
+                    child.geometry.computeVertexNormals();
+                    child.material = new THREE.MeshStandardMaterial({
+                        vertexColors: true,
+                        roughness: 0.42,
+                        metalness: 0.05,
+                        side: THREE.DoubleSide
+                    });
+                }
+            });
+            const box = new THREE.Box3().setFromObject(object);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            object.position.sub(center);
+            scene.add(object);
+
+            const maxDim = Math.max(size.x, size.y, size.z);
+            camera.position.set(maxDim * 0.85, maxDim * 0.25, maxDim * 1.15);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+</html>
