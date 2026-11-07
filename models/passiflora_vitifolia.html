@@ -84,8 +84,7 @@
         const groups = {};
         let currentMat = "Mat_CorolaLimbo";
 
-        objRaw.split('
-').forEach(line => {
+        objRaw.split('\n').forEach(line => {
             const parts = line.trim().split(/\s+/);
             if (parts[0] === 'v') {
                 vertices.push([parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])]);
