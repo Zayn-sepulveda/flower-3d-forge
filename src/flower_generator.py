@@ -137,19 +137,31 @@ def build_araceae_inflorescence(cfg):
     stipe_cols = np.tile(c_stipe, (n_st, 1))
     add_tube_along_curve(stipe_pts, stipe_radii, stipe_cols, 24, vertices, colors, faces)
 
-    # 3. ESPÁDICE PÉNDULO CON TEXTURA TUBERCULADA (FLORES SÉSILES)
+    # 3. ESPÁDICE (DISPOSICIÓN ERECTA O PÉNDULA SEGÚN TAXÓN)
     spadix_len = float(g_cfg.get('estilo_longitud_mm', 70.0))
-    spadix_r_base = float(g_cfg.get('diametro_espadice_mm', 9.5)) / 2.0
+    spadix_r_base = float(g_cfg.get('estilo_grosor_mm', g_cfg.get('diametro_espadice_mm', 9.5))) / 2.0
     n_sp = 90
     n_sl = 44
     s_vals = np.linspace(0, 1, n_sp)
     start_sp = stipe_pts[-1]
 
-    spadix_pts = np.column_stack([
-        np.zeros(n_sp),
-        start_sp[1] - s_vals * spadix_len,
-        start_sp[2] + np.sin(s_vals * np.pi) * 2.2
-    ])
+    # Leer disposición del archivo YAML
+    disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'pendula').lower()
+
+    if disposicion == 'erecta':
+        # ERECTO: Crece hacia arriba (+Y) y ligeramente hacia adelante (+Z)
+        spadix_pts = np.column_stack([
+            np.zeros(n_sp),
+            start_sp[1] + s_vals * spadix_len * 0.95,
+            start_sp[2] + s_vals * spadix_len * 0.35 + np.sin(s_vals * np.pi) * 1.5
+        ])
+    else:
+        # PÉNDULO: Cuelga hacia abajo (-Y) como en Anthurium sanjorgense
+        spadix_pts = np.column_stack([
+            np.zeros(n_sp),
+            start_sp[1] - s_vals * spadix_len,
+            start_sp[2] + np.sin(s_vals * np.pi) * 2.2
+        ])
 
     radii_sp = np.zeros((n_sp, n_sl))
     cols_sp = np.zeros((n_sp, n_sl, 3))
