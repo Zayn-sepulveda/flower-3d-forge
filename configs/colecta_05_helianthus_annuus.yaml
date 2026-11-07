@@ -10,42 +10,42 @@ colecta:
 arquitectura_floral:
   simetria: "actinomorfa"
   tipo_inflorescencia: "capitulo"
-  disposicion: "horizontal"
+  disposicion: "inclinada"             # Inclinación heliotrópica orgánica (35°)
 
 perianto:
   verticilos: "diclamidea"
   caliz:
-    sepalos_numero: 34
+    sepalos_numero: 48                 # 3 series imbricadas de filarias foliáceas acuminadas
     fusion: "dialisepalo"
-    longitud_tubo_mm: 25.0
-    color_hex: "#3B6E22"
+    longitud_tubo_mm: 28.0             # Largo de las brácteas involucrales envolventes
+    color_hex: "#3E6B24"               # Verde oliva intenso del involucro pubescente
   corola:
-    petalos_numero: 34
+    petalos_numero: 42                 # Flores liguladas en 3 capas radiales escalonadas
     fusion: "gamopetala"
-    longitud_tubo_mm: 6.0
-    longitud_limbo_mm: 70.0
-    ancho_petalo_mm: 22.0
+    longitud_tubo_mm: 5.5              # Tubo basal estrecho de la lígula
+    longitud_limbo_mm: 72.0            # Lígula radiante ondulada
+    ancho_petalo_mm: 21.0
     diferenciacion_dorsoventral:
-      factor_tamano_dorsal: 1.0
-      factor_tamano_ventral: 1.0
-      curvatura_dorsal_grados: 88.0
-    grosor_pared_mm: 0.9
-    color_garganta_hex: "#E67E22"
-    color_limbo_hex: "#FFC300"
+      factor_tamano_dorsal: 1.15       # Variación alométrica entre capas externa e interna
+      factor_tamano_ventral: 0.88
+      curvatura_dorsal_grados: 25.0    # Ondulación sinusoidal y torsión longitudinal
+    grosor_pared_mm: 1.1
+    color_garganta_hex: "#E67E22"      # Base anaranjada viva de la lígula
+    color_limbo_hex: "#FFC300"         # Amarillo oro brillante
 
 androceo:
-  estambres_numero: 5
+  estambres_numero: 5                  # Flósculos del disco con anteras singenésicas
   fusion_filamentos: "singenesico"
-  filamento_longitud_mm: 4.0
+  filamento_longitud_mm: 4.2
   filamento_grosor_mm: 0.6
-  antera_longitud_mm: 4.5
-  color_filamento_hex: "#5D4037"
-  color_antera_hex: "#2C1810"
+  antera_longitud_mm: 4.8
+  color_filamento_hex: "#4E3629"
+  color_antera_hex: "#24140E"          # Pardo-purpúreo muy oscuro del cilindro de anteras
 
 gineceo:
   posicion_ovario: "infero"
-  estilo_longitud_mm: 9.5
-  estilo_grosor_mm: 0.8
+  estilo_longitud_mm: 9.8              # Estilo exerto con estigma bífido recurvado
+  estilo_grosor_mm: 0.85
   estigma_lobulos: 2
-  color_ovario_hex: "#4A2311"
-  color_estilo_hex: "#F1C40F"
+  color_ovario_hex: "#3D2012"
+  color_estilo_hex: "#F4D03F"          # Amarillo oro del estigma bífido en antesis
