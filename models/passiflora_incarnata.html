@@ -66,7 +66,7 @@
         const palette = {"Mat_Caliz": "#d8d4f2", "Mat_CorolaGarganta": "#4a0e4e", "Mat_CorolaLimbo": "#8a4fff", "Mat_Filamento": "#c5d86d", "Mat_Antera": "#f3de8a", "Mat_Ovario": "#e9f5db", "Mat_Estilo": "#ede7f6", "Mat_Blanco": "#f9f9ff"};
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 3000);
+        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 3000);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -77,15 +77,18 @@
         controls.enableDamping = true;
         controls.dampingFactor = 0.06;
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.78));
-        const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.88);
-        dirLight1.position.set(80, 140, 100);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+        const dirLight1 = new THREE.DirectionalLight(0xfff8e7, 0.78);
+        dirLight1.position.set(60, 80, 90);
         scene.add(dirLight1);
-        const dirLight2 = new THREE.DirectionalLight(0x90cdf4, 0.42);
-        dirLight2.position.set(-80, -60, -80);
+        const dirLight2 = new THREE.DirectionalLight(0x88bbff, 0.38);
+        dirLight2.position.set(-60, -40, -60);
         scene.add(dirLight2);
 
         const vertices = [];
+        const vColors = [];
+        const vcPositions = [];
+        const vcColors = [];
         const groups = {};
         let currentMat = "Mat_CorolaLimbo";
         const NL_CHAR = String.fromCharCode(10);
@@ -95,19 +98,44 @@
             if (!parts.length) return;
             if (parts[0] === 'v') {
                 vertices.push([parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])]);
+                if (parts.length >= 7) {
+                    vColors.push([parseFloat(parts[4]), parseFloat(parts[5]), parseFloat(parts[6])]);
+                } else {
+                    vColors.push(null);
+                }
             } else if (parts[0] === 'usemtl') {
                 currentMat = parts[1];
                 if (!groups[currentMat]) groups[currentMat] = [];
             } else if (parts[0] === 'f') {
-                if (!groups[currentMat]) groups[currentMat] = [];
                 const idx = parts.slice(1).map(p => parseInt(p.split('/')[0], 10) - 1);
                 if (idx.length >= 3 && vertices[idx[0]] && vertices[idx[1]] && vertices[idx[2]]) {
-                    groups[currentMat].push(...vertices[idx[0]], ...vertices[idx[1]], ...vertices[idx[2]]);
+                    if (vColors[idx[0]]) {
+                        vcPositions.push(...vertices[idx[0]], ...vertices[idx[1]], ...vertices[idx[2]]);
+                        vcColors.push(...vColors[idx[0]], ...vColors[idx[1]], ...vColors[idx[2]]);
+                    } else {
+                        if (!groups[currentMat]) groups[currentMat] = [];
+                        groups[currentMat].push(...vertices[idx[0]], ...vertices[idx[1]], ...vertices[idx[2]]);
+                    }
                 }
             }
         });
 
         const flowerGroup = new THREE.Group();
+
+        if (vcPositions.length > 0) {
+            const geom = new THREE.BufferGeometry();
+            geom.setAttribute('position', new THREE.Float32BufferAttribute(vcPositions, 3));
+            geom.setAttribute('color', new THREE.Float32BufferAttribute(vcColors, 3));
+            geom.computeVertexNormals();
+            const mat = new THREE.MeshStandardMaterial({
+                vertexColors: true,
+                roughness: 0.42,
+                metalness: 0.05,
+                side: THREE.DoubleSide
+            });
+            flowerGroup.add(new THREE.Mesh(geom, mat));
+        }
+
         Object.keys(groups).forEach(matName => {
             const pos = groups[matName];
             if (pos.length === 0) return;
@@ -123,16 +151,22 @@
             flowerGroup.add(new THREE.Mesh(geom, mat));
         });
 
-        const box = new THREE.Box3().setFromObject(flowerGroup);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-        flowerGroup.position.sub(center);
         scene.add(flowerGroup);
 
-        const maxDim = Math.max(size.x, size.y, size.z) || 100;
-        camera.position.set(maxDim * 0.45, maxDim * 0.35, maxDim * 1.25);
-        controls.target.set(0, 0, 0);
-        controls.update();
+        if (vcPositions.length > 0) {
+            const box = new THREE.Box3().setFromObject(flowerGroup);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            flowerGroup.position.sub(center);
+            const maxDim = Math.max(size.x, size.y, size.z) || 100;
+            camera.position.set(maxDim * 0.85, maxDim * 0.25, maxDim * 1.15);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        } else {
+            camera.position.set(0, 75, 145);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;

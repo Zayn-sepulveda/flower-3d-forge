@@ -3,6 +3,7 @@ import sys
 import os
 import math
 import json
+import numpy as np
 
 NL = chr(10)
 
@@ -24,6 +25,10 @@ def hex_to_rgb(hex_color):
         return tuple(int(hex_color[i:i+2], 16) / 255.0 for i in (0, 2, 4))
     except ValueError:
         return (0.5, 0.5, 0.5)
+
+def np_hex_to_rgb(hex_str):
+    hex_str = str(hex_str).strip().lstrip('#')
+    return np.array([int(hex_str[i:i+2], 16) / 255.0 for i in (0, 2, 4)])
 
 def create_material_mtl(cfg, mtl_filepath):
     perianto = cfg.get('perianto') or {}
@@ -49,6 +54,180 @@ def create_material_mtl(cfg, mtl_filepath):
             f.write(f"Kd {rgb[0]:.4f} {rgb[1]:.4f} {rgb[2]:.4f}" + NL)
             f.write("Ka 0.2 0.2 0.2" + NL + "Ks 0.15 0.15 0.15" + NL + "Ns 12" + NL)
     return {k: '#' + ''.join(f'{int(c*255):02x}' for c in v) for k, v in colors.items()}
+
+def add_tube_along_curve(curve_pts, radii, colors_ring, n_slices, vertices, colors, faces):
+    n_rings = len(curve_pts)
+    base_idx = len(vertices)
+    theta_vals = np.linspace(0, 2 * np.pi, n_slices, endpoint=False)
+
+    for i in range(n_rings):
+        p = curve_pts[i]
+        if i < n_rings - 1:
+            tang = curve_pts[i + 1] - p
+        else:
+            tang = p - curve_pts[i - 1]
+        norm_t = np.linalg.norm(tang)
+        tang = tang / (norm_t if norm_t > 1e-6 else 1.0)
+
+        ref = np.array([0.0, 0.0, 1.0]) if abs(tang[2]) < 0.9 else np.array([1.0, 0.0, 0.0])
+        n1 = np.cross(tang, ref)
+        n1 /= np.linalg.norm(n1)
+        n2 = np.cross(tang, n1)
+
+        for j, th in enumerate(theta_vals):
+            r = radii[i, j] if radii.ndim == 2 else radii[i]
+            pt = p + r * (np.cos(th) * n1 + np.sin(th) * n2)
+            vertices.append(pt.tolist())
+            c = colors_ring[i, j] if colors_ring.ndim == 3 else colors_ring[i]
+            colors.append(c.tolist())
+
+    for i in range(n_rings - 1):
+        for j in range(n_slices):
+            j_next = (j + 1) % n_slices
+            p1 = base_idx + i * n_slices + j + 1
+            p2 = base_idx + i * n_slices + j_next + 1
+            p3 = base_idx + (i + 1) * n_slices + j_next + 1
+            p4 = base_idx + (i + 1) * n_slices + j + 1
+            faces.append((p1, p2, p3))
+            faces.append((p1, p3, p4))
+
+def build_sanjorgense_original_obj(cfg):
+    c_cfg = cfg['perianto']['corola']
+    a_cfg = cfg.get('androceo', {})
+    g_cfg = cfg.get('gineceo', {})
+
+    spathe_len = float(c_cfg.get('longitud_limbo_mm', 65.0))
+    acumen_len = float(c_cfg.get('longitud_tubo_mm', 15.0))
+    total_spathe = spathe_len + acumen_len
+    spathe_w = float(c_cfg.get('ancho_petalo_mm', 38.0)) * 0.55
+
+    c_wine = np_hex_to_rgb(c_cfg.get('color_garganta_hex', '#8A1822'))
+    c_dark_wine = c_wine * 0.65
+    c_green = np_hex_to_rgb(c_cfg.get('color_limbo_hex', '#7A9F2E'))
+    c_stipe = np_hex_to_rgb(a_cfg.get('color_filamento_hex', '#C85242'))
+    c_spadix = np_hex_to_rgb(g_cfg.get('color_estilo_hex', '#B8D844'))
+    c_spadix_tip = np_hex_to_rgb(g_cfg.get('color_apice_hex', '#D49442'))
+    c_peduncle = np_hex_to_rgb(cfg['perianto']['caliz'].get('color_hex', '#8C7D38'))
+
+    vertices, colors, faces = [], [], []
+
+    # 1. ESPATA CUCULADA ORIGINAL (Capucha cóncava con ápice acuminado y moteado vino-verde)
+    n_v, n_u = 95, 55
+    v_vals = np.linspace(0.0, 1.0, n_v)
+    u_vals = np.linspace(-1.0, 1.0, n_u)
+    body_frac = spathe_len / total_spathe
+    base_idx = len(vertices)
+
+    for v in v_vals:
+        if v <= body_frac:
+            tv = v / body_frac
+            w_profile = np.sin(np.pi * (tv ** 0.68))
+            depth_profile = np.sin(np.pi * (tv ** 0.8)) * (spathe_w * 0.72)
+        else:
+            ta = (v - body_frac) / (1.0 - body_frac)
+            w_profile = (1.0 - ta) ** 2.2 * 0.18
+            depth_profile = (1.0 - ta) * 2.5
+
+        y_spine = v * total_spathe * 0.78
+        z_arch = np.sin(v * np.pi * 0.72) * 22.0 - (v ** 3) * 8.0
+
+        for u in u_vals:
+            x = u * spathe_w * w_profile
+            hood_curve = (1.0 - (u ** 2)) * depth_profile
+            y = y_spine + (u ** 2) * 2.5
+            z = z_arch - hood_curve
+
+            mottle = (
+                0.09 * np.sin(38.0 * v + 17.0 * u) * np.cos(27.0 * v - 21.0 * u)
+                + 0.05 * np.sin(75.0 * v + 43.0 * u)
+            )
+            trans_center = 0.44 + 0.08 * (1.0 - u ** 2)
+            mix = np.clip((v - trans_center + mottle) / 0.16, 0.0, 1.0)
+
+            base_col = (1.0 - min(v * 2.5, 1.0)) * c_dark_wine + min(v * 2.5, 1.0) * c_wine
+            edge_green = np.clip((abs(u) - 0.78) / 0.22, 0.0, 1.0) * 0.55
+            mix_final = np.clip(mix + edge_green, 0.0, 1.0)
+            col = (1.0 - mix_final) * base_col + mix_final * c_green
+
+            vertices.append([x, y, z])
+            colors.append(col.tolist())
+
+    for i in range(n_v - 1):
+        for j in range(n_u - 1):
+            p1 = base_idx + i * n_u + j + 1
+            p2 = base_idx + i * n_u + (j + 1) + 1
+            p3 = base_idx + (i + 1) * n_u + (j + 1) + 1
+            p4 = base_idx + (i + 1) * n_u + j + 1
+            faces.append((p1, p2, p3))
+            faces.append((p1, p3, p4))
+
+    # 2. ESTÍPITE ROJIZO ARQUEADO
+    stipe_len = float(a_cfg.get('filamento_longitud_mm', 14.0))
+    stipe_r = float(a_cfg.get('filamento_grosor_mm', 2.2))
+    n_st = 20
+    t_st = np.linspace(0, 1, n_st)
+    stipe_pts = np.column_stack([
+        np.zeros(n_st),
+        3.0 - t_st * 6.5,
+        -2.0 + np.sin(t_st * np.pi * 0.5) * stipe_len
+    ])
+    stipe_radii = np.linspace(stipe_r * 1.1, stipe_r * 0.95, n_st)
+    stipe_cols = np.tile(c_stipe, (n_st, 1))
+    add_tube_along_curve(stipe_pts, stipe_radii, stipe_cols, 24, vertices, colors, faces)
+
+    # 3. ESPÁDICE PÉNDULO CON TEXTURA TUBERCULADA
+    spadix_len = float(g_cfg.get('estilo_longitud_mm', 70.0))
+    spadix_r_base = float(g_cfg.get('estilo_grosor_mm', g_cfg.get('diametro_espadice_mm', 9.5))) / 2.0
+    n_sp = 90
+    n_sl = 44
+    s_vals = np.linspace(0, 1, n_sp)
+    start_sp = stipe_pts[-1]
+
+    spadix_pts = np.column_stack([
+        np.zeros(n_sp),
+        start_sp[1] - s_vals * spadix_len,
+        start_sp[2] + np.sin(s_vals * np.pi) * 2.2
+    ])
+
+    radii_sp = np.zeros((n_sp, n_sl))
+    cols_sp = np.zeros((n_sp, n_sl, 3))
+    theta_sp = np.linspace(0, 2 * np.pi, n_sl, endpoint=False)
+
+    for i, s in enumerate(s_vals):
+        if s < 0.93:
+            taper = 1.0 - 0.38 * (s / 0.93)
+        else:
+            taper = 0.62 * np.sqrt(max(1.0 - (s - 0.93) / 0.07, 0.02))
+
+        r_mean = spadix_r_base * taper
+        tip_mix = np.clip((s - 0.80) / 0.20, 0.0, 1.0)
+        c_ring = (1.0 - tip_mix) * c_spadix + tip_mix * c_spadix_tip
+
+        for j, th in enumerate(theta_sp):
+            bump = (np.cos(13 * th + (i % 2) * 1.5) * np.sin(55 * s * np.pi)) ** 2
+            radii_sp[i, j] = r_mean + (0.48 * bump if s < 0.96 else 0.1)
+            cols_sp[i, j] = c_ring * (0.90 + 0.16 * bump)
+
+    add_tube_along_curve(spadix_pts, radii_sp, cols_sp, n_sl, vertices, colors, faces)
+
+    # 4. PEDÚNCULO BASAL
+    n_ped = 30
+    t_ped = np.linspace(0, 1, n_ped)
+    ped_pts = np.column_stack([
+        np.zeros(n_ped),
+        3.0 - t_ped * 85.0,
+        -2.0 - np.sin(t_ped * np.pi * 0.5) * 14.0
+    ])
+    ped_radii = np.linspace(2.6, 3.1, n_ped)
+    ped_cols = np.tile(c_peduncle, (n_ped, 1))
+    add_tube_along_curve(ped_pts, ped_radii, ped_cols, 20, vertices, colors, faces)
+
+    lines = []
+    for v, c in zip(vertices, colors):
+        lines.append(f"v {v[0]:.4f} {v[1]:.4f} {v[2]:.4f} {c[0]:.4f} {c[1]:.4f} {c[2]:.4f}" + NL)
+    for f_idx in faces:
+        lines.append(f"f {f_idx[0]} {f_idx[1]} {f_idx[2]}" + NL)
+    return "".join(lines)
 
 def add_tube(pts, r0, r1, sides, v_offset):
     out = []
@@ -82,6 +261,10 @@ def add_tube(pts, r0, r1, sides, v_offset):
     return "".join(out), v_offset + n * sides
 
 def build_araceae_inflorescence(cfg):
+    disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'erecta').lower()
+    if disposicion == "pendula":
+        return build_sanjorgense_original_obj(cfg)
+
     obj_data = ""
     v_offset = 1
     perianto = cfg['perianto']['corola']
@@ -90,69 +273,48 @@ def build_araceae_inflorescence(cfg):
     ddv = perianto.get('diferenciacion_dorsoventral') or {}
     fd = float(ddv.get('factor_tamano_dorsal', 1.2))
     fv = float(ddv.get('factor_tamano_ventral', 0.9))
-    disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'erecta').lower()
 
     obj_data += "usemtl Mat_Caliz" + NL
-    ped_pts = [(0, -85 + i*8.5, -6 + math.sin(i*0.15)*2.5) for i in range(11)]
-    seg_obj, v_offset = add_tube(ped_pts, 3.8, 3.4, 12, v_offset)
+    ped_pts = [(0, -90 + i*9, -8 + math.sin(i*0.15)*3) for i in range(11)]
+    seg_obj, v_offset = add_tube(ped_pts, 4.2, 3.8, 12, v_offset)
     obj_data += seg_obj
 
-    res_u, res_v = 28, 24
-    for half in ['base', 'apex']:
-        obj_data += ("usemtl Mat_CorolaGarganta" if (half == 'base' and disposicion == 'pendula') else "usemtl Mat_CorolaLimbo") + NL
-        u_start = 0 if half == 'base' else res_u // 2
-        u_end = (res_u // 2) if half == 'base' else res_u
-        rows = u_end - u_start
-        for i in range(u_start, u_end + 1):
-            u = i / res_u
-            for j in range(res_v + 1):
-                v = j / res_v
-                theta = (v - 0.5) * math.pi * 1.5
-                lobe_boost = 1.0 + 0.35 * math.sin(abs(theta)) * (1.0 - u) if disposicion == "erecta" else 1.0
-                radius = (w_petalo / 2.0) * math.sin(math.pi * (u ** 0.72)) * (fd if theta > 0 else fv) * lobe_boost
-                x = radius * math.cos(theta)
-                y_base = l_limbo * (u - 0.12)
-                depth = 0.18 if disposicion == "erecta" else 0.55
-                z = radius * math.sin(theta) * depth - (u * u) * (18.0 if disposicion == "erecta" else 38.0)
-                z += math.sin(u * math.pi * 10) * math.cos(v * math.pi * 10) * 1.2
-                tilt = -50.0 if disposicion == "erecta" else 22.0
-                angle = math.radians(tilt)
-                y_rot = y_base * math.cos(angle) - z * math.sin(angle)
-                z_rot = y_base * math.sin(angle) + z * math.cos(angle)
-                obj_data += build_vertex(x, y_rot, z_rot)
-        for i in range(rows):
-            for j in range(res_v):
-                p1 = v_offset + i * (res_v + 1) + j
-                p2 = p1 + 1
-                p3 = p1 + (res_v + 1)
-                p4 = p3 + 1
-                obj_data += build_face(p1, p2, p3)
-                obj_data += build_face(p2, p4, p3)
-        v_offset += (rows + 1) * (res_v + 1)
+    obj_data += "usemtl Mat_CorolaLimbo" + NL
+    res_u, res_v = 24, 24
+    for i in range(res_u + 1):
+        u = i / res_u
+        for j in range(res_v + 1):
+            v = j / res_v
+            theta = (v - 0.5) * math.pi * 1.5
+            lobe_boost = 1.0 + 0.35 * math.sin(abs(theta)) * (1.0 - u)
+            radius = (w_petalo / 2.0) * math.sin(math.pi * (u ** 0.75)) * (fd if theta > 0 else fv) * lobe_boost
+            x = radius * math.cos(theta)
+            y_base = l_limbo * (u - 0.12)
+            z = radius * math.sin(theta) * 0.18 - (u * u) * 18.0
+            z += math.sin(u * math.pi * 10) * math.cos(v * math.pi * 10) * 1.4
+            angle = math.radians(-50.0)
+            y_rot = y_base * math.cos(angle) - z * math.sin(angle)
+            z_rot = y_base * math.sin(angle) + z * math.cos(angle)
+            obj_data += build_vertex(x, y_rot, z_rot)
+
+    for i in range(res_u):
+        for j in range(res_v):
+            p1 = v_offset + i * (res_v + 1) + j
+            p2 = p1 + 1
+            p3 = p1 + (res_v + 1)
+            p4 = p3 + 1
+            obj_data += build_face(p1, p2, p3)
+            obj_data += build_face(p2, p4, p3)
+    v_offset += (res_u + 1) * (res_v + 1)
 
     gineceo = cfg.get('gineceo') or {}
     androceo = cfg.get('androceo') or {}
     l_espadice = float(gineceo.get('estilo_longitud_mm', 70.0))
-    w_espadice = float(gineceo.get('estilo_grosor_mm', gineceo.get('diametro_espadice_mm', 8.5))) / 2.0
-    estipite_l = float(androceo.get('filamento_longitud_mm', 12.0))
-
-    obj_data += "usemtl Mat_Filamento" + NL
-    if disposicion == "pendula":
-        st_pts = [(0, 2.0 - t*6.0, -3.0 + math.sin(t*math.pi*0.5)*estipite_l) for t in [k/8.0 for k in range(9)]]
-    else:
-        st_pts = [(0, t*estipite_l, t*4.0) for t in [k/8.0 for k in range(9)]]
-    seg_st, v_offset = add_tube(st_pts, w_espadice*0.75, w_espadice*0.85, 12, v_offset)
-    obj_data += seg_st
+    w_espadice = float(gineceo.get('estilo_grosor_mm', 8.0)) / 2.0
+    estipite_l = float(androceo.get('filamento_longitud_mm', 8.0))
 
     obj_data += "usemtl Mat_Estilo" + NL
-    sx0, sy0, sz0 = st_pts[-1]
-    sp_pts = []
-    for i in range(25):
-        h = i / 24.0
-        if disposicion == "pendula":
-            sp_pts.append((sx0, sy0 - l_espadice * h, sz0 + math.sin(h * math.pi) * 2.5))
-        else:
-            sp_pts.append((sx0, sy0 + l_espadice * h * 0.9, sz0 + h * 18.0))
+    sp_pts = [(0, estipite_l + l_espadice * (i / 24.0), (i / 24.0) * 18.0) for i in range(25)]
     seg_obj, v_offset = add_tube(sp_pts, w_espadice, w_espadice * 0.55, 16, v_offset)
     obj_data += seg_obj
     return obj_data
@@ -524,7 +686,7 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
         const palette = {json.dumps(color_map)};
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 3000);
+        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 3000);
 
         const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -535,15 +697,18 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
         controls.enableDamping = true;
         controls.dampingFactor = 0.06;
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.78));
-        const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.88);
-        dirLight1.position.set(80, 140, 100);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.75));
+        const dirLight1 = new THREE.DirectionalLight(0xfff8e7, 0.78);
+        dirLight1.position.set(60, 80, 90);
         scene.add(dirLight1);
-        const dirLight2 = new THREE.DirectionalLight(0x90cdf4, 0.42);
-        dirLight2.position.set(-80, -60, -80);
+        const dirLight2 = new THREE.DirectionalLight(0x88bbff, 0.38);
+        dirLight2.position.set(-60, -40, -60);
         scene.add(dirLight2);
 
         const vertices = [];
+        const vColors = [];
+        const vcPositions = [];
+        const vcColors = [];
         const groups = {{}};
         let currentMat = "Mat_CorolaLimbo";
         const NL_CHAR = String.fromCharCode(10);
@@ -553,19 +718,44 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             if (!parts.length) return;
             if (parts[0] === 'v') {{
                 vertices.push([parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])]);
+                if (parts.length >= 7) {{
+                    vColors.push([parseFloat(parts[4]), parseFloat(parts[5]), parseFloat(parts[6])]);
+                }} else {{
+                    vColors.push(null);
+                }}
             }} else if (parts[0] === 'usemtl') {{
                 currentMat = parts[1];
                 if (!groups[currentMat]) groups[currentMat] = [];
             }} else if (parts[0] === 'f') {{
-                if (!groups[currentMat]) groups[currentMat] = [];
                 const idx = parts.slice(1).map(p => parseInt(p.split('/')[0], 10) - 1);
                 if (idx.length >= 3 && vertices[idx[0]] && vertices[idx[1]] && vertices[idx[2]]) {{
-                    groups[currentMat].push(...vertices[idx[0]], ...vertices[idx[1]], ...vertices[idx[2]]);
+                    if (vColors[idx[0]]) {{
+                        vcPositions.push(...vertices[idx[0]], ...vertices[idx[1]], ...vertices[idx[2]]);
+                        vcColors.push(...vColors[idx[0]], ...vColors[idx[1]], ...vColors[idx[2]]);
+                    }} else {{
+                        if (!groups[currentMat]) groups[currentMat] = [];
+                        groups[currentMat].push(...vertices[idx[0]], ...vertices[idx[1]], ...vertices[idx[2]]);
+                    }}
                 }}
             }}
         }});
 
         const flowerGroup = new THREE.Group();
+
+        if (vcPositions.length > 0) {{
+            const geom = new THREE.BufferGeometry();
+            geom.setAttribute('position', new THREE.Float32BufferAttribute(vcPositions, 3));
+            geom.setAttribute('color', new THREE.Float32BufferAttribute(vcColors, 3));
+            geom.computeVertexNormals();
+            const mat = new THREE.MeshStandardMaterial({{
+                vertexColors: true,
+                roughness: 0.42,
+                metalness: 0.05,
+                side: THREE.DoubleSide
+            }});
+            flowerGroup.add(new THREE.Mesh(geom, mat));
+        }}
+
         Object.keys(groups).forEach(matName => {{
             const pos = groups[matName];
             if (pos.length === 0) return;
@@ -581,16 +771,22 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             flowerGroup.add(new THREE.Mesh(geom, mat));
         }});
 
-        const box = new THREE.Box3().setFromObject(flowerGroup);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-        flowerGroup.position.sub(center);
         scene.add(flowerGroup);
 
-        const maxDim = Math.max(size.x, size.y, size.z) || 100;
-        camera.position.set(maxDim * 0.45, maxDim * 0.35, maxDim * 1.25);
-        controls.target.set(0, 0, 0);
-        controls.update();
+        if (vcPositions.length > 0) {{
+            const box = new THREE.Box3().setFromObject(flowerGroup);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            flowerGroup.position.sub(center);
+            const maxDim = Math.max(size.x, size.y, size.z) || 100;
+            camera.position.set(maxDim * 0.85, maxDim * 0.25, maxDim * 1.15);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }} else {{
+            camera.position.set(0, 75, 145);
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }}
 
         window.addEventListener('resize', () => {{
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -631,7 +827,7 @@ def generate_flower_3d(cfg):
         f.write(f"mtllib {specie_filename}.mtl" + NL + obj_data)
 
     export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath)
-    print(f"✅ Visor 3D reparado en: {html_filepath}")
+    print(f"✅ Modelo 3D restaurado en: {html_filepath}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
