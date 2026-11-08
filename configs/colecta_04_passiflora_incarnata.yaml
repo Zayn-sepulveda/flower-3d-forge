@@ -17,21 +17,21 @@ perianto:
   caliz:
     sepalos_numero: 5
     fusion: "dialisepalo"
-    longitud_tubo_mm: 9.0              # Hipanto acopado verde carnoso
-    color_hex: "#78A942"               # Verde manzana brillante del pedicelo e hipanto
+    longitud_tubo_mm: 8.5              # Hipanto acopado
+    color_hex: "#5A8F32"               # Verde manzana brillante del pedicelo e hipanto
   corola:
     petalos_numero: 5
     fusion: "dialipetala"
-    longitud_tubo_mm: 36.0             # Longitud de filamentos de la corona
+    longitud_tubo_mm: 36.0             # Longitud de la corona
     longitud_limbo_mm: 42.0            # Tépalos oblongos
-    ancho_petalo_mm: 17.5              # Lámina ancha con borde redondeado
+    ancho_petalo_mm: 18.0
     diferenciacion_dorsoventral:
-      factor_tamano_dorsal: 1.05
-      factor_tamano_ventral: 0.95
-      curvatura_dorsal_grados: 28.0    # Curvatura reflexa hacia abajo
+      factor_tamano_dorsal: 1.02
+      factor_tamano_ventral: 0.98
+      curvatura_dorsal_grados: 25.0
     grosor_pared_mm: 1.2
-    color_garganta_hex: "#3D1030"      # Púrpura vino oscuro de la base de la corona
-    color_limbo_hex: "#DDD3E8"         # Lavanda muy pálido / blanquecino de los pétalos
+    color_garganta_hex: "#4A1238"      # Púrpura vino oscuro del ojo basal y estrías
+    color_limbo_hex: "#9F7CBF"         # Lavanda/violeta real del perianto frontal
 
 androceo:
   estambres_numero: 5
@@ -39,13 +39,13 @@ androceo:
   filamento_longitud_mm: 22.0
   filamento_grosor_mm: 2.2
   antera_longitud_mm: 8.0
-  color_filamento_hex: "#E8ECE0"       # Columna crema con moteado
-  color_antera_hex: "#CFCA58"          # Anteras amarillas verdosas
+  color_filamento_hex: "#D4DCB8"       # Columna verde pálido moteada
+  color_antera_hex: "#D2CA4E"          # Anteras amarillas verdosas
 
 gineceo:
   posicion_ovario: "supero"
   estilo_longitud_mm: 9.5
   estilo_grosor_mm: 1.6
   estigma_lobulos: 3
-  color_ovario_hex: "#B8DC72"          # Ovario verde claro subgloboso
-  color_estilo_hex: "#E8ECE0"          # Estilos curvados moteados
+  color_ovario_hex: "#8DB84A"          # Ovario verde vivo
+  color_estilo_hex: "#D4DCB8"          # Estilos verde pálido con púrpura
