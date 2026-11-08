@@ -31,7 +31,7 @@ Ks 0.15 0.15 0.15
 Ns 12
 
 newmtl Mat_Ovario
-Kd 0.2902 0.1373 0.0667
+Kd 0.5529 0.7216 0.2902
 Ka 0.2 0.2 0.2
 Ks 0.15 0.15 0.15
 Ns 12
@@ -42,8 +42,38 @@ Ka 0.2 0.2 0.2
 Ks 0.15 0.15 0.15
 Ns 12
 
+newmtl Mat_CoronaVioleta
+Kd 0.4784 0.3098 0.6275
+Ka 0.2 0.2 0.2
+Ks 0.15 0.15 0.15
+Ns 12
+
 newmtl Mat_Blanco
-Kd 0.9800 0.9800 1.0000
+Kd 0.9500 0.9500 0.9800
+Ka 0.2 0.2 0.2
+Ks 0.15 0.15 0.15
+Ns 12
+
+newmtl Mat_PetaloLila
+Kd 0.8471 0.7216 0.9098
+Ka 0.2 0.2 0.2
+Ks 0.15 0.15 0.15
+Ns 12
+
+newmtl Mat_LabeloPurpura
+Kd 0.6196 0.0706 0.3373
+Ka 0.2 0.2 0.2
+Ks 0.15 0.15 0.15
+Ns 12
+
+newmtl Mat_LabeloAmarillo
+Kd 1.0000 0.7176 0.0118
+Ka 0.2 0.2 0.2
+Ks 0.15 0.15 0.15
+Ns 12
+
+newmtl Mat_Columna
+Kd 0.9725 0.9608 0.9490
 Ka 0.2 0.2 0.2
 Ks 0.15 0.15 0.15
 Ns 12
