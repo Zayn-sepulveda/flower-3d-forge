@@ -1,0 +1,51 @@
+colecta:
+  id_muestra: "COL-CAU-007"
+  familia: "Heliconiaceae"
+  genero: "Heliconia"
+  especie: "Heliconia rostrata"
+  localidad: "Popayán, Cauca, Colombia"
+  fecha: "2026-11-08"
+  foto_campo: "images/heliconia_rostrata.jpg"
+
+arquitectura_floral:
+  simetria: "zigomorfa"
+  tipo_inflorescencia: "tirso_pendulo"
+  disposicion: "pendula"
+
+perianto:
+  verticilos: "bracteada"
+  caliz:
+    sepalos_numero: 0
+    fusion: "nulo"
+    longitud_tubo_mm: 50.0 # Longitud entre nodos del raquis
+    color_hex: "#B00020"   # Rojo carmín del raquis flexuoso
+  corola:
+    petalos_numero: 14     # Número de brácteas a generar
+    fusion: "cimbiforme"
+    longitud_tubo_mm: 60.0 # Altura de la base de la bráctea
+    longitud_limbo_mm: 120.0 # Longitud de la bráctea cimbiforme
+    ancho_petalo_mm: 45.0
+    diferenciacion_dorsoventral:
+      factor_tamano_dorsal: 1.0
+      factor_tamano_ventral: 1.0
+      curvatura_dorsal_grados: 0.0
+    grosor_pared_mm: 3.0
+    color_garganta_hex: "#E6192B" # Base de la bráctea (Rojo escarlata)
+    color_limbo_hex: "#FFD700"    # Margen de la bráctea (Amarillo canario)
+
+androceo:
+  estambres_numero: 5
+  fusion_filamentos: "libres"
+  filamento_longitud_mm: 40.0
+  filamento_grosor_mm: 2.0
+  antera_longitud_mm: 12.0
+  color_filamento_hex: "#008B45" # Borde apical externo (Verde esmeralda)
+  color_antera_hex: "#FFFFFF"
+
+gineceo:
+  posicion_ovario: "infero"
+  estilo_longitud_mm: 50.0
+  estilo_grosor_mm: 3.0
+  estigma_lobulos: 1
+  color_ovario_hex: "#F5F5DC"
+  color_estilo_hex: "#FFFFFF"
