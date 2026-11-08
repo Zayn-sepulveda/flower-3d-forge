@@ -876,7 +876,7 @@ def build_orchidaceae_flower(cfg):
                 faces.append((p1, p3, p4))
         base_idx = len(vertices)
 
-    # 4. Labelo trilobulado tricolor
+    # 4. Labelo trilobulado tricolor (tubo convoluto envolvente + limbo rizado)
     ru_l, rv_l = 32, 22
     u_vals_l = np.linspace(0.0, 1.0, ru_l + 1)
     v_vals_l = np.linspace(-0.5, 0.5, rv_l + 1)
@@ -890,12 +890,14 @@ def build_orchidaceae_flower(cfg):
 
         for v in v_vals_l:
             if u < 0.42:
+                # Tubo que abraza la columna
                 theta = v * np.pi * 1.82
-                px = tube_radius * np.sin(theta)
-                py = y_center - tube_radius * 0.48 * (1.0 - np.cos(theta))
-                pz = z_center + tube_radius * np.cos(theta)
+                px = tube_radius * math.sin(theta)
+                py = y_center - tube_radius * 0.48 * (1.0 - math.cos(theta))
+                pz = z_center + tube_radius * math.cos(theta)
                 col = c_yellow if abs(v) < 0.3 else c_lilac
             else:
+                # Limbo frontal magenta y fimbriado
                 t_flare = (u - 0.42) / 0.58
                 lat = v * 2.0 * lip_width
                 edge_factor = (abs(v) / 0.5) ** 1.6
@@ -932,7 +934,7 @@ def build_orchidaceae_flower(cfg):
             faces.append((p1, p3, p4))
         base_idx = len(vertices)
 
-    # 5. Ginostemio (columna arqueada con antera terminal)
+    # 5. Ginostemio (columna arqueada dentro del tubo)
     l_col = float(a_cfg.get('filamento_longitud_mm', 32.0))
     n_col = 16
     t_col = np.linspace(0.0, 1.0, n_col)
