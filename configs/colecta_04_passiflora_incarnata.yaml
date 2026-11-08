@@ -17,35 +17,35 @@ perianto:
   caliz:
     sepalos_numero: 5
     fusion: "dialisepalo"
-    longitud_tubo_mm: 8.0              # Hipanto acopado corto
-    color_hex: "#7A9F2E"               # Verde pálido en el envés (abaxial)
+    longitud_tubo_mm: 9.0              # Hipanto acopado verde carnoso
+    color_hex: "#78A942"               # Verde manzana brillante del pedicelo e hipanto
   corola:
     petalos_numero: 5
     fusion: "dialipetala"
-    longitud_tubo_mm: 38.0             # Longitud de la corona de filamentos
-    longitud_limbo_mm: 42.0            # Pétalos y sépalos oblongo-redondeados
-    ancho_petalo_mm: 16.0
+    longitud_tubo_mm: 36.0             # Longitud de filamentos de la corona
+    longitud_limbo_mm: 42.0            # Tépalos oblongos
+    ancho_petalo_mm: 17.5              # Lámina ancha con borde redondeado
     diferenciacion_dorsoventral:
-      factor_tamano_dorsal: 1.05       # Sépalos ligeramente más anchos con arista subapical
-      factor_tamano_ventral: 0.95      # Pétalos más suaves
-      curvatura_dorsal_grados: 25.0    # Tépalos reflexos (curvados hacia atrás)
+      factor_tamano_dorsal: 1.05
+      factor_tamano_ventral: 0.95
+      curvatura_dorsal_grados: 28.0    # Curvatura reflexa hacia abajo
     grosor_pared_mm: 1.2
-    color_garganta_hex: "#FFFFFF"      # Base blanca de la corona bandeada
-    color_limbo_hex: "#D0B3E1"         # Lavanda pálido de los pétalos
+    color_garganta_hex: "#3D1030"      # Púrpura vino oscuro de la base de la corona
+    color_limbo_hex: "#DDD3E8"         # Lavanda muy pálido / blanquecino de los pétalos
 
 androceo:
   estambres_numero: 5
   fusion_filamentos: "androginoforo"
-  filamento_longitud_mm: 22.0          # Androginóforo esbelto y largo
+  filamento_longitud_mm: 22.0
   filamento_grosor_mm: 2.2
-  antera_longitud_mm: 7.5
-  color_filamento_hex: "#E8E8E8"       # Columna blanca moteada de púrpura
-  color_antera_hex: "#D4AC0D"          # Anteras versátiles amarillas
+  antera_longitud_mm: 8.0
+  color_filamento_hex: "#E8ECE0"       # Columna crema con moteado
+  color_antera_hex: "#CFCA58"          # Anteras amarillas verdosas
 
 gineceo:
-  posicion_ovario: "supero"            # Ovario elevado sobre la columna
-  estilo_longitud_mm: 9.0
-  estilo_grosor_mm: 1.5
+  posicion_ovario: "supero"
+  estilo_longitud_mm: 9.5
+  estilo_grosor_mm: 1.6
   estigma_lobulos: 3
-  color_ovario_hex: "#A9DFBF"          # Ovario verde claro subgloboso
-  color_estilo_hex: "#E8E8E8"          # Estilos moteados de púrpura
+  color_ovario_hex: "#B8DC72"          # Ovario verde claro subgloboso
+  color_estilo_hex: "#E8ECE0"          # Estilos curvados moteados

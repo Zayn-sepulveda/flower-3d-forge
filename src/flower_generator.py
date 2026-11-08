@@ -313,76 +313,103 @@ def build_araceae_inflorescence(cfg):
 
 def build_passiflora_flower(cfg):
     """
-    Modelo morfométrico de Passiflora con tépalos oblongos reflexos,
-    corona densa y rizada, estilos recurvados y brácteas en el pedicelo.
+    Modelo morfométrico de Passiflora con:
+    - Tépalos oblongos con ápice obtuso redondeado y curvatura reflexa.
+    - Hipanto acopado carnoso verde con costillas y pedicelo curvado.
+    - Corona densa rizada y anillo basal púrpura oscuro.
+    - Androginóforo, estambres versátiles y estilos clavados recurvados.
     """
     obj_data = ""
     v_offset = 1
     is_incarnata = "incarnata" in cfg['colecta']['especie'].lower()
 
     corola = cfg.get('perianto', {}).get('corola', {})
+    caliz = cfg.get('perianto', {}).get('caliz', {})
     l_petal = float(corola.get('longitud_limbo_mm', 42.0))
-    w_petal = float(corola.get('ancho_petalo_mm', 16.0))
+    w_petal = float(corola.get('ancho_petalo_mm', 17.5))
     l_sepal = l_petal * 1.05
 
-    # 1. Pedúnculo y 3 brácteas pediceladas
+    # 1. PEDICELO VERDE CURVADO E HIPANTO ACOPACO ACANALADO
     obj_data += "usemtl Mat_Caliz" + NL
-    ped_pts = [(0, -45 + i * 6, 0) for i in range(8)]
-    seg_obj, v_offset = add_tube(ped_pts, 1.8, 4.5, 12, v_offset)
-    obj_data += seg_obj
+    # 1a. Pedicelo delgado que se curva orgánicamente
+    ped_pts = [
+        (0.0, -38.0, -8.0),
+        (0.0, -30.0, -7.0),
+        (0.0, -22.0, -5.0),
+        (0.0, -15.0, -2.5),
+        (0.0, -9.0, 0.0)
+    ]
+    seg_ped, v_offset = add_tube(ped_pts, 1.8, 2.2, 12, v_offset)
+    obj_data += seg_ped
 
-    for k in range(3):
-        ang_b = k * (2.0 * math.pi / 3.0)
-        ca_b, sa_b = math.cos(ang_b), math.sin(ang_b)
-        for i in range(6):
-            u = i / 5.0
-            r = 2.5 + 12.0 * u
-            w_b = 6.0 * math.sin(math.pi * (u ** 0.6)) * (1.0 - 0.2 * u)
-            y_b = -15.0 - 2.0 * u + 1.5 * math.sin(math.pi * u)
-            for j in range(5):
-                v = (j / 4.0) - 0.5
-                lat = v * 2.0 * w_b
-                cup = -0.8 * (v * v)
-                obj_data += build_vertex(r * ca_b - lat * sa_b, y_b + cup, r * sa_b + lat * ca_b)
-        for i in range(5):
-            for j in range(4):
-                p1 = v_offset + i * 5 + j
-                p2 = p1 + 1
-                p3 = p1 + 5
-                p4 = p3 + 1
-                obj_data += build_face(p1, p2, p3)
-                obj_data += build_face(p2, p4, p3)
-        v_offset += 30
+    # 1b. Hipanto (copa floral carnosa verde manzana con 10 costillas)
+    n_cup_rings, sides_cup = 8, 20
+    for i in range(n_cup_rings):
+        t = i / (n_cup_rings - 1)
+        y_c = -9.0 + t * 9.0
+        # Perfil acopado que se ensancha hasta el borde de inserción
+        r_c = 2.2 + 5.8 * math.sin(t * math.pi * 0.5)
+        for s in range(sides_cup):
+            ang = s * (2.0 * math.pi / sides_cup)
+            # Costillas verticales suaves
+            rib = 1.0 + 0.05 * math.cos(10 * ang)
+            px = r_c * rib * math.cos(ang)
+            pz = r_c * rib * math.sin(ang)
+            obj_data += build_vertex(px, y_c, pz)
 
-    # 2. Tépalos (5 sépalos y 5 pétalos oblongos redondeados y reflexos)
+    for i in range(n_cup_rings - 1):
+        for s in range(sides_cup):
+            p1 = v_offset + i * sides_cup + s
+            p2 = v_offset + i * sides_cup + (s + 1) % sides_cup
+            p3 = v_offset + (i + 1) * sides_cup + s
+            p4 = v_offset + (i + 1) * sides_cup + (s + 1) % sides_cup
+            obj_data += build_face(p1, p2, p3)
+            obj_data += build_face(p2, p4, p3)
+    v_offset += n_cup_rings * sides_cup
+
+    # 2. TÉPALOS OBLONGOS CON ÁPICE TOTALMENTE REDONDEADO
+    ru, rv = 16, 8
     for whorl in ['sepal', 'petal']:
         length = l_sepal if whorl == 'sepal' else l_petal
-        width = w_petal * (1.08 if whorl == 'sepal' else 0.92)
+        width = w_petal * (1.05 if whorl == 'sepal' else 0.95)
         offset_angle = 0.0 if whorl == 'sepal' else (math.pi / 5.0)
-        y_layer = -1.5 if whorl == 'sepal' else -0.5
+        y_layer = -0.8 if whorl == 'sepal' else 0.0
         obj_data += f"usemtl {'Mat_Caliz' if whorl == 'sepal' else 'Mat_CorolaLimbo'}" + NL
-        ru, rv = 14, 8
+
         for k in range(5):
             base_ang = k * (2.0 * math.pi / 5.0) + offset_angle
             ca, sa = math.cos(base_ang), math.sin(base_ang)
+
             for i in range(ru + 1):
                 u = i / ru
-                r = 4.5 + length * u
-                w_local = (width / 2.0) * math.sqrt(max(0.001, math.sin(math.pi * u))) * (1.0 - 0.1 * u)
-                if is_incarnata:
-                    arch_y = y_layer + 4.5 * math.sin(math.pi * u) - 18.0 * (u ** 2.5)
+                r = 7.5 + length * u
+
+                # Perfil oblongo: base ensanchada rápida, lados paralelos y domo apical redondeado
+                if u < 0.18:
+                    w_profile = (u / 0.18) ** 0.55
+                elif u < 0.82:
+                    w_profile = 1.0
                 else:
-                    arch_y = y_layer + 1.5 * u - 5.0 * (u ** 2)
+                    t_tip = (u - 0.82) / 0.18
+                    w_profile = math.sqrt(max(0.001, 1.0 - t_tip * t_tip))
+
+                w_local = (width / 2.0) * w_profile
+                # Curvatura reflexa: se proyecta hacia adelante y luego cae hacia atrás
+                arch_y = y_layer + 3.8 * math.sin(math.pi * u * 0.6) - 16.0 * (u ** 2.2)
 
                 for j in range(rv + 1):
                     v = (j / rv) - 0.5
                     lat = v * 2.0 * w_local
-                    cup = -1.5 * (v * v) * (1.0 - u * 0.4)
+                    cup = -1.4 * (v * v) * (1.0 - u * 0.3)
+
                     px = r * ca - lat * sa
                     pz = r * sa + lat * ca
                     py = arch_y + cup
-                    if whorl == 'sepal' and 0.85 < u < 0.98 and abs(v) < 0.2:
-                        py += 2.5 * math.sin((u - 0.85) / 0.13 * math.pi) * math.cos(v / 0.2 * math.pi * 0.5)
+
+                    # Arista o cuerno subapical verde en el sépalo
+                    if whorl == 'sepal' and 0.80 < u < 0.94 and abs(v) < 0.18:
+                        py += 2.2 * math.sin((u - 0.80) / 0.14 * math.pi)
+
                     obj_data += build_vertex(px, py, pz)
 
             for i in range(ru):
@@ -395,92 +422,100 @@ def build_passiflora_flower(cfg):
                     obj_data += build_face(p2, p4, p3)
             v_offset += (ru + 1) * (rv + 1)
 
-    # 3. Corona de filamentos
-    l_filam = float(corola.get('longitud_tubo_mm', 38.0))
-    series_radii = [5.5, 4.8, 4.0]
+    # 3. CORONA DE FILAMENTOS (BASE VINO TINTO + ZONA MEDIA BLANCA + EXTREMO RIZADO)
+    l_filam = float(corola.get('longitud_tubo_mm', 36.0))
+    series_radii = [7.2, 6.4, 5.6]
     series_counts = [72, 72, 48] if is_incarnata else [64, 48, 36]
 
     for s_idx, (r_start, num_fil) in enumerate(zip(series_radii, series_counts)):
-        scale_len = 1.0 - (s_idx * 0.15)
+        scale_len = 1.0 - (s_idx * 0.14)
         for i in range(num_fil):
             angle = i * (2.0 * math.pi / num_fil) + (s_idx * 0.05)
-            pts_base, pts_tip = [], []
+            pts_dark, pts_white, pts_tip = [], [], []
             steps = 18
+
             for j in range(steps):
                 u = j / (steps - 1)
                 d_theta, d_y = 0.0, 0.0
-                if is_incarnata:
-                    if u > 0.35:
-                        d_theta = 0.25 * ((u - 0.35) ** 1.2) * math.sin(12.0 * math.pi * u + (i % 7) * 1.1)
-                        d_y = 3.5 * ((u - 0.35) ** 1.5) * math.cos(9.0 * math.pi * u + (i % 5) * 0.8)
-                    elev = 2.0 * math.sin(u * math.pi) + d_y - 2.0 * (u ** 2)
-                    r_ext = r_start + l_filam * scale_len * (u + 0.1 * math.sin(u * math.pi))
-                else:
-                    elev = 12.0 * u - 4.0 * (u ** 2)
-                    r_ext = r_start + l_filam * scale_len * u
+                if is_incarnata and u > 0.35:
+                    d_theta = 0.26 * ((u - 0.35) ** 1.2) * math.sin(12.0 * math.pi * u + (i % 7) * 1.1)
+                    d_y = 3.6 * ((u - 0.35) ** 1.5) * math.cos(9.0 * math.pi * u + (i % 5) * 0.8)
 
+                elev = 1.8 * math.sin(u * math.pi) + d_y - 2.5 * (u ** 2)
+                r_ext = r_start + l_filam * scale_len * u
                 ang = angle + d_theta
-                pt = (r_ext * math.cos(ang), 0.5 + elev, r_ext * math.sin(ang))
-                if u <= 0.45:
-                    pts_base.append(pt)
-                if u >= 0.40:
+                pt = (r_ext * math.cos(ang), 0.6 + elev, r_ext * math.sin(ang))
+
+                if u <= 0.32:
+                    pts_dark.append(pt)
+                if 0.28 <= u <= 0.62:
+                    pts_white.append(pt)
+                if u >= 0.58:
                     pts_tip.append(pt)
 
-            obj_data += ("usemtl Mat_CorolaGarganta" if is_incarnata else "usemtl Mat_Filamento") + NL
-            seg1, v_offset = add_tube(pts_base, 0.45, 0.30, 4, v_offset)
+            # Anillo basal púrpura oscuro
+            obj_data += "usemtl Mat_CorolaGarganta" + NL
+            seg1, v_offset = add_tube(pts_dark, 0.46, 0.36, 4, v_offset)
             obj_data += seg1
 
-            obj_data += ("usemtl Mat_CorolaLimbo" if is_incarnata else "usemtl Mat_Filamento") + NL
-            seg2, v_offset = add_tube(pts_tip, 0.30, 0.10, 4, v_offset)
+            # Zona media blanca
+            obj_data += "usemtl Mat_Blanco" + NL
+            seg2, v_offset = add_tube(pts_white, 0.36, 0.28, 4, v_offset)
             obj_data += seg2
 
+            # Extremo ondulado lila/púrpura
+            obj_data += "usemtl Mat_CorolaLimbo" + NL
+            seg3, v_offset = add_tube(pts_tip, 0.28, 0.10, 4, v_offset)
+            obj_data += seg3
+
+    # Opérculo fimbriado basal corto (boca del cáliz)
     obj_data += "usemtl Mat_CorolaGarganta" + NL
     for i in range(48):
         ang = i * (2.0 * math.pi / 48.0)
-        pts_in = [
-            (3.8 * math.cos(ang), 0.5, 3.8 * math.sin(ang)),
-            (5.5 * math.cos(ang), 3.5, 5.5 * math.sin(ang)),
-            (4.8 * math.cos(ang), 6.0, 4.8 * math.sin(ang))
+        pts_op = [
+            (4.8 * math.cos(ang), 0.6, 4.8 * math.sin(ang)),
+            (5.6 * math.cos(ang), 3.2, 5.6 * math.sin(ang)),
+            (5.0 * math.cos(ang), 5.5, 5.0 * math.sin(ang))
         ]
-        seg_in, v_offset = add_tube(pts_in, 0.4, 0.15, 4, v_offset)
-        obj_data += seg_in
+        seg_op, v_offset = add_tube(pts_op, 0.38, 0.14, 4, v_offset)
+        obj_data += seg_op
 
-    # 4. Androginóforo
+    # 4. ANDROGINÓFORO (COLUMNA CENTRAL ESBELTA)
     androceo = cfg.get('androceo') or {}
     gineceo = cfg.get('gineceo') or {}
     l_androg = float(androceo.get('filamento_longitud_mm', 22.0))
     w_androg = float(androceo.get('filamento_grosor_mm', 2.2)) / 2.0
 
-    obj_data += ("usemtl Mat_Estilo" if is_incarnata else "usemtl Mat_Blanco") + NL
+    obj_data += "usemtl Mat_Estilo" + NL
     col_pts = [(0, i * (l_androg / 10.0), 0) for i in range(11)]
-    seg_col, v_offset = add_tube(col_pts, w_androg * 1.1, w_androg * 0.9, 12, v_offset)
+    seg_col, v_offset = add_tube(col_pts, w_androg * 1.1, w_androg * 0.92, 12, v_offset)
     obj_data += seg_col
 
-    # 5. Estambres y anteras
-    l_antera = float(androceo.get('antera_longitud_mm', 7.5))
+    # 5. ESTAMBRES Y ANTERAS VERSÁTILES
+    l_antera = float(androceo.get('antera_longitud_mm', 8.0))
     for i in range(5):
         a = i * (2.0 * math.pi / 5.0)
         ca, sa = math.cos(a), math.sin(a)
         arm_pts = [
             (0, l_androg, 0),
-            (4.0 * ca, l_androg + 1.5, 4.0 * sa),
+            (4.0 * ca, l_androg + 1.2, 4.0 * sa),
             (8.5 * ca, l_androg - 1.5, 8.5 * sa)
         ]
         obj_data += "usemtl Mat_Filamento" + NL
-        seg_arm, v_offset = add_tube(arm_pts, 0.7, 0.45, 6, v_offset)
+        seg_arm, v_offset = add_tube(arm_pts, 0.72, 0.48, 6, v_offset)
         obj_data += seg_arm
 
         tx, tz = -sa, ca
         ant_pts = [
-            (8.5 * ca - (l_antera / 2.0) * tx, l_androg - 2.5, 8.5 * sa - (l_antera / 2.0) * tz),
+            (8.5 * ca - (l_antera / 2.0) * tx, l_androg - 2.4, 8.5 * sa - (l_antera / 2.0) * tz),
             (8.5 * ca, l_androg - 2.0, 8.5 * sa),
-            (8.5 * ca + (l_antera / 2.0) * tx, l_androg - 2.5, 8.5 * sa + (l_antera / 2.0) * tz)
+            (8.5 * ca + (l_antera / 2.0) * tx, l_androg - 2.4, 8.5 * sa + (l_antera / 2.0) * tz)
         ]
         obj_data += "usemtl Mat_Antera" + NL
-        seg_ant, v_offset = add_tube(ant_pts, 1.4, 1.4, 8, v_offset)
+        seg_ant, v_offset = add_tube(ant_pts, 1.45, 1.45, 8, v_offset)
         obj_data += seg_ant
 
-    # 6. Gineceo (ovario y estilos recurvados)
+    # 6. GINECEO (OVARIO SUBGLOBOSO Y ESTILOS CURVADOS)
     obj_data += "usemtl Mat_Ovario" + NL
     ov_r = 3.2 if is_incarnata else 2.5
     ov_pts = [
@@ -490,10 +525,10 @@ def build_passiflora_flower(cfg):
         (0, l_androg + ov_r * 1.5, 0),
         (0, l_androg + ov_r * 1.8, 0)
     ]
-    seg_ov, v_offset = add_tube(ov_pts, ov_r * 0.6, 0.4, 16, v_offset)
+    seg_ov, v_offset = add_tube(ov_pts, ov_r * 0.65, 0.4, 16, v_offset)
     obj_data += seg_ov
 
-    l_estilo = float(gineceo.get('estilo_longitud_mm', 9.0))
+    l_estilo = float(gineceo.get('estilo_longitud_mm', 9.5))
     for i in range(3):
         a = i * (2.0 * math.pi / 3.0) + math.pi / 6.0
         ca, sa = math.cos(a), math.sin(a)
@@ -504,14 +539,14 @@ def build_passiflora_flower(cfg):
             (l_estilo * 1.1 * ca, l_androg + ov_r * 1.9 - 2.5, l_estilo * 1.1 * sa)
         ]
         obj_data += "usemtl Mat_Estilo" + NL
-        seg_st, v_offset = add_tube(st_pts, 0.7, 1.1, 8, v_offset)
+        seg_st, v_offset = add_tube(st_pts, 0.75, 1.15, 8, v_offset)
         obj_data += seg_st
 
         stig_pts = [
             (l_estilo * 1.1 * ca - 1.4 * sa, l_androg + ov_r * 1.9 - 2.8, l_estilo * 1.1 * sa + 1.4 * ca),
             (l_estilo * 1.1 * ca + 1.4 * sa, l_androg + ov_r * 1.9 - 2.8, l_estilo * 1.1 * sa - 1.4 * ca)
         ]
-        obj_data += ("usemtl Mat_Caliz" if is_incarnata else "usemtl Mat_Ovario") + NL
+        obj_data += "usemtl Mat_Caliz" + NL
         seg_sg, v_offset = add_tube(stig_pts, 1.8, 1.8, 10, v_offset)
         obj_data += seg_sg
 
