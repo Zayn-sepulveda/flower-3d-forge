@@ -253,64 +253,151 @@ def add_tube(pts, r0, r1, sides, v_offset):
             out.append(build_face(p2, p4, p3))
     return "".join(out), v_offset + n * sides
 
+def build_andraeanum_obj(cfg):
+    """
+    Modelo morfometrico de Anthurium andraeanum:
+    - Espata cordiforme (forma de corazon con escotadura profunda).
+    - Textura bullada (ampollada/coriacea lustrosa) con nervacion reticulada.
+    - Espadice cilindrico erecto/arqueado con textura granular de flores diminutas.
+    - Pedunculo cilindrico verde.
+    """
+    c_cfg = cfg['perianto']['corola']
+    g_cfg = cfg.get('gineceo', {})
+
+    spathe_len = float(c_cfg.get('longitud_limbo_mm', 90.0))
+    spathe_w = float(c_cfg.get('ancho_petalo_mm', 85.0))
+
+    c_red = np_hex_to_rgb(c_cfg.get('color_limbo_hex', '#D81122'))
+    c_dark_red = np_hex_to_rgb(c_cfg.get('color_garganta_hex', '#8A0A18'))
+    c_spadix = np_hex_to_rgb(g_cfg.get('color_estilo_hex', '#F5DC70'))
+    c_spadix_tip = np_hex_to_rgb(g_cfg.get('color_apice_hex', '#E8B828'))
+    c_peduncle = np_hex_to_rgb(cfg['perianto']['caliz'].get('color_hex', '#3B7322'))
+
+    vertices, colors, faces = [], [], []
+    base_idx = 0
+
+    # 1. ESPATA CORDIFORME BULLADA (Corazon rojo ampollado con brillo ceroso)
+    n_v, n_u = 80, 80
+    v_vals = np.linspace(-0.25, 1.0, n_v)
+    u_vals = np.linspace(-1.0, 1.0, n_u)
+
+    for v in v_vals:
+        if v < 0:
+            # Lobulos basales posteriores (auriculas redondeadas)
+            w_profile = np.sqrt(max(0.001, 1.0 - (v / -0.25) ** 2)) * 0.85
+            y_spine = v * 18.0
+        else:
+            # Cuerpo cordado que se estrecha hacia el apice acuminado
+            w_profile = (1.0 - v) ** 0.65 * (1.0 + 0.48 * np.sin(v * np.pi))
+            y_spine = v * spathe_len
+
+        # Arqueamiento concavo suave hacia atras
+        z_arch = -np.sin(max(0.0, v) * np.pi) * 14.0
+
+        for u in u_vals:
+            x = u * w_profile * (spathe_w / 2.0)
+            y = y_spine
+
+            # Profundidad en copa suave
+            depth = (abs(u) ** 1.3) * 5.5
+            z = z_arch + depth
+
+            # Escotadura del seno central (donde nace el pedunculo y el espadice)
+            if v < 0.16 and abs(u) < 0.32:
+                cleft = (0.32 - abs(u)) * (0.16 - v) * 45.0
+                y -= cleft
+                z -= cleft * 0.35
+
+            # Textura organica: nervaduras primarias y superficie ampollada (bullada)
+            veins = 1.4 * np.sin(10 * np.pi * abs(u)) * np.cos(4 * np.pi * v)
+            bullate = 0.85 * np.sin(36 * np.pi * u) * np.sin(34 * np.pi * v)
+            z += veins + bullate
+
+            # Sombreado de color: rojo profundo en hendiduras y brillo claro en ampollas
+            mix = np.clip((abs(u) + v) / 1.8, 0.0, 1.0)
+            base_col = (1.0 - mix) * c_dark_red + mix * c_red
+            highlight = np.clip(bullate * 0.45, 0.0, 0.25)
+            col = np.clip(base_col + highlight, 0.0, 1.0)
+
+            vertices.append([x, y, z])
+            colors.append(col.tolist())
+
+    for i in range(n_v - 1):
+        for j in range(n_u - 1):
+            p1 = base_idx + i * n_u + j + 1
+            p2 = base_idx + i * n_u + (j + 1) + 1
+            p3 = base_idx + (i + 1) * n_u + (j + 1) + 1
+            p4 = base_idx + (i + 1) * n_u + j + 1
+            faces.append((p1, p2, p3))
+            faces.append((p1, p3, p4))
+
+    # 2. ESPADICE CILINDRICO ERECTO CON TEXTURA DE PARASTICAS (Flores en rombo)
+    spadix_len = float(g_cfg.get('estilo_longitud_mm', 68.0))
+    spadix_r_base = float(g_cfg.get('estilo_grosor_mm', g_cfg.get('diametro_espadice_mm', 8.5))) / 2.0
+    n_sp = 65
+    n_sl = 36
+    s_vals = np.linspace(0, 1, n_sp)
+
+    spadix_pts = np.column_stack([
+        np.zeros(n_sp),
+        s_vals * spadix_len + 1.5,
+        -np.sin(s_vals * np.pi * 0.5) * 6.5
+    ])
+
+    radii_sp = np.zeros((n_sp, n_sl))
+    cols_sp = np.zeros((n_sp, n_sl, 3))
+    theta_sp = np.linspace(0, 2 * np.pi, n_sl, endpoint=False)
+
+    for i, s in enumerate(s_vals):
+        taper = 1.0 - 0.22 * s
+        r_mean = spadix_r_base * taper
+
+        # Degradado: base crema -> centro amarillo -> apice dorado
+        tip_mix = np.clip(s * 1.3, 0.0, 1.0)
+        c_ring = (1.0 - tip_mix) * c_spadix + tip_mix * c_spadix_tip
+
+        for j, th in enumerate(theta_sp):
+            # Filotaxis rombica espiralada (flores hermafroditas con 4 tepalos)
+            parastichy = np.cos(14 * th + 26 * s * np.pi) * np.sin(26 * th - 14 * s * np.pi)
+            bump = 0.24 * parastichy
+            radii_sp[i, j] = r_mean + bump
+            cols_sp[i, j] = np.clip(c_ring * (0.92 + 0.22 * bump), 0.0, 1.0)
+
+    add_tube_along_curve(spadix_pts, radii_sp, cols_sp, n_sl, vertices, colors, faces)
+
+    # 3. PEDUNCULO VERDE CILINDRICO
+    n_ped = 20
+    t_ped = np.linspace(0, 1, n_ped)
+    ped_pts = np.column_stack([
+        np.zeros(n_ped),
+        -t_ped * 80.0,
+        np.zeros(n_ped)
+    ])
+    ped_radii = np.linspace(2.5, 3.2, n_ped)
+    ped_cols = np.tile(c_peduncle, (n_ped, 1))
+    add_tube_along_curve(ped_pts, ped_radii, ped_cols, 16, vertices, colors, faces)
+
+    lines = []
+    for v, c in zip(vertices, colors):
+        lines.append(f"v {v[0]:.4f} {v[1]:.4f} {v[2]:.4f} {c[0]:.4f} {c[1]:.4f} {c[2]:.4f}" + NL)
+    for f_idx in faces:
+        lines.append(f"f {f_idx[0]} {f_idx[1]} {f_idx[2]}" + NL)
+    return "".join(lines)
+
+
 def build_araceae_inflorescence(cfg):
+    """
+    Enrutador para especies de Araceae:
+    - Anthurium sanjorgense: espata cuculada y espadice pendulo.
+    - Anthurium andraeanum: espata cordiforme bullada y espadice erecto.
+    """
+    especie = cfg.get('colecta', {}).get('especie', '').lower()
     disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'erecta').lower()
-    if disposicion == "pendula":
+
+    if "sanjorgense" in especie or disposicion == "pendula":
         return build_sanjorgense_original_obj(cfg)
-
-    obj_data = ""
-    v_offset = 1
-    perianto = cfg['perianto']['corola']
-    l_limbo = float(perianto.get('longitud_limbo_mm', 65.0))
-    w_petalo = float(perianto.get('ancho_petalo_mm', 40.0))
-    ddv = perianto.get('diferenciacion_dorsoventral') or {}
-    fd = float(ddv.get('factor_tamano_dorsal', 1.2))
-    fv = float(ddv.get('factor_tamano_ventral', 0.9))
-
-    obj_data += "usemtl Mat_Caliz" + NL
-    ped_pts = [(0, -90 + i*9, -8 + math.sin(i*0.15)*3) for i in range(11)]
-    seg_obj, v_offset = add_tube(ped_pts, 4.2, 3.8, 12, v_offset)
-    obj_data += seg_obj
-
-    obj_data += "usemtl Mat_CorolaLimbo" + NL
-    res_u, res_v = 24, 24
-    for i in range(res_u + 1):
-        u = i / res_u
-        for j in range(res_v + 1):
-            v = j / res_v
-            theta = (v - 0.5) * math.pi * 1.5
-            lobe_boost = 1.0 + 0.35 * math.sin(abs(theta)) * (1.0 - u)
-            radius = (w_petalo / 2.0) * math.sin(math.pi * (u ** 0.75)) * (fd if theta > 0 else fv) * lobe_boost
-            x = radius * math.cos(theta)
-            y_base = l_limbo * (u - 0.12)
-            z = radius * math.sin(theta) * 0.18 - (u * u) * 18.0
-            z += math.sin(u * math.pi * 10) * math.cos(v * math.pi * 10) * 1.4
-            angle = math.radians(-50.0)
-            y_rot = y_base * math.cos(angle) - z * math.sin(angle)
-            z_rot = y_base * math.sin(angle) + z * math.cos(angle)
-            obj_data += build_vertex(x, y_rot, z_rot)
-
-    for i in range(res_u):
-        for j in range(res_v):
-            p1 = v_offset + i * (res_v + 1) + j
-            p2 = p1 + 1
-            p3 = p1 + (res_v + 1)
-            p4 = p3 + 1
-            obj_data += build_face(p1, p2, p3)
-            obj_data += build_face(p2, p4, p3)
-    v_offset += (res_u + 1) * (res_v + 1)
-
-    gineceo = cfg.get('gineceo') or {}
-    androceo = cfg.get('androceo') or {}
-    l_espadice = float(gineceo.get('estilo_longitud_mm', 70.0))
-    w_espadice = float(gineceo.get('estilo_grosor_mm', 8.0)) / 2.0
-    estipite_l = float(androceo.get('filamento_longitud_mm', 8.0))
-
-    obj_data += "usemtl Mat_Estilo" + NL
-    sp_pts = [(0, estipite_l + l_espadice * (i / 24.0), (i / 24.0) * 18.0) for i in range(25)]
-    seg_obj, v_offset = add_tube(sp_pts, w_espadice, w_espadice * 0.55, 16, v_offset)
-    obj_data += seg_obj
-    return obj_data
+    else:
+        return build_andraeanum_obj(cfg)
 
 def build_passiflora_flower(cfg):
     """
