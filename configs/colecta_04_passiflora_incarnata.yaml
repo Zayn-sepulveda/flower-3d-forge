@@ -10,42 +10,42 @@ colecta:
 arquitectura_floral:
   simetria: "actinomorfa"
   tipo_inflorescencia: "solitaria"
-  disposicion: "erecta"
+  disposicion: "horizontal"
 
 perianto:
   verticilos: "diclamidea"
   caliz:
     sepalos_numero: 5
     fusion: "dialisepalo"
-    longitud_tubo_mm: 8.0              # Copa hipantial corta y ancha
-    color_hex: "#D8D4F2"               # Blanco-lavanda en el haz, envés verdoso con arista subapical
+    longitud_tubo_mm: 8.0              # Hipanto acopado corto
+    color_hex: "#7A9F2E"               # Verde pálido en el envés (abaxial)
   corola:
     petalos_numero: 5
     fusion: "dialipetala"
-    longitud_tubo_mm: 26.0             # Longitud radial de los filamentos rizados de la corona
-    longitud_limbo_mm: 38.0            # Pétalos oblongos lavanda pálido bajo la corona
-    ancho_petalo_mm: 14.0
+    longitud_tubo_mm: 38.0             # Longitud de la corona de filamentos
+    longitud_limbo_mm: 42.0            # Pétalos y sépalos oblongo-redondeados
+    ancho_petalo_mm: 16.0
     diferenciacion_dorsoventral:
-      factor_tamano_dorsal: 1.0
-      factor_tamano_ventral: 1.0
-      curvatura_dorsal_grados: 85.0    # Disposición rotácea ligeramente reflexa
-    grosor_pared_mm: 1.1
-    color_garganta_hex: "#4A0E4E"      # Bandas concéntricas púrpura oscuro y blanco (#FFFFFF) en la base de la corona
-    color_limbo_hex: "#8A4FFF"         # Violeta-lavanda de los filamentos ondulados distales
+      factor_tamano_dorsal: 1.05       # Sépalos ligeramente más anchos con arista subapical
+      factor_tamano_ventral: 0.95      # Pétalos más suaves
+      curvatura_dorsal_grados: 25.0    # Tépalos reflexos (curvados hacia atrás)
+    grosor_pared_mm: 1.2
+    color_garganta_hex: "#FFFFFF"      # Base blanca de la corona bandeada
+    color_limbo_hex: "#D0B3E1"         # Lavanda pálido de los pétalos
 
 androceo:
   estambres_numero: 5
-  fusion_filamentos: "monadelfo"       # Androginóforo corto + 5 brazos estaminales horizontales
-  filamento_longitud_mm: 12.0          # Columna baja anidada sobre el centro de la corona
-  filamento_grosor_mm: 3.8
-  antera_longitud_mm: 10.5             # Anteras versátiles grandes colgando en cruz
-  color_filamento_hex: "#C5D86D"       # Verde pálido moteado de púrpura (#5A189A)
-  color_antera_hex: "#F3DE8A"          # Amarillo crema/dorado del polen y tecas
+  fusion_filamentos: "androginoforo"
+  filamento_longitud_mm: 22.0          # Androginóforo esbelto y largo
+  filamento_grosor_mm: 2.2
+  antera_longitud_mm: 7.5
+  color_filamento_hex: "#E8E8E8"       # Columna blanca moteada de púrpura
+  color_antera_hex: "#D4AC0D"          # Anteras versátiles amarillas
 
 gineceo:
-  posicion_ovario: "supero"
-  estilo_longitud_mm: 13.0             # 3 estilos clavados arqueados hacia las anteras
-  estilo_grosor_mm: 2.6
-  estigma_lobulos: 3                   # Estigmas capitado-reniformes prominentes
-  color_ovario_hex: "#E9F5DB"          # Ovario subgloboso blanco-verdoso pubescente
-  color_estilo_hex: "#EDE7F6"          # Blanco-lavanda con máculas púrpura oscuro
+  posicion_ovario: "supero"            # Ovario elevado sobre la columna
+  estilo_longitud_mm: 9.0
+  estilo_grosor_mm: 1.5
+  estigma_lobulos: 3
+  color_ovario_hex: "#A9DFBF"          # Ovario verde claro subgloboso
+  color_estilo_hex: "#E8E8E8"          # Estilos moteados de púrpura
