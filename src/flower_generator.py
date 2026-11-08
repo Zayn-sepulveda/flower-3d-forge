@@ -38,14 +38,15 @@ def create_material_mtl(cfg, mtl_filepath):
     corola = perianto.get('corola') or {}
 
     colors = {
-        "Mat_Caliz": hex_to_rgb(caliz.get('color_hex', '#3B6E22')),
-        "Mat_CorolaGarganta": hex_to_rgb(corola.get('color_garganta_hex', '#8A1822')),
-        "Mat_CorolaLimbo": hex_to_rgb(corola.get('color_limbo_hex', '#7A9F2E')),
-        "Mat_Filamento": hex_to_rgb(androceo.get('color_filamento_hex', '#C85242')),
-        "Mat_Antera": hex_to_rgb(androceo.get('color_antera_hex', '#FFD700')),
-        "Mat_Ovario": hex_to_rgb(gineceo.get('color_ovario_hex', '#4A2311')),
-        "Mat_Estilo": hex_to_rgb(gineceo.get('color_estilo_hex', '#B8D844')),
-        "Mat_Blanco": (0.98, 0.98, 1.0)
+        "Mat_Caliz": hex_to_rgb(caliz.get('color_hex', '#5A8F32')),
+        "Mat_CorolaGarganta": hex_to_rgb(corola.get('color_garganta_hex', '#4A1238')),
+        "Mat_CorolaLimbo": hex_to_rgb(corola.get('color_limbo_hex', '#9F7CBF')),
+        "Mat_Filamento": hex_to_rgb(androceo.get('color_filamento_hex', '#D4DCB8')),
+        "Mat_Antera": hex_to_rgb(androceo.get('color_antera_hex', '#D2CA4E')),
+        "Mat_Ovario": hex_to_rgb(gineceo.get('color_ovario_hex', '#8DB84A')),
+        "Mat_Estilo": hex_to_rgb(gineceo.get('color_estilo_hex', '#D4DCB8')),
+        "Mat_CoronaVioleta": hex_to_rgb("#7A4FA0"),
+        "Mat_Blanco": (0.95, 0.95, 0.98)
     }
     with open(mtl_filepath, 'w', encoding='utf-8') as f:
         f.write("# Materiales generados automaticamente" + NL)
@@ -313,25 +314,20 @@ def build_araceae_inflorescence(cfg):
 
 def build_passiflora_flower(cfg):
     """
-    Modelo morfométrico de Passiflora con:
-    - Tépalos oblongos con ápice obtuso redondeado y curvatura reflexa.
-    - Hipanto acopado carnoso verde con costillas y pedicelo curvado.
-    - Corona densa rizada y anillo basal púrpura oscuro.
-    - Androginóforo, estambres versátiles y estilos clavados recurvados.
+    Modelo morfometrico de Passiflora con perianto lavanda uniforme,
+    corona estratificada en purpura/blanco/violeta, hipanto verde y pedicelo.
     """
     obj_data = ""
     v_offset = 1
     is_incarnata = "incarnata" in cfg['colecta']['especie'].lower()
 
     corola = cfg.get('perianto', {}).get('corola', {})
-    caliz = cfg.get('perianto', {}).get('caliz', {})
     l_petal = float(corola.get('longitud_limbo_mm', 42.0))
-    w_petal = float(corola.get('ancho_petalo_mm', 17.5))
-    l_sepal = l_petal * 1.05
+    w_petal = float(corola.get('ancho_petalo_mm', 18.0))
+    l_sepal = l_petal * 1.04
 
-    # 1. PEDICELO VERDE CURVADO E HIPANTO ACOPACO ACANALADO
+    # 1. Pedicelo e hipanto verde manzana
     obj_data += "usemtl Mat_Caliz" + NL
-    # 1a. Pedicelo delgado que se curva orgánicamente
     ped_pts = [
         (0.0, -38.0, -8.0),
         (0.0, -30.0, -7.0),
@@ -342,16 +338,13 @@ def build_passiflora_flower(cfg):
     seg_ped, v_offset = add_tube(ped_pts, 1.8, 2.2, 12, v_offset)
     obj_data += seg_ped
 
-    # 1b. Hipanto (copa floral carnosa verde manzana con 10 costillas)
     n_cup_rings, sides_cup = 8, 20
     for i in range(n_cup_rings):
         t = i / (n_cup_rings - 1)
         y_c = -9.0 + t * 9.0
-        # Perfil acopado que se ensancha hasta el borde de inserción
         r_c = 2.2 + 5.8 * math.sin(t * math.pi * 0.5)
         for s in range(sides_cup):
             ang = s * (2.0 * math.pi / sides_cup)
-            # Costillas verticales suaves
             rib = 1.0 + 0.05 * math.cos(10 * ang)
             px = r_c * rib * math.cos(ang)
             pz = r_c * rib * math.sin(ang)
@@ -367,14 +360,15 @@ def build_passiflora_flower(cfg):
             obj_data += build_face(p2, p4, p3)
     v_offset += n_cup_rings * sides_cup
 
-    # 2. TÉPALOS OBLONGOS CON ÁPICE TOTALMENTE REDONDEADO
+    # 2. Tepalos oblongos lavanda / violeta (sin verde arriba)
+    obj_data += "usemtl Mat_CorolaLimbo" + NL
     ru, rv = 16, 8
+
     for whorl in ['sepal', 'petal']:
         length = l_sepal if whorl == 'sepal' else l_petal
         width = w_petal * (1.05 if whorl == 'sepal' else 0.95)
         offset_angle = 0.0 if whorl == 'sepal' else (math.pi / 5.0)
         y_layer = -0.8 if whorl == 'sepal' else 0.0
-        obj_data += f"usemtl {'Mat_Caliz' if whorl == 'sepal' else 'Mat_CorolaLimbo'}" + NL
 
         for k in range(5):
             base_ang = k * (2.0 * math.pi / 5.0) + offset_angle
@@ -384,7 +378,6 @@ def build_passiflora_flower(cfg):
                 u = i / ru
                 r = 7.5 + length * u
 
-                # Perfil oblongo: base ensanchada rápida, lados paralelos y domo apical redondeado
                 if u < 0.18:
                     w_profile = (u / 0.18) ** 0.55
                 elif u < 0.82:
@@ -394,7 +387,6 @@ def build_passiflora_flower(cfg):
                     w_profile = math.sqrt(max(0.001, 1.0 - t_tip * t_tip))
 
                 w_local = (width / 2.0) * w_profile
-                # Curvatura reflexa: se proyecta hacia adelante y luego cae hacia atrás
                 arch_y = y_layer + 3.8 * math.sin(math.pi * u * 0.6) - 16.0 * (u ** 2.2)
 
                 for j in range(rv + 1):
@@ -406,7 +398,6 @@ def build_passiflora_flower(cfg):
                     pz = r * sa + lat * ca
                     py = arch_y + cup
 
-                    # Arista o cuerno subapical verde en el sépalo
                     if whorl == 'sepal' and 0.80 < u < 0.94 and abs(v) < 0.18:
                         py += 2.2 * math.sin((u - 0.80) / 0.14 * math.pi)
 
@@ -422,7 +413,7 @@ def build_passiflora_flower(cfg):
                     obj_data += build_face(p2, p4, p3)
             v_offset += (ru + 1) * (rv + 1)
 
-    # 3. CORONA DE FILAMENTOS (BASE VINO TINTO + ZONA MEDIA BLANCA + EXTREMO RIZADO)
+    # 3. Corona estratificada: purpura -> blanca -> violeta
     l_filam = float(corola.get('longitud_tubo_mm', 36.0))
     series_radii = [7.2, 6.4, 5.6]
     series_counts = [72, 72, 48] if is_incarnata else [64, 48, 36]
@@ -437,38 +428,34 @@ def build_passiflora_flower(cfg):
             for j in range(steps):
                 u = j / (steps - 1)
                 d_theta, d_y = 0.0, 0.0
-                if is_incarnata and u > 0.35:
-                    d_theta = 0.26 * ((u - 0.35) ** 1.2) * math.sin(12.0 * math.pi * u + (i % 7) * 1.1)
-                    d_y = 3.6 * ((u - 0.35) ** 1.5) * math.cos(9.0 * math.pi * u + (i % 5) * 0.8)
+                if is_incarnata and u > 0.32:
+                    d_theta = 0.26 * ((u - 0.32) ** 1.2) * math.sin(12.0 * math.pi * u + (i % 7) * 1.1)
+                    d_y = 3.6 * ((u - 0.32) ** 1.5) * math.cos(9.0 * math.pi * u + (i % 5) * 0.8)
 
                 elev = 1.8 * math.sin(u * math.pi) + d_y - 2.5 * (u ** 2)
                 r_ext = r_start + l_filam * scale_len * u
                 ang = angle + d_theta
                 pt = (r_ext * math.cos(ang), 0.6 + elev, r_ext * math.sin(ang))
 
-                if u <= 0.32:
+                if u <= 0.30:
                     pts_dark.append(pt)
-                if 0.28 <= u <= 0.62:
+                if 0.26 <= u <= 0.58:
                     pts_white.append(pt)
-                if u >= 0.58:
+                if u >= 0.54:
                     pts_tip.append(pt)
 
-            # Anillo basal púrpura oscuro
             obj_data += "usemtl Mat_CorolaGarganta" + NL
             seg1, v_offset = add_tube(pts_dark, 0.46, 0.36, 4, v_offset)
             obj_data += seg1
 
-            # Zona media blanca
             obj_data += "usemtl Mat_Blanco" + NL
             seg2, v_offset = add_tube(pts_white, 0.36, 0.28, 4, v_offset)
             obj_data += seg2
 
-            # Extremo ondulado lila/púrpura
-            obj_data += "usemtl Mat_CorolaLimbo" + NL
+            obj_data += "usemtl Mat_CoronaVioleta" + NL
             seg3, v_offset = add_tube(pts_tip, 0.28, 0.10, 4, v_offset)
             obj_data += seg3
 
-    # Opérculo fimbriado basal corto (boca del cáliz)
     obj_data += "usemtl Mat_CorolaGarganta" + NL
     for i in range(48):
         ang = i * (2.0 * math.pi / 48.0)
@@ -480,7 +467,7 @@ def build_passiflora_flower(cfg):
         seg_op, v_offset = add_tube(pts_op, 0.38, 0.14, 4, v_offset)
         obj_data += seg_op
 
-    # 4. ANDROGINÓFORO (COLUMNA CENTRAL ESBELTA)
+    # 4. Androginofero
     androceo = cfg.get('androceo') or {}
     gineceo = cfg.get('gineceo') or {}
     l_androg = float(androceo.get('filamento_longitud_mm', 22.0))
@@ -491,7 +478,7 @@ def build_passiflora_flower(cfg):
     seg_col, v_offset = add_tube(col_pts, w_androg * 1.1, w_androg * 0.92, 12, v_offset)
     obj_data += seg_col
 
-    # 5. ESTAMBRES Y ANTERAS VERSÁTILES
+    # 5. Estambres y anteras
     l_antera = float(androceo.get('antera_longitud_mm', 8.0))
     for i in range(5):
         a = i * (2.0 * math.pi / 5.0)
@@ -515,7 +502,7 @@ def build_passiflora_flower(cfg):
         seg_ant, v_offset = add_tube(ant_pts, 1.45, 1.45, 8, v_offset)
         obj_data += seg_ant
 
-    # 6. GINECEO (OVARIO SUBGLOBOSO Y ESTILOS CURVADOS)
+    # 6. Gineceo
     obj_data += "usemtl Mat_Ovario" + NL
     ov_r = 3.2 if is_incarnata else 2.5
     ov_pts = [
@@ -546,7 +533,7 @@ def build_passiflora_flower(cfg):
             (l_estilo * 1.1 * ca - 1.4 * sa, l_androg + ov_r * 1.9 - 2.8, l_estilo * 1.1 * sa + 1.4 * ca),
             (l_estilo * 1.1 * ca + 1.4 * sa, l_androg + ov_r * 1.9 - 2.8, l_estilo * 1.1 * sa - 1.4 * ca)
         ]
-        obj_data += "usemtl Mat_Caliz" + NL
+        obj_data += "usemtl Mat_Ovario" + NL
         seg_sg, v_offset = add_tube(stig_pts, 1.8, 1.8, 10, v_offset)
         obj_data += seg_sg
 
