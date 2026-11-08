@@ -25,6 +25,7 @@ perianto:
     longitud_tubo_mm: 55.0             # Longitud de los pétalos anchos
     longitud_limbo_mm: 65.0            # Longitud del labelo extendido
     ancho_petalo_mm: 45.0              # Ancho máximo del labelo frontal
+    ancho_labelo_mm: 52.0
     diferenciacion_dorsoventral:
       factor_tamano_dorsal: 1.0
       factor_tamano_ventral: 1.0
