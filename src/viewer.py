@@ -1,3 +1,4 @@
+import os
 import json
 
 NL = chr(10)
@@ -65,20 +66,37 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
         const palette = {json.dumps(color_map)};
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 3000);
+        
         const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
         document.body.appendChild(renderer.domElement);
+        
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.06;
-        scene.add(new THREE.AmbientLight(0xffffff, 0.75));
-        const dirLight1 = new THREE.DirectionalLight(0xfff8e7, 0.78);
-        dirLight1.position.set(60, 80, 90);
-        scene.add(dirLight1);
-        const dirLight2 = new THREE.DirectionalLight(0x88bbff, 0.38);
-        dirLight2.position.set(-60, -40, -60);
-        scene.add(dirLight2);
+        controls.dampingFactor = 0.05;
+        
+        scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+        
+        const keyLight = new THREE.DirectionalLight(0xfffaee, 1.4);
+        keyLight.position.set(60, 80, 90);
+        keyLight.castShadow = true;
+        keyLight.shadow.mapSize.width = 2048;
+        keyLight.shadow.mapSize.height = 2048;
+        keyLight.shadow.bias = -0.0005;
+        scene.add(keyLight);
+        
+        const fillLight = new THREE.DirectionalLight(0x88bbff, 0.6);
+        fillLight.position.set(-60, -40, -60);
+        scene.add(fillLight);
+        
+        const rimLight = new THREE.PointLight(0xffffff, 1.2, 300);
+        rimLight.position.set(0, 30, -100);
+        scene.add(rimLight);
 
         const vertices = [];
         const vColors = [];
@@ -116,13 +134,28 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
         }});
 
         const flowerGroup = new THREE.Group();
+        
         if (vcPositions.length > 0) {{
             const geom = new THREE.BufferGeometry();
             geom.setAttribute('position', new THREE.Float32BufferAttribute(vcPositions, 3));
             geom.setAttribute('color', new THREE.Float32BufferAttribute(vcColors, 3));
             geom.computeVertexNormals();
-            const mat = new THREE.MeshStandardMaterial({{ vertexColors: true, roughness: 0.42, metalness: 0.05, side: THREE.DoubleSide }});
-            flowerGroup.add(new THREE.Mesh(geom, mat));
+            
+            const physMatVC = new THREE.MeshPhysicalMaterial({{ 
+                vertexColors: true, 
+                roughness: 0.35, 
+                metalness: 0.02, 
+                clearcoat: 0.65, 
+                clearcoatRoughness: 0.18,
+                transmission: 0.2,
+                thickness: 2.0,
+                side: THREE.DoubleSide 
+            }});
+            
+            const meshVC = new THREE.Mesh(geom, physMatVC);
+            meshVC.castShadow = true;
+            meshVC.receiveShadow = true;
+            flowerGroup.add(meshVC);
         }}
 
         Object.keys(groups).forEach(matName => {{
@@ -131,8 +164,22 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             const geom = new THREE.BufferGeometry();
             geom.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
             geom.computeVertexNormals();
-            const mat = new THREE.MeshStandardMaterial({{ color: palette[matName] || '#ffffff', roughness: 0.44, metalness: 0.05, side: THREE.DoubleSide }});
-            flowerGroup.add(new THREE.Mesh(geom, mat));
+            
+            const physMat = new THREE.MeshPhysicalMaterial({{ 
+                color: palette[matName] || '#ffffff', 
+                roughness: 0.35, 
+                metalness: 0.02,
+                clearcoat: 0.65, 
+                clearcoatRoughness: 0.18,
+                transmission: 0.2,
+                thickness: 2.0,
+                side: THREE.DoubleSide 
+            }});
+            
+            const meshMat = new THREE.Mesh(geom, physMat);
+            meshMat.castShadow = true;
+            meshMat.receiveShadow = true;
+            flowerGroup.add(meshMat);
         }});
 
         scene.add(flowerGroup);
@@ -164,4 +211,3 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
 </html>"""
     with open(html_filepath, 'w', encoding='utf-8') as f:
         f.write(html_content)
-
