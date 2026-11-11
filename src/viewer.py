@@ -99,17 +99,29 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
         const objRaw = {json.dumps(obj_data)};
         const palette = {json.dumps(color_map)};
 
-        const ANATOMY_DB = {{
+       const ANATOMY_DB = {{
+            // --- ORCHIDACEAE (Cattleya) ---
             "Sepalo_Dorsal": {{ title: "Sépalo Dorsal", whorl: "Cáliz (Verticilo Externo)", cat: "caliz", desc: "Tépalo externo erecto (83 × 20 mm). Protege la yema floral antes de la antesis.", exp: [0, 42, -28], plate: [0, 58, 0] }},
             "Sepalo_Lateral_Izq": {{ title: "Sépalo Lateral Izquierdo", whorl: "Cáliz (Verticilo Externo)", cat: "caliz", desc: "Sépalo lanceolado subfalcado descendente.", exp: [-35, -30, -28], plate: [-55, -48, 0] }},
             "Sepalo_Lateral_Der": {{ title: "Sépalo Lateral Derecho", whorl: "Cáliz (Verticilo Externo)", cat: "caliz", desc: "Sépalo lanceolado subfalcado descendente.", exp: [35, -30, -28], plate: [55, -48, 0] }},
             "Petalo_Lateral_Izq": {{ title: "Pétalo Lateral Izquierdo", whorl: "Corola (Perianto Interno)", cat: "corola", desc: "Pétalo romboidal ancho con margen ondulado-fimbriado (85 × 60 mm).", exp: [-48, 15, -8], plate: [-78, 18, 0] }},
             "Petalo_Lateral_Der": {{ title: "Pétalo Lateral Derecho", whorl: "Corola (Perianto Interno)", cat: "corola", desc: "Pétalo romboidal ancho con margen ondulado-fimbriado (85 × 60 mm).", exp: [48, 15, -8], plate: [78, 18, 0] }},
-            "Labelo_Trilobulado": {{ title: "Labelo Trilobulado Convoluto", whorl: "Corola Modificada", cat: "corola", desc: "Pétalo medio especializado: tubo basal que envuelve la columna y limbo tricolor (amarillo, púrpura y lila) como plataforma de polinización.", exp: [0, -38, 42], plate: [0, -32, 10] }},
+            "Labelo_Trilobulado": {{ title: "Labelo Trilobulado Convoluto", whorl: "Corola Modificada", cat: "corola", desc: "Pétalo medio especializado: tubo basal que envuelve la columna y limbo tricolor como plataforma de polinización.", exp: [0, -38, 42], plate: [0, -32, 10] }},
             "Ginostemio_Columna": {{ title: "Ginostemio (Columna)", whorl: "Androceo + Gineceo Fusionados", cat: "reproductivo", desc: "Órgano reproductivo semicilíndrico arqueado (28 mm) característico de Orchidaceae.", exp: [0, 14, 26], plate: [-28, -52, 10] }},
             "Antera_Polinios": {{ title: "Antera Apical y Polinios", whorl: "Androceo", cat: "reproductivo", desc: "Cápsula operculada terminal que aloja las masas de polen ceroso (polinios).", exp: [0, 22, 46], plate: [28, -52, 10] }},
             "Ovario_Infero": {{ title: "Ovario Pedicelado Ínfero", whorl: "Gineceo (Receptáculo/Pedicelo)", cat: "ovario", desc: "Ovario ínfero 6-acanalado situado por debajo de la inserción del perianto y resupinado 180°.", exp: [0, -25, -45], plate: [-55, -85, 0] }},
             "Ovulos_Placentacion": {{ title: "Placentas Parietales y Óvulos", whorl: "Gineceo Interno (Cavidad Ovárica)", cat: "ovario", desc: "Tres cordones placentarios parietales con miles de primordios seminales microscópicos dentro del ovario ínfero.", exp: [0, -10, -25], plate: [55, -85, 0] }},
+
+            // --- ARACEAE (Anthurium) ---
+            "Espata_Cuculada": {{ title: "Espata Cuculada", whorl: "Bráctea Modificada", cat: "caliz", desc: "Bráctea protectora lanceolada con gradiente vino a verde y acumen distal.", exp: [0, 45, -20], plate: [0, 65, 0] }},
+            "Estipite_Basal": {{ title: "Estípite Cilíndrico", whorl: "Eje Inflorescente", cat: "reproductivo", desc: "Segmento corto de articulación entre el espádice y el pedúnculo.", exp: [0, 5, 25], plate: [-25, 0, 0] }},
+            "Espadice_Florifero": {{ title: "Espádice Péndulo", whorl: "Inflorescencia Carnosa", cat: "corola", desc: "Espiga cilíndrica con flores hermafroditas sésiles dispuestas en espiral.", exp: [0, -35, 35], plate: [35, 0, 0] }},
+            "Gineceo_Ovarios": {{ title: "Matriz Ovárica Bilocular", whorl: "Anatomía Interna (Gineceo)", cat: "ovario", desc: "Red de ovarios súperos que conforman la estructura carnosa bajo la superficie del espádice.", exp: [0, -25, 45], plate: [50, 0, 0] }},
+            "Ovulos_Internos": {{ title: "Óvulos Primordiales", whorl: "Anatomía Interna (Semillas)", cat: "ovario", desc: "Centenares de primordios seminales anclados en los lóculos alrededor del eje vascular.", exp: [0, -15, 50], plate: [65, 0, 0] }},
+            "Eje_Vascular_Interno": {{ title: "Eje Vascular Central", whorl: "Anatomía Interna", cat: "ovario", desc: "Médula vascular interna visible en rayos X que irriga cada flor del espádice.", exp: [0, -15, 55], plate: [65, 0, 0] }},
+            "Pedunculo_Tallo": {{ title: "Pedúnculo", whorl: "Tallo Principal", cat: "ovario", desc: "Eje de soporte principal de la inflorescencia.", exp: [0, -55, -25], plate: [-55, -60, 0] }},
+
+            // --- MATERIALES GENÉRICOS DE RESPALDO ---
             "Mat_Caliz": {{ title: "Cáliz / Brácteas", whorl: "Cáliz", cat: "caliz", desc: "Verticilo externo de protección floral.", exp: [0, -25, 0], plate: [-50, 30, 0] }},
             "Mat_CorolaLimbo": {{ title: "Limbo de la Corola", whorl: "Corola", cat: "corola", desc: "Verticilo de atracción óptica.", exp: [0, 15, 0], plate: [0, 30, 0] }},
             "Mat_CorolaGarganta": {{ title: "Garganta / Serie Basal", whorl: "Corola", cat: "corola", desc: "Zona basal del perianto o corona.", exp: [0, 8, 0], plate: [50, 30, 0] }},
