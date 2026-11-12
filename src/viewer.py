@@ -120,6 +120,21 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             "Ovulos_Internos": {{ title: "Óvulos Primordiales", whorl: "Anatomía Interna (Semillas)", cat: "ovario", desc: "Centenares de primordios seminales anclados en los lóculos alrededor del eje vascular.", exp: [0, -15, 50], plate: [65, 0, 0] }},
             "Eje_Vascular_Interno": {{ title: "Eje Vascular Central", whorl: "Anatomía Interna", cat: "ovario", desc: "Médula vascular interna visible en rayos X que irriga cada flor del espádice.", exp: [0, -15, 55], plate: [65, 0, 0] }},
             "Pedunculo_Tallo": {{ title: "Pedúnculo", whorl: "Tallo Principal", cat: "ovario", desc: "Eje de soporte principal de la inflorescencia.", exp: [0, -55, -25], plate: [-55, -60, 0] }},
+           
+             // --- PASSIFLORACEAE (Passiflora incarnata / P. vitifolia) ---
+            "Pedicelo_Hipanto": {{ title: "Pedicelo y Copa del Hipanto", whorl: "Receptáculo Floral", cat: "caliz", desc: "Tallo floral y receptáculo acopado urceolado donde se insertan el perianto y la corona.", exp: [0, -25, 0], plate: [0, -50, 0] }},
+            "Epicaliz_Bracteas_Involucrales": {{ title: "Brácteas Involucrales", whorl: "Epicáliz", cat: "caliz", desc: "3 brácteas foliáceas bajo el hipanto con glándulas nectaríferas extraflorales.", exp: [0, -40, 0], plate: [-35, -50, 0] }},
+            "Caliz_Sepalos": {{ title: "Sépalos Carena-Corniculados (5)", whorl: "Cáliz", cat: "caliz", desc: "5 sépalos con envés verde, quilla dorsal (carina) y mucrón subapical (corniculum).", exp: [0, -12, 0], plate: [35, -50, 0] }},
+            "Corola_Petalos": {{ title: "Pétalos Laminares (5)", whorl: "Corola", cat: "corola", desc: "5 pétalos membranáceos alternados con los sépalos, de contorno elíptico-obtuso.", exp: [0, 5, 0], plate: [0, 35, 0] }},
+            "Corona_Filamentos_Radii": {{ title: "Corona Exterior (Radii)", whorl: "Paracorola Externa", cat: "corola", desc: "Verticilo de filamentos largos con bandeado cromático y ondulación distal.", exp: [0, 18, 0], plate: [-45, 35, 0] }},
+            "Corona_Interna_Pali": {{ title: "Corona Interna (Pali)", whorl: "Paracorola Interna", cat: "corola", desc: "Anillos de filamentos cortos y capitados de color púrpura granate.", exp: [0, 26, 0], plate: [45, 35, 0] }},
+            "Columna_Androginoforo": {{ title: "Androginóforo Columnar", whorl: "Eje Reproductivo", cat: "reproductivo", desc: "Columna que eleva el androceo y gineceo por encima de la corona.", exp: [0, 40, 0], plate: [-25, 0, 0] }},
+            "Androceo_Estambres": {{ title: "Estambres y Anteras (5)", whorl: "Androceo", cat: "reproductivo", desc: "5 filamentos acintados y anteras biloculares en inserción dorsifija en 'T'.", exp: [0, 55, 0], plate: [25, 0, 0] }},
+            "Gineceo_Ovario_Supero": {{ title: "Ovario Súpero", whorl: "Gineceo", cat: "ovario", desc: "Ovario globoso elevado sobre el androginóforo, de superficie velutina.", exp: [0, 68, 0], plate: [0, -15, 0] }},
+            "Gineceo_Estilos_Estigmas": {{ title: "Estilos y Estigmas (3)", whorl: "Gineceo Apical", cat: "reproductivo", desc: "3 estilos claviformes rematados en estigmas sólidos reniformes.", exp: [0, 85, 0], plate: [45, -15, 0] }},
+            "Ovulos_Placentacion_Parietal": {{ title: "Placentas Parietales y Óvulos", whorl: "Anatomía Interna", cat: "ovario", desc: "Cavidad unilocular con 3 cordones parietales y óvulos anátropos.", exp: [0, 68, 0], plate: [0, -15, 0] }},
+            "Camara_Nectarifera_Interna": {{ title: "Cámara Nectarífera y Opérculo", whorl: "Anatomía Interna", cat: "ovario", desc: "Cavidad anular cerrada por el opérculo membranoso plicado y el toroide secretor.", exp: [0, -6, 0], plate: [-45, -15, 0] }},
+            "Eje_Vascular_Interno": {{ title: "Sistema Vascular Central", whorl: "Anatomía Interna", cat: "ovario", desc: "Cilindro vascular que ramifica hacia los 5 estambres y las 3 placentas.", exp: [0, 15, 0], plate: [25, -15, 0] }},
 
             // --- MATERIALES GENÉRICOS DE RESPALDO ---
             "Mat_Caliz": {{ title: "Cáliz / Brácteas", whorl: "Cáliz", cat: "caliz", desc: "Verticilo externo de protección floral.", exp: [0, -25, 0], plate: [-50, 30, 0] }},
@@ -301,7 +316,14 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             this.classList.toggle('active', xrayMode);
             interactMeshes.forEach(m => {{
                 const k = m.userData.key;
-                const isInternal = (k === 'Ovulos_Placentacion' || k === 'Ginostemio_Columna' || k === 'Antera_Polinios');
+                const isInternal = (
+                      k === 'Ovulos_Placentacion' || 
+                      k === 'Ginostemio_Columna' || 
+                      k === 'Antera_Polinios' ||
+                      k === 'Ovulos_Placentacion_Parietal' || 
+                      k === 'Camara_Nectarifera_Interna' || 
+                      k === 'Eje_Vascular_Interno'
+                );
                 if (xrayMode && !isInternal) {{
                     m.material.transparent = true;
                     m.material.opacity = 0.18;
