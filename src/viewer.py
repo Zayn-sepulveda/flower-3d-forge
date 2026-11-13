@@ -112,14 +112,18 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             "Ovario_Infero": {{ title: "Ovario Pedicelado Ínfero", whorl: "Gineceo (Receptáculo/Pedicelo)", cat: "ovario", desc: "Ovario ínfero 6-acanalado situado por debajo de la inserción del perianto y resupinado 180°.", exp: [0, -25, -45], plate: [-55, -85, 0] }},
             "Ovulos_Placentacion": {{ title: "Placentas Parietales y Óvulos", whorl: "Gineceo Interno (Cavidad Ovárica)", cat: "ovario", desc: "Tres cordones placentarios parietales con miles de primordios seminales microscópicos dentro del ovario ínfero.", exp: [0, -10, -25], plate: [55, -85, 0] }},
 
-            // --- ARACEAE (Anthurium) ---
+            // --- ARACEAE (Anthurium sanjorgense & Anthurium andraeanum) ---
             "Espata_Cuculada": {{ title: "Espata Cuculada", whorl: "Bráctea Modificada", cat: "caliz", desc: "Bráctea protectora lanceolada con gradiente vino a verde y acumen distal.", exp: [0, 45, -20], plate: [0, 65, 0] }},
+            "Espata_Cordiforme": {{ title: "Espata Cordiforme Bullada", whorl: "Bráctea Modificada (Espata)", cat: "caliz", desc: "Bráctea abierta plano-convexa en forma de corazón con lóbulos basales (aurículas) extendidos, ápice acuminado y acabado céreo rojo carmín.", exp: [0, -8, -42], plate: [-65, 10, 0] }},
             "Estipite_Basal": {{ title: "Estípite Cilíndrico", whorl: "Eje Inflorescente", cat: "reproductivo", desc: "Segmento corto de articulación entre el espádice y el pedúnculo.", exp: [0, 5, 25], plate: [-25, 0, 0] }},
             "Espadice_Florifero": {{ title: "Espádice Péndulo", whorl: "Inflorescencia Carnosa", cat: "corola", desc: "Espiga cilíndrica con flores hermafroditas sésiles dispuestas en espiral.", exp: [0, -35, 35], plate: [35, 0, 0] }},
-            "Gineceo_Ovarios": {{ title: "Matriz Ovárica Bilocular", whorl: "Anatomía Interna (Gineceo)", cat: "ovario", desc: "Red de ovarios súperos que conforman la estructura carnosa bajo la superficie del espádice.", exp: [0, -25, 45], plate: [50, 0, 0] }},
+            "Espadice_Florifero_Externo": {{ title: "Espádice Florífero Externo", whorl: "Inflorescencia (Tépalos en Parísticas)", cat: "corola", desc: "Cilindro subulado inclinado a 35° con ápice subcónico cerrado y trama espiral densa de flores bisexuales diminutas.", exp: [0, 36, 48], plate: [0, 38, 0] }},
+            "Androceo_Micro_Estambres": {{ title: "Capa de Micro-Estambres", whorl: "Androceo (88% del Radio)", cat: "reproductivo", desc: "Estrato estaminal subyacente a los tépalos que agrupa los 4 micro-estambres por cada flor perfecta del espádice.", exp: [0, 26, 34], plate: [55, 38, 0] }},
+            "Gineceo_Ovarios": {{ title: "Matriz Ovárica Bilocular", whorl: "Anatomía Interna (Gineceo, 75% Radio)", cat: "ovario", desc: "Tejido reticular en panal compuesto por los ovarios súperos biloculares inmersos en la corteza carnosa del espádice.", exp: [0, 16, 20], plate: [-10, -38, 0] }},
             "Ovulos_Internos": {{ title: "Óvulos Primordiales", whorl: "Anatomía Interna (Semillas)", cat: "ovario", desc: "Centenares de primordios seminales anclados en los lóculos alrededor del eje vascular.", exp: [0, -15, 50], plate: [65, 0, 0] }},
-            "Eje_Vascular_Interno": {{ title: "Eje Vascular Central", whorl: "Anatomía Interna", cat: "ovario", desc: "Médula vascular interna visible en rayos X que irriga cada flor del espádice.", exp: [0, -15, 55], plate: [65, 0, 0] }},
-            "Pedunculo_Tallo": {{ title: "Pedúnculo", whorl: "Tallo Principal", cat: "ovario", desc: "Eje de soporte principal de la inflorescencia.", exp: [0, -55, -25], plate: [-55, -60, 0] }},
+            "Ovulos_Internos_Placentarios": {{ title: "Capa de Óvulos Placentarios", whorl: "Anatomía Interna (Lóculos Ováricos)", cat: "ovario", desc: "Multitud de cuerpos ovoides blanco-crema brillante insertados axialmente en los lóculos ováricos.", exp: [0, 8, 10], plate: [30, -38, 0] }},
+            "Eje_Vascular_Interno": {{ title: "Eje Vascular Central", whorl: "Anatomía Interna (Estela Medular)", cat: "ovario", desc: "Cilindro vascular sólido color marfil que actúa como núcleo conductor de toda la inflorescencia.", exp: [0, 0, 0], plate: [68, -38, 0] }},
+            "Pedunculo_Tallo": {{ title: "Pedúnculo Sólido", whorl: "Tallo Floral Principal", cat: "caliz", desc: "Eje cilíndrico sólido verde oliva oscuro unido de forma continua al nodo basal de la espata y el espádice.", exp: [0, -38, -18], plate: [-65, -48, 0] }},
            
              // --- PASSIFLORACEAE (Passiflora incarnata / P. vitifolia) ---
             "Pedicelo_Hipanto": {{ title: "Pedicelo y Copa del Hipanto", whorl: "Receptáculo Floral", cat: "caliz", desc: "Tallo floral y receptáculo acopado urceolado donde se insertan el perianto y la corona.", exp: [0, -25, 0], plate: [0, -50, 0] }},
@@ -317,12 +321,14 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             interactMeshes.forEach(m => {{
                 const k = m.userData.key;
                 const isInternal = (
-                      k === 'Ovulos_Placentacion' || 
-                      k === 'Ginostemio_Columna' || 
-                      k === 'Antera_Polinios' ||
-                      k === 'Ovulos_Placentacion_Parietal' || 
-                      k === 'Camara_Nectarifera_Interna' || 
-                      k === 'Eje_Vascular_Interno'
+                    k === 'Ovulos_Placentacion' || 
+                    k === 'Ginostemio_Columna' || 
+                    k === 'Antera_Polinios' ||
+                    k === 'Ovulos_Placentacion_Parietal' || 
+                    k === 'Camara_Nectarifera_Interna' || 
+                    k === 'Eje_Vascular_Interno' ||
+                    k === 'Ovulos_Internos' ||
+                    k === 'Ovulos_Internos_Placentarios'
                 );
                 if (xrayMode && !isInternal) {{
                     m.material.transparent = true;
