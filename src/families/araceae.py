@@ -1,5 +1,6 @@
 import os
 import math
+import importlib
 import numpy as np
 from geometry import *
 
@@ -13,11 +14,11 @@ def _load_spathe_photometric_relief(photo_path, grid_size=128):
         return None
     img = None
     try:
-        from PIL import Image
-        img = np.asarray(Image.open(photo_path).convert('RGB'), dtype=np.float32) / 255.0
+        pil_image = importlib.import_module('PIL.Image')
+        img = np.asarray(pil_image.open(photo_path).convert('RGB'), dtype=np.float32) / 255.0
     except Exception:
         try:
-            import matplotlib.image as mpimg
+            mpimg = importlib.import_module('matplotlib.image')
             raw = mpimg.imread(photo_path)
             img = raw[..., :3].astype(np.float32)
             if img.max() > 1.0:
