@@ -135,7 +135,7 @@ def build_sanjorgense_original_obj(cfg):
         c_ring = (1.0 - tip_mix) * c_spadix + tip_mix * c_spadix_tip
 
         for j, th in enumerate(theta_sp):
-            bump = (math.cos(13 * th + (i % 2) * 1.5) * math.sin(55 * s * math.pi)) ** 2
+            bump = (math.cos(13 * th + (i % 2) * 1.5) * math.sin(55 * s * np.pi)) ** 2
             radii_sp[i, j] = r_mean + (0.48 * bump * (1.0 - s) if s < 0.95 else 0.02)
             cols_sp[i, j] = np.clip(c_ring * (0.90 + 0.16 * bump), 0.0, 1.0)
 
@@ -203,44 +203,50 @@ def build_sanjorgense_original_obj(cfg):
 
 def build_andraeanum_obj(cfg):
     """
-    Morfología e histología interna en formato Atlas para Anthurium andraeanum (COL-NAR-002):
-    - Espata cordiforme orgánica: Venación palmada-arcuada proyectada en coordenadas polares (theta = atan2(u,v))
-      con nervio central profundo y cojinetes bullados (convexos) entre nervaduras.
-    - Pedúnculo sólido frenado exactamente en el receptáculo dorsal (0, -0.5, -1.2).
-    - Espádice proyectado a +62° respecto al tallo (~84° respecto a la espata reflexa) con 5 capas de disección.
+    Atlas Morfométrico Floral de Alta Precisión para Anthurium andraeanum (COL-NAR-002):
+    - Contorno C1-continuo (sin escalones laterales en v=0) desde los lóbulos cordados
+      basales hasta el ápice acuminado (acumen) curvado.
+    - Campo de venación pinnado-pedado continuo mediante transición hiperbólica (tanh),
+      surcos venosos profundos exponenciales, nervio colector submarginal y relieve
+      celular bullado (ampollado) asimétrico entre nervaduras.
+    - Espádice protógino con micro-relieve de tépalos y gotas estigmáticas en 5 capas.
     """
     c_cfg = cfg.get('perianto', {}).get('corola', {})
     g_cfg = cfg.get('gineceo', {})
+    arq_cfg = cfg.get('arquitectura_floral', {})
 
-    spathe_len = float(c_cfg.get('longitud_limbo_mm', 90.0))
-    w_max = float(c_cfg.get('ancho_petalo_mm', 85.0)) * 0.62
+    spathe_len = float(c_cfg.get('longitud_limbo_mm', 98.0))
+    w_max = float(c_cfg.get('ancho_petalo_mm', 86.0)) * 0.58
+    wall_thick = float(c_cfg.get('grosor_pared_mm', 1.8))
 
-    # Paleta cromática anatómica
-    c_carmine = np.array([0.86, 0.05, 0.15])     # Rojo carmín ceroso principal
-    c_vein_deep = np.array([0.55, 0.01, 0.06])   # Fondo hundido de venas (muy oscuro)
-    c_gloss = np.array([0.96, 0.15, 0.22])       # Brillo especular en cojinetes convexos
-    c_abaxial = np.array([0.75, 0.15, 0.18])     # Envés mate
-    c_node_green = np.array([0.40, 0.55, 0.15])  # Transición en el receptáculo
+    # Paleta cromática histológica de alto contraste (antocianinas epidérmicas/hipodérmicas)
+    c_carmine = np.array([0.82, 0.04, 0.11])      # Rojo carmín intenso base
+    c_vein_deep = np.array([0.32, 0.01, 0.03])    # Sombra profunda en surcos venosos
+    c_gloss = np.array([1.00, 0.30, 0.34])        # Brillo especular ceroso en crestas bulladas
+    c_rim_dark = np.array([0.52, 0.02, 0.06])     # Borde submarginal intenso
+    c_abaxial = np.array([0.72, 0.14, 0.17])      # Envés rosado-rojizo
+    c_node_green = np.array([0.36, 0.54, 0.15])   # Transición clorofílica basal
 
-    c_peduncle = np.array([0.23, 0.42, 0.14])    # Verde oliva
-    c_spadix_base = np.array([0.95, 0.86, 0.24]) # Trama tépalos (exterior)
-    c_spadix_tip = np.array([0.98, 0.94, 0.58])  # Ápice claro
-    c_androceo = np.array([0.98, 0.93, 0.52])    # Polen (androceo estaminal)
-    c_ovary = np.array([0.80, 0.91, 0.66])       # Tejido gineceo (verde pálido translúcido)
-    c_ovule = np.array([0.98, 0.97, 0.88])       # Perlas ovulares brillantes
-    c_axis = np.array([0.93, 0.90, 0.78])        # Haces vasculares (núcleo)
+    c_peduncle = np.array([0.22, 0.42, 0.13])     # Verde pedúnculo
+    c_spadix_base = np.array([0.96, 0.94, 0.82])  # Zona femenina protógina (blanco-crema)
+    c_spadix_mid = np.array([0.96, 0.84, 0.24])   # Transición amarilla
+    c_spadix_tip = np.array([0.90, 0.68, 0.10])   # Ápice amarillo-dorado cálido
+    c_androceo = np.array([0.98, 0.93, 0.52])     # Micro-estambres
+    c_ovary = np.array([0.80, 0.91, 0.66])        # Matriz de ovarios biloculares
+    c_ovule = np.array([0.98, 0.97, 0.88])        # Óvulos placentarios
+    c_axis = np.array([0.93, 0.90, 0.78])         # Eje vascular central
 
     vertices, colors = [], []
     groups = {}
 
     # =========================================================================
-    # 1. ESPATA CORDIFORME BULLADA - Mapeo Polar Palmado-Arcuado
+    # 1. ESPATA CORDIFORME BULLADA (Continuidad C1 Exacta + Ampollas Orgánicas)
     # =========================================================================
     f_spathe = []
-    v_min = -0.36
-    n_v_neg = 32
-    n_v_pos = 72
-    n_u_half = 36
+    v_min = -float(c_cfg.get('lobe_length_ratio', 0.35))
+    n_v_neg = 42
+    n_v_pos = 92
+    n_u_half = 48
 
     v_neg = np.linspace(v_min, 0.0, n_v_neg, endpoint=False)
     v_pos = np.linspace(0.0, 1.0, n_v_pos)
@@ -248,7 +254,8 @@ def build_andraeanum_obj(cfg):
     n_v = len(v_vals)
     u_locs = np.linspace(0.0, 1.0, n_u_half)
 
-    pitch_spathe = math.radians(-22.0)
+    pitch_deg = float(arq_cfg.get('angulo_espata_reflexa_grados', -38.0))
+    pitch_spathe = math.radians(pitch_deg)
     cp_s, sp_s = math.cos(pitch_spathe), math.sin(pitch_spathe)
 
     for side in (-1.0, 1.0):
@@ -256,81 +263,105 @@ def build_andraeanum_obj(cfg):
         bot_grid = np.zeros((n_v, n_u_half), dtype=int)
 
         for i, v in enumerate(v_vals):
-            # Perfil 2D del corazón
+            # Contorno C1-continuo: en v=0 tanto v<0 como v>=0 valen exactamente w_max con derivada 0
             if v < 0.0:
                 tau = min(1.0, abs(v / v_min))
-                ellipse_rad = math.sqrt(max(0.0, 1.0 - (tau ** 2)))
-                x_lobe_center = w_max * (0.44 + 0.04 * (1.0 - tau))
-                x_in = x_lobe_center * (1.0 - ellipse_rad)
-                x_out = x_lobe_center + (w_max - x_lobe_center) * ellipse_rad
-                y_base = v * spathe_len * 0.85
+                lobe_arc = math.sqrt(max(0.0, 1.0 - (tau ** 2)))
+                x_c = 0.43 * w_max
+                # Seno basal estrecho y redondeado que se cierra en x_c cuando tau=1
+                x_in = x_c * (1.0 - lobe_arc) * (0.12 + 0.88 * (tau ** 1.8))
+                # En tau=0 (v=0): x_out = 0.43*w_max + 0.57*w_max = 1.00 * w_max
+                x_out = x_c + (w_max - x_c) * lobe_arc
+                y_base = v * spathe_len * 0.82
             else:
                 x_in = 0.0
-                acumen_taper = (1.0 - (v ** 1.15)) ** 0.62
-                shoulder_round = 1.0 + 0.10 * math.sin(math.pi * (v ** 0.7))
-                x_out = w_max * acumen_taper * shoulder_round
+                # En v=0: x_out = 1.00 * w_max y derivada dx_out/dv = 0 (CERO escalón lateral)
+                env_main = ((1.0 - (v ** 1.85)) ** 0.82) * (1.0 - 0.38 * (v ** 2.2))
+                acumen_cusp = 0.045 * (1.0 - v) * math.exp(-(((v - 0.91) / 0.06) ** 2))
+                x_out = w_max * (env_main + acumen_cusp)
                 y_base = v * spathe_len
+
+            # Ligera asimetría orgánica en el acumen apical (como en especímenes reales)
+            apex_bend_x = 2.8 * (max(0.0, (v - 0.72) / 0.28) ** 2.2)
 
             for j, u_loc in enumerate(u_locs):
                 x_abs = x_in + u_loc * (x_out - x_in)
-                x_lam = side * x_abs
+                x_lam = side * x_abs + apex_bend_x
                 y_lam = y_base
 
+                # Coordenadas normalizadas sobre la lámina
+                X_n = x_abs / max(1.0, w_max)
+                Y_n = y_lam / max(1.0, spathe_len)
+                r_polar = math.sqrt(x_abs ** 2 + y_lam ** 2)
+
                 # -------------------------------------------------------------
-                # MATEMÁTICA POLAR EXACTA: Venación y Tejido Bullado
+                # VENACIÓN PINNADA-PEDADA CONTINUA + TEJIDO BULLADO CELULAR
                 # -------------------------------------------------------------
-                # 1. Coordenadas polares irradiando desde el receptáculo
-                r_polar = math.sqrt(x_abs**2 + y_lam**2)
-                r_norm = min(1.0, r_polar / max(1.0, spathe_len))
-                
-                # Ángulo desde el nervio central (eje Y) hacia los márgenes
-                theta_polar = math.atan2(x_abs, y_lam)
-                
-                # Curvatura arcuada paramétrica (las venas se abren hacia los lados)
-                theta_arcuate = theta_polar + 0.75 * (r_norm ** 1.25)
-                n_veins = 5.5
-                
-                # 2. Nervio Central Profundo (z_central)
-                # Zanja gaussiana profunda en x=0, atenuándose hacia el ápice (v=1)
-                z_central = -1.8 * math.exp(-((x_abs / 2.5) ** 2)) * (1.0 - max(0.0, v))
-                
-                # 3. Tejido Bullado Intervenal (z_bullate)
-                # Elevando al cuadrado el seno creamos cúpulas anchas (cojinetes) y surcos estrechos (venas)
-                fade_margin = 1.0 - (u_loc ** 2.0)
+                # u_vein traza venas que suben en Y>0 (pinnadas) y bajan en Y<0 (pedadas)
+                arch_dir = math.tanh(3.4 * (Y_n + 0.06))
+                u_vein = Y_n - 0.38 * (X_n ** 1.15) * arch_dir + 0.08 * (X_n ** 2)
+
+                # Surcos venosos primarios estrechos y profundos (perfil exponencial en V)
+                s_primary = math.sin(6.2 * math.pi * u_vein)
+                primary_groove = math.exp(-5.5 * (s_primary ** 2))
+                primary_pillow = 1.0 - primary_groove
+
+                # Nervio colector submarginal continuo a u_loc = 0.84
+                collector_groove = math.exp(-(((u_loc - 0.84) / 0.036) ** 2)) * (1.0 - 0.45 * (max(0.0, v) ** 2))
+
+                # Ampollas / Bullae celulares entre venas primarias (reticulado secundario y terciario)
+                cell_w1 = math.sin(4.6 * math.pi * X_n + 1.4 * math.sin(5.0 * math.pi * Y_n)) ** 2
+                cell_w2 = math.cos(3.2 * math.pi * u_vein - 2.4 * math.pi * X_n) ** 2
+                tertiary_wrinkle = 0.18 * math.sin(14.0 * math.pi * X_n + 8.0 * math.pi * u_vein)
+                blister_field = (0.58 + 0.42 * cell_w1 * (0.45 + 0.55 * cell_w2) + tertiary_wrinkle)
+
+                # Atenuación suave en márgenes, seno y punta acuminada
+                fade_margin = (1.0 - (u_loc ** 2.6)) * (1.0 - 0.55 * (max(0.0, v) ** 3))
                 if v < 0.0:
                     fade_margin *= math.sqrt(max(0.0, 1.0 - ((v / v_min) ** 2)))
-                
-                z_bullate = 1.65 * (math.sin(n_veins * theta_arcuate) ** 2) * math.sin(math.pi * min(1.0, r_norm * 2.2)) * fade_margin
-                
-                # Forma de plato de la lámina general
-                edge_dist = x_abs / max(1.0, w_max)
-                z_cup = -3.5 * (edge_dist ** 1.8) * (1.0 - 0.4 * max(0.0, v))
-                
-                # Suma topológica de desplazamientos Z
+
+                # Nervio central hundido en el haz (v >= 0)
+                midrib_mask = math.exp(-((x_abs / 2.0) ** 2)) * (1.0 - max(0.0, v) ** 1.4) if v >= -0.02 else 0.0
+                z_central = -2.2 * midrib_mask
+
+                # Relieve total bullado (cojinetes elevados + surcos primarios y colector hundidos)
+                z_bullate = (
+                    2.85 * primary_pillow * blister_field * fade_margin * math.sin(math.pi * min(1.0, u_loc * 1.10 + 0.06))
+                    - 1.15 * primary_groove * fade_margin
+                    - 1.05 * collector_groove
+                )
+
+                # Curvatura macroscópica de la espata (aurículas elevadas, dorso arqueado y acumen deflexo)
+                lobe_lift = 4.8 * abs(min(0.0, v) / v_min) * (u_loc ** 1.1)
+                acumen_droop = -5.2 * (max(0.0, (v - 0.65) / 0.35) ** 2.0)
+                margin_undulation = 1.45 * (u_loc ** 3) * math.sin(4.5 * math.pi * v + 0.6 * side)
+                z_cup = -3.6 * (X_n ** 1.65) * (1.0 - 0.35 * max(0.0, v)) + lobe_lift + acumen_droop + margin_undulation
+
                 z_lam_ad = z_cup + z_central + z_bullate
-                thickness = (1.2 + 0.8 * math.exp(-((x_abs / 2.5) ** 2))) * (1.0 - 0.4 * (u_loc ** 2))
+                thickness = (wall_thick * 0.62 + 0.80 * midrib_mask) * (1.0 - 0.38 * (u_loc ** 2))
                 z_lam_ab = z_lam_ad - thickness
 
-                # 4. Inclinación Global de la Espata (-22° Pivotando en 0,0,0)
+                # Rotación reflexa de la espata
                 y_ad = y_lam * cp_s - z_lam_ad * sp_s
                 z_ad = y_lam * sp_s + z_lam_ad * cp_s
                 y_ab = y_lam * cp_s - z_lam_ab * sp_s
                 z_ab = y_lam * sp_s + z_lam_ab * cp_s
 
-                # 5. Colorimetría de Contraste Céreo
-                # Las venas profundas y el nervio central toman sombra, los abultamientos toman brillo
-                is_midrib = math.exp(-((x_abs / 2.5) ** 2))
-                vein_valley = 1.0 - (math.sin(n_veins * theta_arcuate) ** 2)
-                
+                # Colorimetría PBR por vértice: surcos venosos oscuros y cúpulas bulladas con brillo especular
+                vein_shadow = np.clip((primary_groove * 0.85 + collector_groove * 0.75) * fade_margin + 0.45 * midrib_mask, 0.0, 1.0)
+                dome_highlight = np.clip((z_bullate / 2.85), 0.0, 1.0) ** 1.35
+                rim_shade = np.clip((u_loc - 0.86) / 0.14, 0.0, 1.0)
+
                 col_ad = (
-                    c_carmine * (1.0 - 0.4 * is_midrib)
-                    + (c_gloss - c_carmine) * (0.6 * (z_bullate / 1.65))
-                    - (c_carmine - c_vein_deep) * (0.5 * vein_valley * fade_margin)
+                    (1.0 - vein_shadow) * c_carmine
+                    + vein_shadow * c_vein_deep
+                    + (c_gloss - c_carmine) * (0.78 * dome_highlight)
+                    - (c_carmine - c_rim_dark) * (0.35 * rim_shade)
                 )
-                
-                node_blend = math.exp(-((r_polar / 5.0) ** 2))
-                col_ad = (1.0 - 0.5 * node_blend) * col_ad + (0.5 * node_blend) * c_node_green
-                col_ab = (1.0 - 0.6 * node_blend) * c_abaxial + (0.6 * node_blend) * c_node_green
+
+                node_blend = math.exp(-((r_polar / 4.6) ** 2))
+                col_ad = (1.0 - 0.55 * node_blend) * col_ad + (0.55 * node_blend) * c_node_green
+                col_ab = (1.0 - 0.60 * node_blend) * c_abaxial + (0.60 * node_blend) * c_node_green
 
                 vertices.append([x_lam, y_ad, z_ad])
                 colors.append(np.clip(col_ad, 0.0, 1.0).tolist())
@@ -340,7 +371,6 @@ def build_andraeanum_obj(cfg):
                 colors.append(np.clip(col_ab, 0.0, 1.0).tolist())
                 bot_grid[i, j] = len(vertices)
 
-        # Malla para cada hemisferio
         for i in range(n_v - 1):
             for j in range(n_u_half - 1):
                 if side > 0:
@@ -370,7 +400,7 @@ def build_andraeanum_obj(cfg):
     groups["Espata_Cordiforme"] = f_spathe
 
     # =========================================================================
-    # 2. PEDÚNCULO SÓLIDO (Frenado en el Nodo 0,0,0)
+    # 2. PEDÚNCULO SÓLIDO Y ESTÍPITE BASAL (2.0 mm)
     # =========================================================================
     f_ped = []
     n_ped = 36
@@ -381,34 +411,37 @@ def build_andraeanum_obj(cfg):
         -0.8 - t_ped * 12.0
     ])
     ped_radii = 2.6 + 1.3 * np.exp(-t_ped * 15.0)
-    ped_cols = np.tile(c_peduncle, (n_ped, 1))
+    ped_cols = np.zeros((n_ped, 3))
+    for i, tp in enumerate(t_ped):
+        top_tint = math.exp(-tp * 10.0) * 0.32
+        ped_cols[i] = (1.0 - top_tint) * c_peduncle + top_tint * np.array([0.46, 0.22, 0.14])
 
     _add_closed_tube(ped_pts, ped_radii, ped_cols, 24, vertices, colors, f_ped, cap_start=True, cap_end=True)
     groups["Pedunculo_Tallo"] = f_ped
 
     # =========================================================================
-    # EJE DEL ESPÁDICE: +62° (Perpendicularidad orgánica)
+    # 3 a 7. ESPÁDICE PROTÓGINO: 5 Capas Concéntricas con Pápilas Estigmáticas
     # =========================================================================
-    spadix_len = float(g_cfg.get('estilo_longitud_mm', 68.0))
-    spadix_r_base = float(g_cfg.get('diametro_espadice_mm', 8.5)) / 2.0
-    n_sp, n_sl = 96, 44
+    spadix_len = float(g_cfg.get('estilo_longitud_mm', 70.0))
+    spadix_r_base = float(g_cfg.get('diametro_espadice_mm', 9.2)) / 2.0
+    stipe_mm = float(arq_cfg.get('estipite_longitud_mm', 2.0))
+    n_sp, n_sl = 110, 52
     s_vals = np.linspace(0.0, 1.0, n_sp)
     theta_sp = np.linspace(0.0, 2.0 * np.pi, n_sl, endpoint=False)
 
-    inc_rad = math.radians(62.0)
+    inc_rad = math.radians(float(arq_cfg.get('angulo_espadice_grados', 52.0)))
     spadix_pts = np.column_stack([
         np.zeros(n_sp),
-        s_vals * spadix_len * math.cos(inc_rad) + np.sin(s_vals * np.pi) * 2.2,
-        s_vals * spadix_len * math.sin(inc_rad)
+        (stipe_mm + s_vals * spadix_len) * math.cos(inc_rad) + np.sin(s_vals * np.pi) * 2.0,
+        (stipe_mm + s_vals * spadix_len) * math.sin(inc_rad)
     ])
 
     def _spadix_taper(s):
-        if s < 0.88: return 1.0 - 0.26 * (s / 0.88)
-        else: return 0.74 * math.sqrt(max(0.0, 1.0 - (((s - 0.88) / 0.12) ** 2)))
+        if s < 0.88:
+            return 1.0 - 0.26 * (s / 0.88)
+        else:
+            return 0.74 * math.sqrt(max(0.0, 1.0 - (((s - 0.88) / 0.12) ** 2)))
 
-    # =========================================================================
-    # 3 a 7. ANATOMÍA INTERNA: 5 Capas de Disección Concéntricas
-    # =========================================================================
     f_spadix_ext, f_androceo, f_ovary, f_ovules, f_axis = [], [], [], [], []
     r_ext, r_and, r_ov, r_ovm, r_ax = np.zeros((5, n_sp, n_sl))
     c_ext, c_and, c_ov, c_ovm = np.zeros((4, n_sp, n_sl, 3))
@@ -417,28 +450,38 @@ def build_andraeanum_obj(cfg):
     for i, s in enumerate(s_vals):
         taper = _spadix_taper(s)
         r_mean = spadix_r_base * taper
-        c_ring = (1.0 - s) * c_spadix_base + s * c_spadix_tip
-        
-        # 7. Eje Vascular (22% Radio)
+
+        if s < 0.42:
+            mix_s = s / 0.42
+            c_ring = (1.0 - mix_s) * c_spadix_base + mix_s * c_spadix_mid
+        else:
+            mix_s = (s - 0.42) / 0.58
+            c_ring = (1.0 - mix_s) * c_spadix_mid + mix_s * c_spadix_tip
+
         r_ax[i, :] = max(0.03, r_mean * 0.22 + 0.06 * math.sin(s * 50.0 * math.pi) * (1.0 - s))
 
         for j, th in enumerate(theta_sp):
-            # 3. Perianto Externo (100%)
-            parastichy = (math.cos(15.0 * th + 48.0 * s * math.pi) * math.cos(15.0 * th - 48.0 * s * math.pi)) ** 2
-            r_ext[i, j] = max(0.04, r_mean + 0.34 * parastichy * (1.0 - (s ** 4)))
-            c_ext[i, j] = np.clip(c_ring * (0.92 + 0.12 * parastichy), 0.0, 1.0)
+            # 3. Perianto Externo: Tépalos romboidales + pápilas estigmáticas prominentes en zona basal/media
+            floret_grid = math.cos(14.0 * th + 46.0 * s * math.pi) * math.cos(14.0 * th - 46.0 * s * math.pi)
+            parastichy = floret_grid ** 2
+            stigma_papilla = (max(0.0, floret_grid) ** 10) * (1.0 - 0.65 * (s ** 2))
+            r_ext[i, j] = max(0.04, r_mean + (0.28 * parastichy + 0.52 * stigma_papilla) * (1.0 - (s ** 4)))
+            c_ext[i, j] = np.clip(
+                c_ring * (0.86 + 0.16 * parastichy) + np.array([0.14, 0.14, 0.18]) * stigma_papilla,
+                0.0, 1.0
+            )
 
-            # 4. Androceo / Estambres (88%)
-            granules = (math.sin(30.0 * th + (i % 2) * 0.8) * math.sin(85.0 * s * math.pi)) ** 2
+            # 4. Androceo / 4 Micro-Estambres por flósculo (88%)
+            granules = (math.sin(28.0 * th + (i % 2) * 0.8) * math.sin(85.0 * s * math.pi)) ** 2
             r_and[i, j] = max(0.03, r_mean * 0.88 + 0.20 * granules * (1.0 - (s ** 3)))
             c_and[i, j] = np.clip(c_androceo * (0.88 + 0.18 * granules), 0.0, 1.0)
 
-            # 5. Gineceo / Matriz Ovárica (70%)
-            honeycomb = math.cos(15.0 * th) * math.sin(55.0 * s * math.pi)
+            # 5. Gineceo / Matriz de Ovarios Biloculares (70%)
+            honeycomb = math.cos(14.0 * th) * math.sin(55.0 * s * math.pi)
             r_ov[i, j] = max(0.02, r_mean * 0.70 + 0.16 * honeycomb * (1.0 - (s ** 3)))
             c_ov[i, j] = np.clip(c_ovary * (0.88 + 0.14 * honeycomb), 0.0, 1.0)
 
-            # 6. Óvulos Internos Brillantes (42%)
+            # 6. Óvulos Placentarios Internos (42%)
             ovoid_bump = (math.cos(14.0 * th + (i % 2) * 0.5) * math.sin(46.0 * s * math.pi)) ** 4
             r_ovm[i, j] = max(0.02, r_mean * 0.42 + 0.62 * ovoid_bump * (1.0 - (s ** 2)))
             c_ovm[i, j] = np.clip(c_ovule * (0.88 + 0.15 * ovoid_bump), 0.0, 1.0)
