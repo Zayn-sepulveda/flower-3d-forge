@@ -1,13 +1,57 @@
+import os
 import math
 import numpy as np
 from geometry import *
 
 
+def _load_spathe_photometric_relief(photo_path, grid_size=128):
+    """
+    Segmenta la espata roja de la fotografia de campo mediante dominancia antocianica
+    (R - max(G, B)) y extrae un mapa normalizado de alta frecuencia para matizar el color.
+    """
+    if not photo_path or not os.path.exists(photo_path):
+        return None
+    img = None
+    try:
+        from PIL import Image
+        img = np.asarray(Image.open(photo_path).convert('RGB'), dtype=np.float32) / 255.0
+    except Exception:
+        try:
+            import matplotlib.image as mpimg
+            raw = mpimg.imread(photo_path)
+            img = raw[..., :3].astype(np.float32)
+            if img.max() > 1.0:
+                img /= 255.0
+        except Exception:
+            return None
+
+    redness = img[..., 0] - np.maximum(img[..., 1], img[..., 2])
+    ys, xs = np.where(redness > 0.14)
+    if len(xs) < 120:
+        return None
+
+    y0, y1 = int(ys.min()), int(ys.max()) + 1
+    x0, x1 = int(xs.min()), int(xs.max()) + 1
+    crop = img[y0:y1, x0:x1]
+    lum = 0.299 * crop[..., 0] + 0.587 * crop[..., 1] + 0.114 * crop[..., 2]
+
+    gy = np.linspace(0, lum.shape[0] - 1, grid_size).astype(int)
+    gx = np.linspace(0, lum.shape[1] - 1, grid_size).astype(int)
+    sampled = lum[np.ix_(gy, gx)]
+
+    pad = np.pad(sampled, 4, mode='edge')
+    smooth = sum(
+        pad[4 + dy:4 + dy + grid_size, 4 + dx:4 + dx + grid_size]
+        for dy in (-4, -2, 0, 2, 4) for dx in (-4, -2, 0, 2, 4)
+    ) / 25.0
+    high_pass = sampled - smooth
+    std = float(np.std(high_pass))
+    if std < 1e-5:
+        return None
+    return np.clip(high_pass / (2.5 * std), -1.0, 1.0)
+
+
 def _add_closed_tube(pts, radii, cols, n_sl, vertices, colors, face_list, cap_start=True, cap_end=True):
-    """
-    Envuelve add_tube_along_curve añadiendo tapas sólidas (caps) en el inicio y el final
-    para evitar cilindros huecos o agujeros apicales en el espádice y el pedúnculo.
-    """
     start_v_idx = len(vertices)
     add_tube_along_curve(pts, radii, cols, n_sl, vertices, colors, face_list)
     n_pts = len(pts)
@@ -35,7 +79,6 @@ def _add_closed_tube(pts, radii, cols, n_sl, vertices, colors, face_list, cap_st
 
 
 def build_sanjorgense_original_obj(cfg):
-    """Morfología de Anthurium sanjorgense con anatomía interna completa para disección."""
     c_cfg = cfg['perianto']['corola']
     a_cfg = cfg.get('androceo', {})
     g_cfg = cfg.get('gineceo', {})
@@ -68,7 +111,6 @@ def build_sanjorgense_original_obj(cfg):
     for v in v_vals:
         w_profile = math.sin(math.pi * (v ** 0.68)) * (1.0 - (v ** 2))
         depth_profile = 22.0 * (1.0 - v) * (v ** 0.4)
-
         y_spine = v * total_spathe * 0.78
         z_arch = np.sin(v * np.pi * 0.72) * 22.0 - (v ** 3) * 8.0
 
@@ -149,7 +191,7 @@ def build_sanjorgense_original_obj(cfg):
         taper = 1.0 - 0.38 * (s / 0.93) if s < 0.93 else 0.62 * math.sqrt(max(1.0 - (s - 0.93) / 0.07, 0.0))
         r_mean = spadix_r_base * taper * 0.85
         for j, th in enumerate(theta_sp):
-            locules = math.sin(13 * th) * math.sin(55 * s * math.pi)
+            locules = math.sin(13 * th) * math.sin(55 * s * np.pi)
             ovary_radii[i, j] = r_mean + (0.15 * locules if s < 0.95 else 0.01)
             cols_ovary[i, j] = np.clip(c_ovary_tissue * (0.85 + 0.15 * locules), 0.0, 1.0)
     _add_closed_tube(spadix_pts, ovary_radii, cols_ovary, n_sl, vertices, colors, f_ovary, cap_start=True, cap_end=True)
@@ -162,7 +204,7 @@ def build_sanjorgense_original_obj(cfg):
         taper = 1.0 - 0.38 * (s / 0.93) if s < 0.93 else 0.62 * math.sqrt(max(1.0 - (s - 0.93) / 0.07, 0.0))
         r_mean = spadix_r_base * taper * 0.55
         for j, th in enumerate(theta_sp):
-            primordia = (math.cos(26 * th) * math.cos(110 * s * math.pi)) ** 4
+            primordia = (math.cos(26 * th) * math.cos(110 * s * np.pi)) ** 4
             ovule_radii[i, j] = r_mean + (0.25 * primordia * (1.0 - s))
             cols_ovules[i, j] = np.clip(c_ovule * (0.7 + 0.3 * primordia), 0.0, 1.0)
     _add_closed_tube(spadix_pts, ovule_radii, cols_ovules, n_sl, vertices, colors, f_ovules, cap_start=True, cap_end=True)
@@ -201,317 +243,375 @@ def build_sanjorgense_original_obj(cfg):
     return "".join(lines)
 
 
+# =====================================================================================
+#  Anthurium andraeanum  -  generador v3  (espata reticulada de venacion arqueada)
+# =====================================================================================
+
+def _ss(a, b, x):
+    """smoothstep(a, b, x) vectorizado."""
+    t = np.clip((np.asarray(x, dtype=float) - a) / (b - a), 0.0, 1.0)
+    return t * t * (3.0 - 2.0 * t)
+
+
+def _lowfreq(x, y, seed=0.0):
+    """Ruido suave determinista en [-1, 1] (suma de senos). Rompe la regularidad de 'tira de lavar'."""
+    n = (np.sin(0.19 * x + 1.7 + seed) * np.cos(0.23 * y - 0.6 + 2.0 * seed)
+         + 0.6 * np.sin(0.11 * x - 0.31 * y + 3.1 + seed)
+         + 0.4 * np.cos(0.37 * x + 0.29 * y - 1.3 * seed))
+    return np.clip(n / 1.6, -1.0, 1.0)
+
+
+def _spathe_halfwidth(y, L, D, Wh, y_w, Ac, pU=1.8, qU=1.35, pL=1.9):
+    """
+    Semi-ancho de la espata a la altura y (mm, y=0 en el nodo, +y hacia el apice).
+    y >= y_w : cuerpo ovado-acuminado (lados convexos que se vuelven concavos en el acumen)
+    y <  y_w : lobulos basales redondeados (superelipse)
+    """
+    y = np.asarray(y, dtype=float)
+    s = np.clip((y - y_w) / max(L - y_w, 1e-6), 0.0, 1.0)
+    up = Wh * np.clip(1.0 - s ** pU, 0.0, 1.0) ** qU
+    sa = np.clip((y - (L - Ac)) / max(Ac, 1e-6), 0.0, 1.0)
+    up = up * (1.0 - 0.30 * _ss(0.0, 1.0, sa))
+    eta = np.clip((y_w - y) / (y_w + D), 0.0, 1.0)
+    lo = Wh * np.clip(1.0 - eta ** pL, 0.0, 1.0) ** (1.0 / pL)
+    return np.where(y >= y_w, up, lo)
+
+
+def _flower_lattice(s_vals, thetas, length_mm, radius_mm, n_flowers):
+    """
+    Distancia (mm, sobre la superficie) de cada vertice (s, theta) a la flor mas cercana (d1) y a la
+    segunda mas cercana (d2) en una filotaxis espiral (angulo de divergencia 137.5 grados).
+    Con 300-450 flores sale la red romboidal de parastiquios 5/8/13 de un espadice real.
+    """
+    golden = math.radians(137.50776)
+    n = np.arange(n_flowers)
+    z_f = (n + 0.5) / n_flowers * length_mm * 0.985
+    th_f = (n * golden) % (2.0 * math.pi)
+    d1 = np.zeros((len(s_vals), len(thetas)))
+    d2 = np.zeros_like(d1)
+    for i, s in enumerate(s_vals):
+        z = s * length_mm
+        lo = np.searchsorted(z_f, z - 4.2)
+        hi = np.searchsorted(z_f, z + 4.2)
+        lo, hi = max(0, lo - 1), min(n_flowers, hi + 1)
+        dth = np.abs(thetas[:, None] - th_f[None, lo:hi])
+        dth = np.minimum(dth, 2.0 * math.pi - dth) * radius_mm
+        dd = dth ** 2 + (z - z_f[None, lo:hi]) ** 2
+        part = np.partition(dd, 1, axis=1)
+        d1[i] = np.sqrt(part[:, 0])
+        d2[i] = np.sqrt(part[:, 1])
+    return d1, d2
+
+
+def _spadix_curve(n, length_mm, alpha_deg, bend_deg, m_vec, n_vec, start):
+    """
+    Eje del espadice. alpha = angulo respecto al nervio medio de la espata (dato: 22-83 grados, media 48),
+    medido en el plano (m, n). El espadice se curva `bend_deg` hacia el apice de la espata (arqueo suave).
+    """
+    s = np.linspace(0.0, 1.0, n)
+    ang = np.radians(alpha_deg + 0.5 * bend_deg - bend_deg * s)
+    dirs = np.cos(ang)[:, None] * m_vec[None, :] + np.sin(ang)[:, None] * n_vec[None, :]
+    ds = length_mm / (n - 1)
+    pos = np.vstack([np.zeros(3), np.cumsum(0.5 * (dirs[1:] + dirs[:-1]) * ds, axis=0)])
+    return start[None, :] + pos, s
+
+
 def build_andraeanum_obj(cfg):
-    """
-    Atlas Morfométrico Floral de Alta Precisión para Anthurium andraeanum (COL-NAR-002):
-    - Contorno C1-continuo (sin escalones laterales en v=0) desde los lóbulos cordados
-      basales hasta el ápice acuminado (acumen) curvado.
-    - Campo de venación pinnado-pedado continuo mediante transición hiperbólica (tanh),
-      surcos venosos profundos exponenciales, nervio colector submarginal y relieve
-      celular bullado (ampollado) asimétrico entre nervaduras.
-    - Espádice protógino con micro-relieve de tépalos y gotas estigmáticas en 5 capas.
-    """
     c_cfg = cfg.get('perianto', {}).get('corola', {})
     g_cfg = cfg.get('gineceo', {})
+    a_cfg = cfg.get('androceo', {})
     arq_cfg = cfg.get('arquitectura_floral', {})
+    photo_path = cfg.get('colecta', {}).get('foto_campo', 'images/anthurium_andraeanum.jpg')
+    photo_map = _load_spathe_photometric_relief(photo_path, grid_size=128)   # solo COLOR, ya no relieve
 
-    spathe_len = float(c_cfg.get('longitud_limbo_mm', 98.0))
-    w_max = float(c_cfg.get('ancho_petalo_mm', 86.0)) * 0.58
-    wall_thick = float(c_cfg.get('grosor_pared_mm', 1.8))
+    # ---------------- parametros (mm / grados) ----------------
+    L = float(c_cfg.get('longitud_limbo_mm', 118.0))            # nodo -> apice
+    Wfull = float(c_cfg.get('ancho_petalo_mm', 98.0))           # ancho maximo total de la espata
+    Wh = 0.5 * Wfull
+    D = float(c_cfg.get('lobe_length_ratio', 0.32)) * L         # profundidad de los lobulos bajo el nodo
+    Ac = float(np.clip(c_cfg.get('longitud_acumen_mm', 22.0), 8.0, 0.3 * L))
+    wall = float(c_cfg.get('grosor_pared_mm', 1.2))
+    sinus_open = float(c_cfg.get('seno_apertura_mm', 15.0))     # semi-abertura del seno en el fondo de los lobulos
+    y_w = 0.14 * L                                              # altura del punto mas ancho
+    p_sin = 1.6                                                 # borde interno del seno: x = a*|y|^1.6 (estrecho arriba, abierto abajo)
+    a_sin = sinus_open / (D ** p_sin)
 
-    # Paleta cromática histológica de alto contraste (antocianinas epidérmicas/hipodérmicas)
-    c_carmine = np.array([0.82, 0.04, 0.11])      # Rojo carmín intenso base
-    c_vein_deep = np.array([0.32, 0.01, 0.03])    # Sombra profunda en surcos venosos
-    c_gloss = np.array([1.00, 0.30, 0.34])        # Brillo especular ceroso en crestas bulladas
-    c_rim_dark = np.array([0.52, 0.02, 0.06])     # Borde submarginal intenso
-    c_abaxial = np.array([0.72, 0.14, 0.17])      # Envés rosado-rojizo
-    c_node_green = np.array([0.36, 0.54, 0.15])   # Transición clorofílica basal
+    pitch = math.radians(float(arq_cfg.get('angulo_espata_reflexa_grados', -38.0)))
+    cp, sp = math.cos(pitch), math.sin(pitch)
+    m_vec = np.array([0.0, cp, sp])        # direccion del nervio medio (nodo -> apice)
+    n_vec = np.array([0.0, -sp, cp])       # normal adaxial (cara que mira al espadice)
 
-    c_peduncle = np.array([0.22, 0.42, 0.13])     # Verde pedúnculo
-    c_spadix_base = np.array([0.96, 0.94, 0.82])  # Zona femenina protógina (blanco-crema)
-    c_spadix_mid = np.array([0.96, 0.84, 0.24])   # Transición amarilla
-    c_spadix_tip = np.array([0.90, 0.68, 0.10])   # Ápice amarillo-dorado cálido
-    c_androceo = np.array([0.98, 0.93, 0.52])     # Micro-estambres
-    c_ovary = np.array([0.80, 0.91, 0.66])        # Matriz de ovarios biloculares
-    c_ovule = np.array([0.98, 0.97, 0.88])        # Óvulos placentarios
-    c_axis = np.array([0.93, 0.90, 0.78])         # Eje vascular central
+    # paleta (RGB 0-1) medida sobre la imagen objetivo: p5 #890E11 | p50 #CE4754 | p75 #F0666A | p95 #E5A9AB
+    c_body = np.array([0.78, 0.16, 0.23])
+    c_cell = np.array([0.56, 0.05, 0.10])
+    c_ridge = np.array([0.92, 0.42, 0.46])
+    c_rim = np.array([0.94, 0.64, 0.66])
+    c_abax = np.array([0.80, 0.30, 0.36])
+    c_node = np.array([0.55, 0.60, 0.26])
+    c_peduncle = np.array([0.24, 0.38, 0.14])
+    c_collar = np.array([0.42, 0.22, 0.14])
+    c_sp_base = np.array([0.86, 0.71, 0.58])     # #DAB593
+    c_sp_mid = np.array([0.88, 0.77, 0.57])      # #E0C491
+    c_sp_tip = np.array([0.90, 0.75, 0.26])      # amarillo apical (#E4C05D saturado)
+    c_sp_ring = np.array([0.80, 0.54, 0.30])     # anillo ocre en la insercion
+    c_pearl = np.array([0.97, 0.92, 0.79])
+    c_androceo = np.array([0.98, 0.93, 0.52])
+    c_ovary = np.array([0.80, 0.91, 0.66])
+    c_ovule = np.array([0.98, 0.97, 0.88])
+    c_axis = np.array([0.93, 0.90, 0.78])
 
     vertices, colors = [], []
     groups = {}
 
-    # =========================================================================
-    # 1. ESPATA CORDIFORME BULLADA (Continuidad C1 Exacta + Ampollas Orgánicas)
-    # =========================================================================
+    # =====================================================================================
+    # 1) ESPATA  (malla continua sin costura; adaxial + abaxial + bordes cerrados)
+    # =====================================================================================
+    yy_f = np.linspace(-D, 0.0, 4000)
+    ok = _spathe_halfwidth(yy_f, L, D, Wh, y_w, Ac) >= a_sin * np.abs(yy_f) ** p_sin + 0.3
+    y_min = float(yy_f[ok][0])                                  # esquina inferior de los lobulos
+
+    dy = 1.0
+    n_neg = max(10, int(round(-y_min / dy)))
+    n_pos = max(40, int(round(L / dy)))
+    y_rows = np.concatenate([np.linspace(y_min, 0.0, n_neg, endpoint=False), np.linspace(0.0, L, n_pos)])
+    nr = len(y_rows)
+    n_half = 52
+    nc = 2 * n_half
+    uh = np.linspace(0.0, 1.0, n_half)
+    U = np.concatenate([uh[::-1], uh])
+    S = np.concatenate([-np.ones(n_half), np.ones(n_half)])
+
+    xo = _spathe_halfwidth(y_rows, L, D, Wh, y_w, Ac)[:, None]
+    xi = np.where(y_rows < 0.0, a_sin * np.abs(y_rows) ** p_sin, 0.0)[:, None]
+    cap = np.sqrt(2.0 * 40.0 * np.maximum(y_rows - y_min, 0.0))[:, None]          # esquina del lobulo redondeada
+    xo = np.where(y_rows[:, None] < 0.0, xi + np.minimum(xo - xi, cap), xo)
+    dxo_dy = np.gradient(xo[:, 0], y_rows)[:, None]
+    YY = np.repeat(y_rows[:, None], nc, axis=1)
+    u = np.repeat(U[None, :], nr, axis=0)
+    side = np.repeat(S[None, :], nr, axis=0)
+    XA = xi + u * (xo - xi)
+    X = side * XA
+    strip = np.maximum(xo - xi, 1e-6)
+    t = np.clip(YY / L, -1.0, 1.0)
+    tp = np.clip(t, 0.0, 1.0)
+    r_node = np.sqrt(X ** 2 + YY ** 2)
+
+    # ---- venacion: nervios primarios ARQUEADOS (siguen el margen) + peldaños transversales ----
+    Kp = 4.0
+    wq = 0.80
+    q = np.clip(u, 0.0, 1.0) ** wq
+    lane = q * Kp
+    n_l = np.minimum(np.floor(lane), Kp - 1.0)
+    a_fr = lane - n_l
+    dq_du = wq * np.maximum(u, 0.04) ** (wq - 1.0)
+    lane_w = np.maximum(strip / (Kp * dq_du), 0.3)              # ancho de cada carril en mm
+
+    warp = _lowfreq(XA * 1.0, YY * 1.0, 0.7)
+    d_p = np.minimum(a_fr, 1.0 - a_fr) * lane_w
+    w_mid = 1.0 - 0.65 * np.exp(-(XA / 1.6) ** 2)               # nervio medio mas discreto
+    R_prim = np.exp(-(d_p / 1.25) ** 2) * w_mid
+
+    lam = 6.5 * (1.0 + 3.6 * (1.0 - (n_l + 0.5) / Kp) ** 1.9)   # peldaños: ~6.5 mm en el margen, ~25 mm al centro
+    y_eff = YY + XA * dxo_dy * u                                # peldaño perpendicular al carril (siguen el arco)
+    b = (y_eff + 4.5 * warp) / lam + 0.43 * n_l + 0.37 * (side > 0) + 0.18 * _lowfreq(YY, XA, 5.1)
+    b_fr = b - np.floor(b)
+    d_r = np.minimum(b_fr, 1.0 - b_fr) * lam
+    R_rung = np.exp(-(d_r / 1.05) ** 2) * (0.75 + 0.25 * _lowfreq(YY * 0.7, XA * 0.7, 1.9))
+
+    V = 1.0 - (1.0 - 0.85 * R_prim) * (1.0 - 0.75 * R_rung)               # mascara de nervios (0..1)
+    cell = np.clip(1.0 - V, 0.0, 1.0) * np.sin(np.pi * a_fr) ** 0.5 * np.sin(np.pi * b_fr) ** 0.5
+
+    rim = _ss(0.945, 0.995, u)
+    env = _ss(2.5, 10.0, r_node) * (1.0 - 0.55 * _ss(0.88, 1.0, tp))
+    z_rel = env * (0.95 * V - 2.0 * cell) + 0.9 * rim
+
+    # ---- forma 3D de la lamina ----
+    sa = np.clip((YY - (L - Ac)) / Ac, 0.0, 1.0)
+    lobe_f = _ss(0.0, 1.0, np.clip(-YY / max(-y_min, 1e-6), 0.0, 1.0))
+    lift = np.where(side < 0, 0.55, 0.20) * (-y_min)            # lobulo A se enrolla mas que el B
+    z_lobe = lobe_f * lift * (0.35 + 0.65 * u ** 1.2)
+    z_cup = 0.15 * Wh * u ** 2 * (1.0 - 0.6 * tp)
+    z_long = -0.075 * L * tp ** 2
+    z_acu = -0.22 * Ac * sa ** 2
+    z_und = (0.020 * Wfull * u ** 3 * np.sin(2.0 * np.pi * YY / (0.30 * L) + 0.8 * side)
+             + 0.012 * Wfull * u ** 3 * np.sin(2.0 * np.pi * YY / (0.17 * L) + 2.1))
+    z_roll = 0.08 * X
+    z_ad = z_cup + z_long + z_acu + z_lobe + z_und + z_roll + z_rel
+    thick = wall * (0.95 - 0.40 * u ** 2) + 0.5 * np.exp(-(XA / 2.0) ** 2) * (1.0 - tp)
+    z_ab = z_ad - thick
+
+    y_ad = YY * cp - z_ad * sp
+    zw_ad = YY * sp + z_ad * cp
+    y_ab = YY * cp - z_ab * sp
+    zw_ab = YY * sp + z_ab * cp
+
+    # ---- color ----
+    tint = np.zeros_like(u)
+    if photo_map is not None:
+        px = np.clip((0.5 + 0.48 * side * XA / max(Wh, 1.0)) * 127, 0, 127).astype(int)
+        py = np.clip((1.0 - (YY - y_min) / (L - y_min)) * 127, 0, 127).astype(int)
+        tint = photo_map[py, px]
+    col = np.tile(c_body, (nr, nc, 1))
+    col = (1 - 0.85 * cell[..., None] ** 1.0) * col + 0.85 * cell[..., None] ** 1.0 * c_cell
+    col = (1 - 0.55 * (V * env)[..., None]) * col + 0.55 * (V * env)[..., None] * c_ridge
+    col = (1 - 0.65 * rim[..., None]) * col + 0.65 * rim[..., None] * c_rim
+    col = col * (1.0 + 0.07 * _lowfreq(XA, YY, 2.3) + 0.04 * tint)[..., None]
+    nb = np.exp(-(r_node / 4.8) ** 2)[..., None]
+    col_ad = np.clip((1 - 0.55 * nb) * col + 0.55 * nb * c_node, 0, 1)
+    col_ab = np.clip((1 - 0.55 * V[..., None]) * c_abax + 0.55 * V[..., None] * np.array([0.90, 0.46, 0.50]), 0, 1)
+    col_ab = np.clip((1 - 0.55 * nb) * col_ab + 0.55 * nb * c_node, 0, 1)
+
+    # ---- indices (se sueldan las columnas centrales donde no hay seno) ----
+    base = len(vertices)
+    pos_ad = np.stack([X, y_ad, zw_ad], axis=-1).reshape(-1, 3)
+    pos_ab = np.stack([X, y_ab, zw_ab], axis=-1).reshape(-1, 3)
+    vertices.extend(pos_ad.tolist()); colors.extend(col_ad.reshape(-1, 3).tolist())
+    vertices.extend(pos_ab.tolist()); colors.extend(col_ab.reshape(-1, 3).tolist())
+    T_idx = np.arange(nr * nc).reshape(nr, nc) + base + 1
+    B_idx = T_idx + nr * nc
+    for i in range(nr):
+        if y_rows[i] >= 0.0:
+            T_idx[i, n_half] = T_idx[i, n_half - 1]
+            B_idx[i, n_half] = B_idx[i, n_half - 1]
+
     f_spathe = []
-    v_min = -float(c_cfg.get('lobe_length_ratio', 0.35))
-    n_v_neg = 42
-    n_v_pos = 92
-    n_u_half = 48
-
-    v_neg = np.linspace(v_min, 0.0, n_v_neg, endpoint=False)
-    v_pos = np.linspace(0.0, 1.0, n_v_pos)
-    v_vals = np.concatenate([v_neg, v_pos])
-    n_v = len(v_vals)
-    u_locs = np.linspace(0.0, 1.0, n_u_half)
-
-    pitch_deg = float(arq_cfg.get('angulo_espata_reflexa_grados', -38.0))
-    pitch_spathe = math.radians(pitch_deg)
-    cp_s, sp_s = math.cos(pitch_spathe), math.sin(pitch_spathe)
-
-    for side in (-1.0, 1.0):
-        top_grid = np.zeros((n_v, n_u_half), dtype=int)
-        bot_grid = np.zeros((n_v, n_u_half), dtype=int)
-
-        for i, v in enumerate(v_vals):
-            # Contorno C1-continuo: en v=0 tanto v<0 como v>=0 valen exactamente w_max con derivada 0
-            if v < 0.0:
-                tau = min(1.0, abs(v / v_min))
-                lobe_arc = math.sqrt(max(0.0, 1.0 - (tau ** 2)))
-                x_c = 0.43 * w_max
-                # Seno basal estrecho y redondeado que se cierra en x_c cuando tau=1
-                x_in = x_c * (1.0 - lobe_arc) * (0.12 + 0.88 * (tau ** 1.8))
-                # En tau=0 (v=0): x_out = 0.43*w_max + 0.57*w_max = 1.00 * w_max
-                x_out = x_c + (w_max - x_c) * lobe_arc
-                y_base = v * spathe_len * 0.82
+    for i in range(nr - 1):
+        both_neg = (y_rows[i] < 0.0) and (y_rows[i + 1] < 0.0)
+        for j in range(nc - 1):
+            if both_neg and j == n_half - 1:
+                continue
+            a, bb, c, d = T_idx[i, j], T_idx[i, j + 1], T_idx[i + 1, j + 1], T_idx[i + 1, j]
+            f_spathe += [(a, bb, c), (a, c, d)]
+            a, bb, c, d = B_idx[i, j], B_idx[i, j + 1], B_idx[i + 1, j + 1], B_idx[i + 1, j]
+            f_spathe += [(a, c, bb), (a, d, c)]
+        # bordes (cierran el grosor de la lamina)
+        for j_edge, flip in ((0, False), (nc - 1, True)):
+            Ti, Tn, Bi, Bn = T_idx[i, j_edge], T_idx[i + 1, j_edge], B_idx[i, j_edge], B_idx[i + 1, j_edge]
+            if flip:
+                f_spathe += [(Ti, Bi, Tn), (Bi, Bn, Tn)]
             else:
-                x_in = 0.0
-                # En v=0: x_out = 1.00 * w_max y derivada dx_out/dv = 0 (CERO escalón lateral)
-                env_main = ((1.0 - (v ** 1.85)) ** 0.82) * (1.0 - 0.38 * (v ** 2.2))
-                acumen_cusp = 0.045 * (1.0 - v) * math.exp(-(((v - 0.91) / 0.06) ** 2))
-                x_out = w_max * (env_main + acumen_cusp)
-                y_base = v * spathe_len
-
-            # Ligera asimetría orgánica en el acumen apical (como en especímenes reales)
-            apex_bend_x = 2.8 * (max(0.0, (v - 0.72) / 0.28) ** 2.2)
-
-            for j, u_loc in enumerate(u_locs):
-                x_abs = x_in + u_loc * (x_out - x_in)
-                x_lam = side * x_abs + apex_bend_x
-                y_lam = y_base
-
-                # Coordenadas normalizadas sobre la lámina
-                X_n = x_abs / max(1.0, w_max)
-                Y_n = y_lam / max(1.0, spathe_len)
-                r_polar = math.sqrt(x_abs ** 2 + y_lam ** 2)
-
-                # -------------------------------------------------------------
-                # VENACIÓN PINNADA-PEDADA CONTINUA + TEJIDO BULLADO CELULAR
-                # -------------------------------------------------------------
-                # u_vein traza venas que suben en Y>0 (pinnadas) y bajan en Y<0 (pedadas)
-                arch_dir = math.tanh(3.4 * (Y_n + 0.06))
-                u_vein = Y_n - 0.38 * (X_n ** 1.15) * arch_dir + 0.08 * (X_n ** 2)
-
-                # Surcos venosos primarios estrechos y profundos (perfil exponencial en V)
-                s_primary = math.sin(6.2 * math.pi * u_vein)
-                primary_groove = math.exp(-5.5 * (s_primary ** 2))
-                primary_pillow = 1.0 - primary_groove
-
-                # Nervio colector submarginal continuo a u_loc = 0.84
-                collector_groove = math.exp(-(((u_loc - 0.84) / 0.036) ** 2)) * (1.0 - 0.45 * (max(0.0, v) ** 2))
-
-                # Ampollas / Bullae celulares entre venas primarias (reticulado secundario y terciario)
-                cell_w1 = math.sin(4.6 * math.pi * X_n + 1.4 * math.sin(5.0 * math.pi * Y_n)) ** 2
-                cell_w2 = math.cos(3.2 * math.pi * u_vein - 2.4 * math.pi * X_n) ** 2
-                tertiary_wrinkle = 0.18 * math.sin(14.0 * math.pi * X_n + 8.0 * math.pi * u_vein)
-                blister_field = (0.58 + 0.42 * cell_w1 * (0.45 + 0.55 * cell_w2) + tertiary_wrinkle)
-
-                # Atenuación suave en márgenes, seno y punta acuminada
-                fade_margin = (1.0 - (u_loc ** 2.6)) * (1.0 - 0.55 * (max(0.0, v) ** 3))
-                if v < 0.0:
-                    fade_margin *= math.sqrt(max(0.0, 1.0 - ((v / v_min) ** 2)))
-
-                # Nervio central hundido en el haz (v >= 0)
-                midrib_mask = math.exp(-((x_abs / 2.0) ** 2)) * (1.0 - max(0.0, v) ** 1.4) if v >= -0.02 else 0.0
-                z_central = -2.2 * midrib_mask
-
-                # Relieve total bullado (cojinetes elevados + surcos primarios y colector hundidos)
-                z_bullate = (
-                    2.85 * primary_pillow * blister_field * fade_margin * math.sin(math.pi * min(1.0, u_loc * 1.10 + 0.06))
-                    - 1.15 * primary_groove * fade_margin
-                    - 1.05 * collector_groove
-                )
-
-                # Curvatura macroscópica de la espata (aurículas elevadas, dorso arqueado y acumen deflexo)
-                lobe_lift = 4.8 * abs(min(0.0, v) / v_min) * (u_loc ** 1.1)
-                acumen_droop = -5.2 * (max(0.0, (v - 0.65) / 0.35) ** 2.0)
-                margin_undulation = 1.45 * (u_loc ** 3) * math.sin(4.5 * math.pi * v + 0.6 * side)
-                z_cup = -3.6 * (X_n ** 1.65) * (1.0 - 0.35 * max(0.0, v)) + lobe_lift + acumen_droop + margin_undulation
-
-                z_lam_ad = z_cup + z_central + z_bullate
-                thickness = (wall_thick * 0.62 + 0.80 * midrib_mask) * (1.0 - 0.38 * (u_loc ** 2))
-                z_lam_ab = z_lam_ad - thickness
-
-                # Rotación reflexa de la espata
-                y_ad = y_lam * cp_s - z_lam_ad * sp_s
-                z_ad = y_lam * sp_s + z_lam_ad * cp_s
-                y_ab = y_lam * cp_s - z_lam_ab * sp_s
-                z_ab = y_lam * sp_s + z_lam_ab * cp_s
-
-                # Colorimetría PBR por vértice: surcos venosos oscuros y cúpulas bulladas con brillo especular
-                vein_shadow = np.clip((primary_groove * 0.85 + collector_groove * 0.75) * fade_margin + 0.45 * midrib_mask, 0.0, 1.0)
-                dome_highlight = np.clip((z_bullate / 2.85), 0.0, 1.0) ** 1.35
-                rim_shade = np.clip((u_loc - 0.86) / 0.14, 0.0, 1.0)
-
-                col_ad = (
-                    (1.0 - vein_shadow) * c_carmine
-                    + vein_shadow * c_vein_deep
-                    + (c_gloss - c_carmine) * (0.78 * dome_highlight)
-                    - (c_carmine - c_rim_dark) * (0.35 * rim_shade)
-                )
-
-                node_blend = math.exp(-((r_polar / 4.6) ** 2))
-                col_ad = (1.0 - 0.55 * node_blend) * col_ad + (0.55 * node_blend) * c_node_green
-                col_ab = (1.0 - 0.60 * node_blend) * c_abaxial + (0.60 * node_blend) * c_node_green
-
-                vertices.append([x_lam, y_ad, z_ad])
-                colors.append(np.clip(col_ad, 0.0, 1.0).tolist())
-                top_grid[i, j] = len(vertices)
-
-                vertices.append([x_lam, y_ab, z_ab])
-                colors.append(np.clip(col_ab, 0.0, 1.0).tolist())
-                bot_grid[i, j] = len(vertices)
-
-        for i in range(n_v - 1):
-            for j in range(n_u_half - 1):
-                if side > 0:
-                    f_spathe.append((top_grid[i, j], top_grid[i, j + 1], top_grid[i + 1, j + 1]))
-                    f_spathe.append((top_grid[i, j], top_grid[i + 1, j + 1], top_grid[i + 1, j]))
-                    f_spathe.append((bot_grid[i, j + 1], bot_grid[i, j], bot_grid[i + 1, j + 1]))
-                    f_spathe.append((bot_grid[i, j], bot_grid[i + 1, j], bot_grid[i + 1, j + 1]))
+                f_spathe += [(Ti, Tn, Bi), (Bi, Tn, Bn)]
+        if both_neg:   # bordes internos del seno
+            for j_edge, flip in ((n_half - 1, True), (n_half, False)):
+                Ti, Tn, Bi, Bn = T_idx[i, j_edge], T_idx[i + 1, j_edge], B_idx[i, j_edge], B_idx[i + 1, j_edge]
+                if flip:
+                    f_spathe += [(Ti, Bi, Tn), (Bi, Bn, Tn)]
                 else:
-                    f_spathe.append((top_grid[i, j + 1], top_grid[i, j], top_grid[i + 1, j + 1]))
-                    f_spathe.append((top_grid[i, j], top_grid[i + 1, j], top_grid[i + 1, j + 1]))
-                    f_spathe.append((bot_grid[i, j], bot_grid[i, j + 1], bot_grid[i + 1, j + 1]))
-                    f_spathe.append((bot_grid[i, j], bot_grid[i + 1, j + 1], bot_grid[i + 1, j]))
+                    f_spathe += [(Ti, Tn, Bi), (Bi, Tn, Bn)]
+    # descarta triangulos degenerados (apice, esquinas del lobulo, nodo)
+    V_arr = np.array(vertices)
+    F = np.array(f_spathe, dtype=np.int64)
+    p0, p1, p2 = V_arr[F[:, 0] - 1], V_arr[F[:, 1] - 1], V_arr[F[:, 2] - 1]
+    area2 = np.linalg.norm(np.cross(p1 - p0, p2 - p0), axis=1)
+    f_spathe = [tuple(r) for r in F[area2 > 1e-9].tolist()]
+    groups['Espata_Cordiforme'] = f_spathe
 
-            if side > 0:
-                f_spathe.append((top_grid[i, -1], bot_grid[i, -1], top_grid[i + 1, -1]))
-                f_spathe.append((bot_grid[i, -1], bot_grid[i + 1, -1], top_grid[i + 1, -1]))
-                if i < n_v_neg:
-                    f_spathe.append((bot_grid[i, 0], top_grid[i, 0], top_grid[i + 1, 0]))
-                    f_spathe.append((bot_grid[i, 0], top_grid[i + 1, 0], bot_grid[i + 1, 0]))
-            else:
-                f_spathe.append((bot_grid[i, -1], top_grid[i, -1], top_grid[i + 1, -1]))
-                f_spathe.append((bot_grid[i, -1], top_grid[i + 1, -1], bot_grid[i + 1, -1]))
-                if i < n_v_neg:
-                    f_spathe.append((top_grid[i, 0], bot_grid[i, 0], top_grid[i + 1, 0]))
-                    f_spathe.append((bot_grid[i, 0], bot_grid[i + 1, 0], top_grid[i + 1, 0]))
-
-    groups["Espata_Cordiforme"] = f_spathe
-
-    # =========================================================================
-    # 2. PEDÚNCULO SÓLIDO Y ESTÍPITE BASAL (2.0 mm)
-    # =========================================================================
-    f_ped = []
-    n_ped = 36
-    t_ped = np.linspace(0.0, 1.0, n_ped)
-    ped_pts = np.column_stack([
-        np.zeros(n_ped),
-        -0.4 - t_ped * 90.0,
-        -0.8 - t_ped * 12.0
-    ])
-    ped_radii = 2.6 + 1.3 * np.exp(-t_ped * 15.0)
+    # =====================================================================================
+    # 2) PEDUNCULO  (Bezier cubica: sale por el dorso del nodo y se endereza hacia abajo)
+    # =====================================================================================
+    Lp = float(arq_cfg.get('pedunculo_longitud_mm', 250.0))
+    p0_ped = -n_vec * (wall * 0.95 + 0.6)
+    p3_ped = p0_ped + np.array([0.0, -0.96 * Lp, -0.10 * Lp])
+    p1_ped = p0_ped - n_vec * (0.16 * Lp) + np.array([0.05 * Lp, 0.0, 0.0])
+    p2_ped = p3_ped + np.array([-0.05 * Lp, 0.34 * Lp, 0.04 * Lp])
+    n_ped = 90
+    tt = np.linspace(0.0, 1.0, n_ped)[:, None]
+    ped_pts = ((1 - tt) ** 3 * p0_ped + 3 * (1 - tt) ** 2 * tt * p1_ped
+               + 3 * (1 - tt) * tt ** 2 * p2_ped + tt ** 3 * p3_ped)
+    arc = np.concatenate([[0.0], np.cumsum(np.linalg.norm(np.diff(ped_pts, axis=0), axis=1))])
+    ped_radii = 2.7 + 1.5 * np.exp(-arc / 14.0)
     ped_cols = np.zeros((n_ped, 3))
-    for i, tp in enumerate(t_ped):
-        top_tint = math.exp(-tp * 10.0) * 0.32
-        ped_cols[i] = (1.0 - top_tint) * c_peduncle + top_tint * np.array([0.46, 0.22, 0.14])
-
+    for i in range(n_ped):
+        k = math.exp(-arc[i] / 26.0) * 0.40
+        ped_cols[i] = (1 - k) * c_peduncle + k * c_collar
+    f_ped = []
     _add_closed_tube(ped_pts, ped_radii, ped_cols, 24, vertices, colors, f_ped, cap_start=True, cap_end=True)
-    groups["Pedunculo_Tallo"] = f_ped
+    groups['Pedunculo_Tallo'] = f_ped
 
-    # =========================================================================
-    # 3 a 7. ESPÁDICE PROTÓGINO: 5 Capas Concéntricas con Pápilas Estigmáticas
-    # =========================================================================
-    spadix_len = float(g_cfg.get('estilo_longitud_mm', 70.0))
-    spadix_r_base = float(g_cfg.get('diametro_espadice_mm', 9.2)) / 2.0
+    # =====================================================================================
+    # 3) ESPADICE  (curvo, filotaxis 137.5 grados, perlas = estigmas; capas internas concentricas)
+    # =====================================================================================
+    Ls = float(g_cfg.get('estilo_longitud_mm', 80.0))
+    Rs = float(g_cfg.get('diametro_espadice_mm', 9.2)) / 2.0
+    alpha = float(arq_cfg.get('angulo_espadice_grados', 58.0))
+    bend = float(arq_cfg.get('espadice_curvatura_grados', 20.0))
     stipe_mm = float(arq_cfg.get('estipite_longitud_mm', 2.0))
-    n_sp, n_sl = 110, 52
-    s_vals = np.linspace(0.0, 1.0, n_sp)
-    theta_sp = np.linspace(0.0, 2.0 * np.pi, n_sl, endpoint=False)
+    n_flow = int(a_cfg.get('estambres_numero', 400))
 
-    inc_rad = math.radians(float(arq_cfg.get('angulo_espadice_grados', 52.0)))
-    spadix_pts = np.column_stack([
-        np.zeros(n_sp),
-        (stipe_mm + s_vals * spadix_len) * math.cos(inc_rad) + np.sin(s_vals * np.pi) * 2.0,
-        (stipe_mm + s_vals * spadix_len) * math.sin(inc_rad)
-    ])
+    def taper(s):
+        s = np.asarray(s, dtype=float)
+        body = 1.0 - 0.12 * np.clip(s / 0.90, 0, 1)
+        cap = np.sqrt(np.clip(1.0 - ((s - 0.92) / 0.08) ** 2, 0.0, 1.0))
+        out = np.where(s < 0.92, body, 0.88 * cap)
+        return out * (1.0 + 0.10 * np.exp(-s / 0.02))
 
-    def _spadix_taper(s):
-        if s < 0.88:
-            return 1.0 - 0.26 * (s / 0.88)
-        else:
-            return 0.74 * math.sqrt(max(0.0, 1.0 - (((s - 0.88) / 0.12) ** 2)))
+    d0 = math.cos(math.radians(alpha + 0.5 * bend)) * m_vec + math.sin(math.radians(alpha + 0.5 * bend)) * n_vec
+    sp_start = (stipe_mm - 1.2) * d0
 
-    f_spadix_ext, f_androceo, f_ovary, f_ovules, f_axis = [], [], [], [], []
-    r_ext, r_and, r_ov, r_ovm, r_ax = np.zeros((5, n_sp, n_sl))
-    c_ext, c_and, c_ov, c_ovm = np.zeros((4, n_sp, n_sl, 3))
-    c_ax_flat = np.tile(c_axis, (n_sp, 1))
+    # --- capa externa (alta resolucion) ---
+    n_sp, n_sl = 210, 84
+    pts_ext, s_ext = _spadix_curve(n_sp, Ls, alpha, bend, m_vec, n_vec, sp_start)
+    th_ext = np.linspace(0.0, 2.0 * np.pi, n_sl, endpoint=False)
+    d1, d2 = _flower_lattice(s_ext, th_ext, Ls, Rs, n_flow)
+    S2 = s_ext[:, None]
+    r_mean = Rs * taper(s_ext)[:, None]
+    pearl_h = 0.55 * (1.0 - 0.40 * _ss(0.5, 0.9, S2))
+    pearl = pearl_h * np.exp(-(d1 / 0.62) ** 1.6) * (1.0 - _ss(0.93, 1.0, S2))
+    frame = (0.10 + 0.12 * _ss(0.4, 0.9, S2)) * np.exp(-((d2 - d1) / 0.22) ** 2) * (1.0 - _ss(0.93, 1.0, S2))
+    r_ext = np.maximum(0.05, r_mean + pearl + frame)
+    mix = _ss(0.40, 0.72, S2)
+    base_c = (1 - mix[..., None]) * ((1 - _ss(0.0, 0.5, S2))[..., None] * c_sp_base + _ss(0.0, 0.5, S2)[..., None] * c_sp_mid) \
+        + mix[..., None] * c_sp_tip
+    ring = np.exp(-S2 / 0.025)[..., None]
+    base_c = (1 - 0.7 * ring) * base_c + 0.7 * ring * c_sp_ring
+    pw = (pearl / 0.55)[..., None] * (1.0 - 0.6 * _ss(0.5, 0.9, S2)[..., None])
+    c_ext = np.clip((1 - 0.55 * pw) * base_c + 0.55 * pw * c_pearl - 0.05 * (frame / 0.2)[..., None], 0.0, 1.0)
+    f_ext = []
+    _add_closed_tube(pts_ext, r_ext, c_ext, n_sl, vertices, colors, f_ext, cap_start=True, cap_end=True)
+    groups['Espadice_Florifero_Externo'] = f_ext
 
-    for i, s in enumerate(s_vals):
-        taper = _spadix_taper(s)
-        r_mean = spadix_r_base * taper
+    # --- capas internas (resolucion media, solo visibles al disecar) ---
+    n_in, n_sl_in = 110, 40
+    pts_in, s_in = _spadix_curve(n_in, Ls, alpha, bend, m_vec, n_vec, sp_start)
+    th_in = np.linspace(0.0, 2.0 * np.pi, n_sl_in, endpoint=False)
+    e1, e2 = _flower_lattice(s_in, th_in, Ls, Rs, n_flow)
+    S3 = s_in[:, None]
+    rm_in = Rs * taper(s_in)[:, None]
+    fade = (1.0 - _ss(0.90, 1.0, S3))
 
-        if s < 0.42:
-            mix_s = s / 0.42
-            c_ring = (1.0 - mix_s) * c_spadix_base + mix_s * c_spadix_mid
-        else:
-            mix_s = (s - 0.42) / 0.58
-            c_ring = (1.0 - mix_s) * c_spadix_mid + mix_s * c_spadix_tip
+    r_and = np.maximum(0.03, rm_in * 0.90 + 0.30 * np.exp(-(e1 / 0.95) ** 2) * fade)
+    c_and = np.clip(c_androceo * (0.88 + 0.18 * np.exp(-(e1 / 0.95) ** 2))[..., None], 0, 1)
+    r_ov = np.maximum(0.02, rm_in * 0.72 + 0.22 * np.exp(-((e2 - e1) / 0.5) ** 2) * fade)
+    c_ov = np.clip(c_ovary * (0.88 + 0.14 * np.exp(-((e2 - e1) / 0.5) ** 2))[..., None], 0, 1)
+    r_ovm = np.maximum(0.02, rm_in * 0.45 + 0.55 * np.exp(-(e1 / 0.80) ** 2) * fade)
+    c_ovm = np.clip(c_ovule * (0.86 + 0.16 * np.exp(-(e1 / 0.80) ** 2))[..., None], 0, 1)
+    r_ax = np.maximum(0.03, rm_in[:, 0] * 0.22 + 0.06 * np.sin(s_in * 50.0 * np.pi) * (1.0 - s_in))
+    c_ax = np.tile(c_axis, (n_in, 1))
 
-        r_ax[i, :] = max(0.03, r_mean * 0.22 + 0.06 * math.sin(s * 50.0 * math.pi) * (1.0 - s))
-
-        for j, th in enumerate(theta_sp):
-            # 3. Perianto Externo: Tépalos romboidales + pápilas estigmáticas prominentes en zona basal/media
-            floret_grid = math.cos(14.0 * th + 46.0 * s * math.pi) * math.cos(14.0 * th - 46.0 * s * math.pi)
-            parastichy = floret_grid ** 2
-            stigma_papilla = (max(0.0, floret_grid) ** 10) * (1.0 - 0.65 * (s ** 2))
-            r_ext[i, j] = max(0.04, r_mean + (0.28 * parastichy + 0.52 * stigma_papilla) * (1.0 - (s ** 4)))
-            c_ext[i, j] = np.clip(
-                c_ring * (0.86 + 0.16 * parastichy) + np.array([0.14, 0.14, 0.18]) * stigma_papilla,
-                0.0, 1.0
-            )
-
-            # 4. Androceo / 4 Micro-Estambres por flósculo (88%)
-            granules = (math.sin(28.0 * th + (i % 2) * 0.8) * math.sin(85.0 * s * math.pi)) ** 2
-            r_and[i, j] = max(0.03, r_mean * 0.88 + 0.20 * granules * (1.0 - (s ** 3)))
-            c_and[i, j] = np.clip(c_androceo * (0.88 + 0.18 * granules), 0.0, 1.0)
-
-            # 5. Gineceo / Matriz de Ovarios Biloculares (70%)
-            honeycomb = math.cos(14.0 * th) * math.sin(55.0 * s * math.pi)
-            r_ov[i, j] = max(0.02, r_mean * 0.70 + 0.16 * honeycomb * (1.0 - (s ** 3)))
-            c_ov[i, j] = np.clip(c_ovary * (0.88 + 0.14 * honeycomb), 0.0, 1.0)
-
-            # 6. Óvulos Placentarios Internos (42%)
-            ovoid_bump = (math.cos(14.0 * th + (i % 2) * 0.5) * math.sin(46.0 * s * math.pi)) ** 4
-            r_ovm[i, j] = max(0.02, r_mean * 0.42 + 0.62 * ovoid_bump * (1.0 - (s ** 2)))
-            c_ovm[i, j] = np.clip(c_ovule * (0.88 + 0.15 * ovoid_bump), 0.0, 1.0)
-
-    _add_closed_tube(spadix_pts, r_ext, c_ext, n_sl, vertices, colors, f_spadix_ext, cap_start=True, cap_end=True)
-    _add_closed_tube(spadix_pts, r_and, c_and, n_sl, vertices, colors, f_androceo,   cap_start=True, cap_end=True)
-    _add_closed_tube(spadix_pts, r_ov,  c_ov,  n_sl, vertices, colors, f_ovary,      cap_start=True, cap_end=True)
-    _add_closed_tube(spadix_pts, r_ovm, c_ovm, n_sl, vertices, colors, f_ovules,     cap_start=True, cap_end=True)
-    _add_closed_tube(spadix_pts, r_ax[:, 0], c_ax_flat, 16, vertices, colors, f_axis, cap_start=True, cap_end=True)
-
-    groups["Espadice_Florifero_Externo"] = f_spadix_ext
-    groups["Androceo_Micro_Estambres"] = f_androceo
-    groups["Gineceo_Ovarios"] = f_ovary
-    groups["Ovulos_Internos_Placentarios"] = f_ovules
-    groups["Eje_Vascular_Interno"] = f_axis
+    f_and, f_ov, f_ovm, f_ax = [], [], [], []
+    _add_closed_tube(pts_in, r_and, c_and, n_sl_in, vertices, colors, f_and, cap_start=True, cap_end=True)
+    _add_closed_tube(pts_in, r_ov, c_ov, n_sl_in, vertices, colors, f_ov, cap_start=True, cap_end=True)
+    _add_closed_tube(pts_in, r_ovm, c_ovm, n_sl_in, vertices, colors, f_ovm, cap_start=True, cap_end=True)
+    _add_closed_tube(pts_in, r_ax, c_ax, 16, vertices, colors, f_ax, cap_start=True, cap_end=True)
+    groups['Androceo_Micro_Estambres'] = f_and
+    groups['Gineceo_Ovarios'] = f_ov
+    groups['Ovulos_Internos_Placentarios'] = f_ovm
+    groups['Eje_Vascular_Interno'] = f_ax
 
     lines = []
     for v, c in zip(vertices, colors):
-        lines.append(f"v {v[0]:.4f} {v[1]:.4f} {v[2]:.4f} {c[0]:.4f} {c[1]:.4f} {c[2]:.4f}" + NL)
+        lines.append(f'v {v[0]:.4f} {v[1]:.4f} {v[2]:.4f} {c[0]:.4f} {c[1]:.4f} {c[2]:.4f}' + NL)
     for grp_name, grp_faces in groups.items():
-        lines.append(f"g {grp_name}" + NL)
+        lines.append(f'g {grp_name}' + NL)
         for f_idx in grp_faces:
-            lines.append(f"f {f_idx[0]} {f_idx[1]} {f_idx[2]}" + NL)
-    return "".join(lines)
+            lines.append(f'f {f_idx[0]} {f_idx[1]} {f_idx[2]}' + NL)
+    return ''.join(lines)
 
 
 def build_araceae_inflorescence(cfg):
     especie = cfg.get('colecta', {}).get('especie', '').lower()
     disposicion = cfg.get('arquitectura_floral', {}).get('disposicion', 'erecta').lower()
-    if "sanjorgense" in especie or disposicion == "pendula":
+    if 'sanjorgense' in especie or disposicion == 'pendula':
         return build_sanjorgense_original_obj(cfg)
     else:
         return build_andraeanum_obj(cfg)

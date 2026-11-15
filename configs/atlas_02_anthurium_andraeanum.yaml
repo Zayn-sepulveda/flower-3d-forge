@@ -1,18 +1,25 @@
 colecta:
-  id_muestra: COL-ATL-002 | Nativa de Colombia
+  id_muestra: COL-ATL-002 | Nativa de Colombia (Sección Calomystrium)
+  nombre_cientifico: Anthurium andraeanum Linden ex André
   familia: Araceae
+  subfamilia: Pothoideae
+  seccion: Calomystrium
   genero: Anthurium
   especie: Anthurium andraeanum
-  localidad: Pacífico / Chocó Biogeográfico (Nariño, Cauca, Chocó) • 400–1200 m s.n.m.
+  origen: Nativa (Andes Suroccidentales / Chocó Biogeográfico)
+  localidad: Pacífico / Chocó Biogeográfico (Reserva Natural Río Ñambí, Barbacoas,
+    Nariño; Cauca, Chocó) • 400–1200 m s.n.m.
   fecha: 'Linden ex André (1877) Ill. Hort. 24: 43, Pl. 271; Elibox & Umaharan (2012)'
   foto_campo: images/anthurium_andraeanum.jpg
 arquitectura_floral:
   simetria: zigomorfa
   tipo_inflorescencia: espadice
   disposicion: erecta
-  angulo_espadice_grados: 48.0
+  angulo_espadice_grados: 58.0
   angulo_espata_reflexa_grados: -38.0
   estipite_longitud_mm: 2.0
+  pedunculo_longitud_mm: 250.0
+  espadice_curvatura_grados: 20.0
 perianto:
   verticilos: espatado
   caliz:
@@ -24,16 +31,18 @@ perianto:
     petalos_numero: 1
     fusion: espata
     longitud_tubo_mm: 12.0
-    longitud_limbo_mm: 98.0
-    ancho_petalo_mm: 86.0
-    lobe_length_ratio: 0.34
+    longitud_limbo_mm: 116.0
+    longitud_acumen_mm: 22.0
+    ancho_petalo_mm: 104.0
+    lobe_length_ratio: 0.32
+    seno_apertura_mm: 15.0
     diferenciacion_dorsoventral:
       factor_tamano_dorsal: 1.0
       factor_tamano_ventral: 1.0
       curvatura_dorsal_grados: 15.0
-    grosor_pared_mm: 1.8
-    color_garganta_hex: '#5A030B'
-    color_limbo_hex: '#D81122'
+    grosor_pared_mm: 1.2
+    color_garganta_hex: '#890E11'
+    color_limbo_hex: '#CE4754'
 androceo:
   estambres_numero: 400
   estambres_por_flor: 4
@@ -45,10 +54,10 @@ androceo:
   color_antera_hex: '#FFFFFF'
 gineceo:
   posicion_ovario: supero_bilocular
-  estilo_longitud_mm: 70.0
+  estilo_longitud_mm: 80.0
   estilo_grosor_mm: 9.2
   diametro_espadice_mm: 9.2
   estigma_lobulos: 1
-  color_ovario_hex: '#F9F4D0'
-  color_estilo_hex: '#F5DC70'
-  color_apice_hex: '#E8B828'
+  color_ovario_hex: '#DAB593'
+  color_estilo_hex: '#E0C491'
+  color_apice_hex: '#E4C05D'
