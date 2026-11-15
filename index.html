@@ -3,67 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Atlas Morfométrico y Departamental 3D — Flora Nativa de Colombia</title>
+  <title>Atlas Morfométrico y Biogeográfico 3D — Flora Nativa de Colombia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <style>
     :root {
-      --bg-dark: #070d12;
-      --panel-bg: rgba(13, 22, 30, 0.90);
-      --border-col: rgba(94, 234, 212, 0.22);
-      --accent: #10b981;
-      --accent-bright: #34d399;
-      --endemic: #f59e0b;
-      --native: #38bdf8;
-      --text-main: #f1f5f9;
-      --text-dim: #94a3b8;
+      --bg-obsidian: #15100c;
+      --bg-clay: #211913;
+      --card-bg: rgba(36, 27, 20, 0.90);
+      --card-hover: rgba(48, 35, 26, 0.96);
+      --border-warm: rgba(212, 163, 89, 0.26);
+      --gold-tumbaga: #dfb15b;
+      --terracotta: #c86446;
+      --terracotta-bright: #e07a5f;
+      --jade-native: #52a37e;
+      --parchment: #f4ece1;
+      --sand-dim: #bba894;
+      --ochre-muted: #8c7662;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: radial-gradient(circle at 30% 20%, #0f222d 0%, #060b0f 75%);
-      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: radial-gradient(circle at 28% 22%, #2a1f17 0%, #140f0b 78%);
+      color: var(--parchment);
       height: 100vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
 
-    /* CABECERA CIENTÍFICA Y FILTROS POR DEPARTAMENTO */
+    /* CENEFA PRECOLOMBINA ESCALONADA SUPERIOR */
+    .precolumbian-frieze {
+      height: 6px;
+      width: 100%;
+      background-color: #1a120d;
+      background-image: repeating-linear-gradient(
+        90deg,
+        var(--gold-tumbaga) 0px,
+        var(--gold-tumbaga) 12px,
+        transparent 12px,
+        transparent 18px,
+        var(--terracotta) 18px,
+        var(--terracotta) 30px,
+        transparent 30px,
+        transparent 36px
+      );
+      opacity: 0.75;
+      z-index: 25;
+    }
+
+    /* CABECERA ARTESANAL Y CONTROLES */
     header {
-      padding: 12px 22px;
-      background: rgba(8, 15, 21, 0.94);
-      border-bottom: 1px solid var(--border-col);
-      backdrop-filter: blur(12px);
+      padding: 12px 24px;
+      background: rgba(22, 16, 12, 0.94);
+      border-bottom: 1px solid var(--border-warm);
+      backdrop-filter: blur(10px);
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 14px;
       z-index: 20;
     }
+
     .brand-block h1 {
-      font-size: 1.18rem;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.55rem;
       font-weight: 700;
-      letter-spacing: -0.02em;
-      color: #ffffff;
+      letter-spacing: 0.01em;
+      color: var(--parchment);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
+
     .brand-badge {
-      font-size: 0.70rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.68rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 3px 9px;
+      letter-spacing: 0.10em;
+      padding: 4px 10px;
       border-radius: 999px;
-      background: rgba(16, 185, 129, 0.18);
-      border: 1px solid rgba(16, 185, 129, 0.45);
-      color: var(--accent-bright);
+      background: rgba(200, 100, 70, 0.20);
+      border: 1px solid rgba(223, 177, 91, 0.50);
+      color: var(--gold-tumbaga);
+      font-weight: 700;
     }
+
     .brand-block p {
       font-size: 0.78rem;
-      color: var(--text-dim);
+      color: var(--sand-dim);
       margin-top: 2px;
     }
 
@@ -71,41 +105,45 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
     }
+
     .search-box {
       position: relative;
     }
     .search-box input {
-      background: rgba(15, 27, 38, 0.92);
-      border: 1px solid rgba(148, 163, 184, 0.3);
-      color: var(--text-main);
-      padding: 7px 12px 7px 32px;
+      background: rgba(35, 26, 19, 0.92);
+      border: 1px solid rgba(212, 163, 89, 0.32);
+      color: var(--parchment);
+      padding: 8px 14px 8px 34px;
       border-radius: 8px;
-      font-size: 0.82rem;
-      width: 230px;
+      font-size: 0.81rem;
+      width: 235px;
       outline: none;
       transition: border-color 0.2s;
     }
+    .search-box input::placeholder {
+      color: var(--ochre-muted);
+    }
     .search-box input:focus, .dept-select:focus {
-      border-color: var(--accent-bright);
+      border-color: var(--gold-tumbaga);
     }
     .search-icon {
       position: absolute;
-      left: 10px;
+      left: 11px;
       top: 50%;
       transform: translateY(-50%);
-      color: var(--text-dim);
+      color: var(--gold-tumbaga);
       font-size: 0.82rem;
     }
 
     .dept-select {
-      background: rgba(15, 27, 38, 0.92);
-      border: 1px solid rgba(16, 185, 129, 0.45);
-      color: var(--text-main);
-      padding: 7px 12px;
+      background: rgba(35, 26, 19, 0.95);
+      border: 1px solid rgba(212, 163, 89, 0.45);
+      color: var(--parchment);
+      padding: 8px 12px;
       border-radius: 8px;
-      font-size: 0.82rem;
+      font-size: 0.81rem;
       font-weight: 600;
       outline: none;
       cursor: pointer;
@@ -116,10 +154,10 @@
       gap: 6px;
     }
     .pill-btn {
-      background: rgba(20, 34, 46, 0.85);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      color: var(--text-dim);
-      padding: 6px 12px;
+      background: rgba(38, 28, 21, 0.85);
+      border: 1px solid rgba(212, 163, 89, 0.25);
+      color: var(--sand-dim);
+      padding: 7px 13px;
       border-radius: 999px;
       font-size: 0.75rem;
       font-weight: 600;
@@ -127,17 +165,17 @@
       transition: all 0.2s;
     }
     .pill-btn:hover {
-      color: #fff;
-      border-color: rgba(255, 255, 255, 0.4);
+      color: var(--parchment);
+      border-color: var(--gold-tumbaga);
     }
     .pill-btn.active {
-      background: rgba(16, 185, 129, 0.22);
-      border: 1px solid var(--accent-bright);
-      color: #ffffff;
-      box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+      background: linear-gradient(135deg, rgba(200, 100, 70, 0.35), rgba(223, 177, 91, 0.25));
+      border-color: var(--gold-tumbaga);
+      color: var(--parchment);
+      box-shadow: 0 0 14px rgba(223, 177, 91, 0.20);
     }
 
-    /* CONTENEDOR DIVIDIDO: MAPA DEPARTAMENTAL 3D + CATÁLOGO */
+    /* ESPACIO DE TRABAJO DIVIDIDO */
     .workspace {
       flex: 1;
       display: grid;
@@ -150,7 +188,7 @@
       position: relative;
       width: 100%;
       height: 100%;
-      border-right: 1px solid var(--border-col);
+      border-right: 1px solid var(--border-warm);
       overflow: hidden;
     }
     #colombia-map-canvas {
@@ -163,105 +201,112 @@
       cursor: grabbing;
     }
 
-    /* HUD SUPERIOR E INFERIOR DEL MAPA */
+    /* TARJETA INFORMATIVA SUPERIOR IZQUIERDA DEL MAPA */
     .map-overlay-top {
       position: absolute;
       top: 16px;
       left: 18px;
-      background: var(--panel-bg);
-      border: 1px solid var(--border-col);
-      padding: 12px 16px;
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-      max-width: 355px;
+      background: rgba(28, 20, 15, 0.90);
+      border: 1px solid var(--border-warm);
+      border-left: 3px solid var(--gold-tumbaga);
+      padding: 13px 16px;
+      border-radius: 10px;
+      backdrop-filter: blur(8px);
+      max-width: 375px;
       pointer-events: none;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
     }
     .map-overlay-top h3 {
-      font-size: 0.88rem;
-      color: var(--accent-bright);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.12rem;
+      color: var(--gold-tumbaga);
+      letter-spacing: 0.03em;
       margin-bottom: 4px;
     }
     .map-overlay-top p {
       font-size: 0.76rem;
-      color: var(--text-dim);
-      line-height: 1.4;
+      color: var(--sand-dim);
+      line-height: 1.45;
     }
 
-    /* TOOLTIP FLOTANTE AL PASAR EL CURSOR POR UN DEPARTAMENTO */
+    /* TOOLTIP EN HOVER */
     .dept-tooltip {
       position: absolute;
       pointer-events: none;
-      background: rgba(7, 14, 20, 0.94);
-      border: 1px solid var(--accent-bright);
-      color: #fff;
-      padding: 6px 10px;
+      background: rgba(24, 17, 12, 0.95);
+      border: 1px solid var(--gold-tumbaga);
+      color: var(--parchment);
+      padding: 7px 11px;
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.76rem;
       font-weight: 600;
       display: none;
       z-index: 30;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
       white-space: nowrap;
     }
 
+    /* LEYENDA INFERIOR IZQUIERDA */
     .map-legend {
       position: absolute;
       bottom: 18px;
       left: 18px;
-      background: var(--panel-bg);
-      border: 1px solid var(--border-col);
-      padding: 10px 14px;
+      background: rgba(28, 20, 15, 0.90);
+      border: 1px solid var(--border-warm);
+      padding: 11px 15px;
       border-radius: 10px;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(8px);
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
       font-size: 0.73rem;
     }
     .legend-row {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: var(--text-main);
+      color: var(--parchment);
     }
     .dot {
-      width: 10px;
-      height: 10px;
+      width: 11px;
+      height: 11px;
       border-radius: 50%;
       display: inline-block;
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
     }
 
+    /* BOTÓN DE REINICIO DE MAPA */
     .map-reset-btn {
       position: absolute;
       top: 16px;
       right: 18px;
-      background: rgba(16, 185, 129, 0.22);
-      border: 1px solid var(--accent-bright);
-      color: #fff;
-      padding: 7px 13px;
+      background: rgba(44, 32, 23, 0.92);
+      border: 1px solid var(--gold-tumbaga);
+      color: var(--gold-tumbaga);
+      padding: 8px 14px;
       border-radius: 8px;
       font-size: 0.76rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       backdrop-filter: blur(8px);
+      transition: all 0.2s;
     }
     .map-reset-btn:hover {
-      background: rgba(16, 185, 129, 0.40);
+      background: var(--gold-tumbaga);
+      color: #16100b;
     }
 
-    /* TARJETA EMERGENTE EN EL MAPA 3D */
+    /* TARJETA EMERGENTE DE ESPECIE EN EL MAPA */
     .map-popup {
       position: absolute;
       bottom: 18px;
       right: 18px;
-      width: 310px;
-      background: rgba(11, 20, 28, 0.96);
-      border: 1px solid var(--accent-bright);
+      width: 315px;
+      background: rgba(26, 19, 14, 0.96);
+      border: 1px solid var(--gold-tumbaga);
       border-radius: 12px;
       padding: 14px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.7);
       display: none;
       z-index: 15;
     }
@@ -275,22 +320,24 @@
       margin-bottom: 6px;
     }
     .map-popup h4 {
-      font-size: 1.0rem;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.25rem;
       font-style: italic;
-      color: #fff;
+      color: var(--parchment);
+      margin-bottom: 4px;
     }
     .map-popup .pop-meta {
       font-size: 0.75rem;
-      color: var(--text-dim);
-      margin-bottom: 8px;
-      line-height: 1.4;
+      color: var(--sand-dim);
+      margin-bottom: 10px;
+      line-height: 1.45;
     }
     .map-popup .pop-link {
       display: inline-block;
       width: 100%;
       text-align: center;
-      background: var(--accent);
-      color: #04130e;
+      background: linear-gradient(135deg, var(--gold-tumbaga), #c58f36);
+      color: #18110b;
       font-weight: 700;
       font-size: 0.80rem;
       padding: 8px 12px;
@@ -298,50 +345,66 @@
       text-decoration: none;
     }
 
-    /* PANEL LATERAL DERECHO: CATÁLOGO DE ESPECIES */
+    /* PANEL LATERAL DERECHO: CATÁLOGO */
     .catalog-panel {
       height: 100%;
       overflow-y: auto;
-      padding: 18px 22px 40px 22px;
+      padding: 18px 22px 42px 22px;
       display: flex;
       flex-direction: column;
       gap: 14px;
+      background: linear-gradient(180deg, rgba(25, 19, 14, 0.65) 0%, rgba(18, 13, 10, 0.88) 100%);
     }
     .catalog-status {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.79rem;
-      color: var(--text-dim);
-      padding-bottom: 6px;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+      font-size: 0.78rem;
+      color: var(--sand-dim);
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(212, 163, 89, 0.18);
     }
 
     .species-card {
-      background: rgba(15, 26, 36, 0.84);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      border-radius: 14px;
+      background: var(--card-bg);
+      border: 1px solid rgba(212, 163, 89, 0.22);
+      border-radius: 13px;
       padding: 14px;
       display: grid;
-      grid-template-columns: 112px 1fr;
+      grid-template-columns: 110px 1fr;
       gap: 14px;
-      transition: all 0.22s ease;
+      transition: all 0.24s ease;
       cursor: pointer;
+      position: relative;
     }
-    .species-card:hover, .species-card.highlighted {
-      border-color: var(--accent-bright);
-      background: rgba(19, 35, 48, 0.96);
+    .species-card:hover {
+      border-color: rgba(223, 177, 91, 0.60);
+      background: var(--card-hover);
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    }
+    .species-card.highlighted {
+      border-color: var(--gold-tumbaga);
+      background: rgba(54, 38, 26, 0.96);
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.55), inset 0 0 0 1px var(--gold-tumbaga);
+    }
+
+    .card-thumb-wrap {
+      width: 110px;
+      height: 116px;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, var(--gold-tumbaga), var(--terracotta));
+      align-self: center;
     }
     .card-thumb {
-      width: 112px;
-      height: 118px;
-      border-radius: 10px;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
       object-fit: cover;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: #0c161e;
+      background: #140f0b;
+      display: block;
     }
+
     .card-body {
       display: flex;
       flex-direction: column;
@@ -354,58 +417,62 @@
       margin-bottom: 4px;
     }
     .badge {
-      font-size: 0.67rem;
+      font-size: 0.66rem;
       font-weight: 700;
-      padding: 2px 7px;
+      padding: 2px 8px;
       border-radius: 6px;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.03em;
     }
     .badge-id {
-      background: rgba(148, 163, 184, 0.16);
-      color: #cbd5e1;
+      background: rgba(244, 236, 225, 0.10);
+      color: var(--sand-dim);
     }
     .badge-endemic {
-      background: rgba(245, 158, 11, 0.2);
-      border: 1px solid rgba(245, 158, 11, 0.5);
-      color: #fbbf24;
+      background: rgba(223, 177, 91, 0.20);
+      border: 1px solid rgba(223, 177, 91, 0.55);
+      color: var(--gold-tumbaga);
     }
     .badge-native {
-      background: rgba(56, 189, 248, 0.18);
-      border: 1px solid rgba(56, 189, 248, 0.45);
-      color: #7dd3fc;
+      background: rgba(82, 163, 126, 0.20);
+      border: 1px solid rgba(82, 163, 126, 0.50);
+      color: #84d9b3;
     }
     .badge-dept {
-      background: rgba(16, 185, 129, 0.14);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      color: #6ee7b7;
+      background: rgba(200, 100, 70, 0.18);
+      border: 1px solid rgba(200, 100, 70, 0.38);
+      color: #f2a68d;
     }
 
     .card-title {
-      font-size: 1.04rem;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.26rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--parchment);
+      line-height: 1.15;
     }
     .card-title em { font-style: italic; }
     .card-author {
-      font-size: 0.74rem;
-      color: var(--text-dim);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.72rem;
+      color: var(--sand-dim);
       font-weight: 400;
-      margin-left: 4px;
+      margin-left: 5px;
     }
     .card-family {
-      font-size: 0.75rem;
-      color: var(--accent-bright);
-      margin-bottom: 4px;
+      font-size: 0.74rem;
+      color: var(--gold-tumbaga);
+      margin: 2px 0 5px 0;
+      font-weight: 600;
     }
     .card-corology, .card-ref {
       font-size: 0.73rem;
-      color: #cbd5e1;
-      line-height: 1.35;
+      color: #dfd3c3;
+      line-height: 1.38;
       margin-bottom: 3px;
     }
     .card-ref {
-      color: var(--text-dim);
-      font-size: 0.70rem;
+      color: var(--ochre-muted);
+      font-size: 0.69rem;
     }
     .card-actions {
       display: flex;
@@ -415,69 +482,75 @@
       gap: 8px;
     }
     .btn-locate {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      color: var(--text-main);
-      padding: 6px 10px;
+      background: rgba(223, 177, 91, 0.10);
+      border: 1px solid rgba(223, 177, 91, 0.38);
+      color: var(--gold-tumbaga);
+      padding: 6px 11px;
       border-radius: 7px;
       font-size: 0.72rem;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s;
     }
     .btn-locate:hover {
-      border-color: var(--accent-bright);
+      background: rgba(223, 177, 91, 0.25);
+      color: var(--parchment);
     }
     .btn-atlas {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #04130e;
+      background: linear-gradient(135deg, var(--terracotta), #a6492e);
+      border: 1px solid rgba(223, 177, 91, 0.45);
+      color: var(--parchment);
       text-decoration: none;
       font-weight: 700;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       padding: 6px 13px;
       border-radius: 7px;
       transition: filter 0.2s;
     }
     .btn-atlas:hover {
-      filter: brightness(1.12);
+      filter: brightness(1.15);
     }
 
     .empty-dept-msg {
-      background: rgba(15, 26, 36, 0.75);
-      border: 1px dashed rgba(148, 163, 184, 0.35);
+      background: rgba(34, 25, 18, 0.80);
+      border: 1px dashed rgba(212, 163, 89, 0.35);
       border-radius: 12px;
-      padding: 22px;
+      padding: 24px;
       text-align: center;
-      color: var(--text-dim);
-      font-size: 0.84rem;
-      line-height: 1.5;
+      color: var(--sand-dim);
+      font-size: 0.83rem;
+      line-height: 1.55;
     }
 
     @media (max-width: 980px) {
       body { height: auto; overflow: auto; }
       .workspace { grid-template-columns: 1fr; height: auto; }
-      .map-stage { height: 480px; border-right: none; border-bottom: 1px solid var(--border-col); }
+      .map-stage { height: 480px; border-right: none; border-bottom: 1px solid var(--border-warm); }
       .catalog-panel { height: auto; }
     }
   </style>
 </head>
 <body>
 
+  <div class="precolumbian-frieze"></div>
+
   <header>
     <div class="brand-block">
       <h1>
-        Atlas Morfométrico Floral 3D de Colombia
-        <span class="brand-badge">Mapa por Departamentos</span>
+        Atlas Morfométrico Floral de Colombia
+        <span class="brand-badge">Herbario Digital 3D</span>
       </h1>
-      <p>Explora la distribución departamental y altitudinal de especies nativas y endémicas con modelos 3D de disección</p>
+      <p>Corología departamental y disección botánica interactiva de la flora nativa y endémica</p>
     </div>
 
     <div class="controls-bar">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon">❖</span>
         <input type="text" id="search-input" placeholder="Buscar especie, familia o depto..." />
       </div>
 
       <select id="dept-select" class="dept-select">
-        <option value="ALL">🗺️ Todos los Departamentos (33)</option>
+        <option value="ALL">🗺️ Mapa en Reposo (33 Deptos.)</option>
       </select>
 
       <div class="status-pills">
@@ -489,24 +562,25 @@
   </header>
 
   <main class="workspace">
-    <!-- MAPA 3D DE COLOMBIA POR DEPARTAMENTOS -->
+    <!-- LIENZO DEL MAPA ESCULTÓRICO 3D DE COLOMBIA -->
     <section class="map-stage">
       <canvas id="colombia-map-canvas"></canvas>
       <div id="dept-tooltip" class="dept-tooltip"></div>
 
       <div class="map-overlay-top">
-        <h3 id="active-dept-title">Colombia — 32 Departamentos y Distrito Capital</h3>
+        <h3 id="active-dept-title">Territorio Colombiano — Estado Neutro</h3>
         <p id="active-dept-desc">
-          Haz clic sobre cualquier <strong>departamento en el mapa 3D</strong> o sobre un <strong>pin botánico</strong> para consultar las especies distribuidas en su territorio.
+          Selecciona un <strong>departamento en el mapa</strong> para elevar su relieve y descubrir sus especies, o elige una <strong>especie del catálogo</strong> para elevar todos los departamentos donde se distribuye con su medallón floral.
         </p>
       </div>
 
-      <button class="map-reset-btn" id="reset-camera-btn">Vista General de Colombia</button>
+      <button class="map-reset-btn" id="reset-camera-btn">Restaurar Mapa Neutro</button>
 
       <div class="map-legend">
-        <div class="legend-row"><span class="dot" style="background:#f59e0b;"></span> Pin Dorado: Especie Endémica de Colombia</div>
-        <div class="legend-row"><span class="dot" style="background:#38bdf8;"></span> Pin Azul: Especie Nativa en Colombia</div>
-        <div class="legend-row"><span class="dot" style="background:#10b981;"></span> Depto. Verde Intenso: Con registros en el Atlas</div>
+        <div class="legend-row"><span class="dot" style="background:#3b2e25;"></span> Reposo Neutro: Arcilla basal sin pines</div>
+        <div class="legend-row"><span class="dot" style="background:#c86446;"></span> Depto. Elevado: Territorio activo seleccionado</div>
+        <div class="legend-row"><span class="dot" style="background:#dfb15b;"></span> Medallón Oro Tumbaga: Especie Endémica</div>
+        <div class="legend-row"><span class="dot" style="background:#52a37e;"></span> Medallón Jade: Especie Nativa</div>
       </div>
 
       <div class="map-popup" id="map-popup">
@@ -520,11 +594,11 @@
       </div>
     </section>
 
-    <!-- CATÁLOGO CIENTÍFICO -->
+    <!-- CATÁLOGO CIENTÍFICO LATERAL -->
     <section class="catalog-panel">
       <div class="catalog-status">
-        <span id="catalog-count">Mostrando 7 especies del Atlas</span>
-        <span id="catalog-sub">Filtro activo: Todos los departamentos</span>
+        <span id="catalog-count">7 especies documentadas</span>
+        <span id="catalog-sub">Modo: Vista General Neutra</span>
       </div>
       <div id="cards-container" style="display:flex; flex-direction:column; gap:14px;"></div>
     </section>
@@ -532,7 +606,7 @@
 
   <script>
     // ============================================================================
-    // NORMALIZACIÓN DE NOMBRES DE DEPARTAMENTOS
+    // NORMALIZACIÓN DE DEPARTAMENTOS
     // ============================================================================
     function normDept(str) {
       if (!str) return "";
@@ -544,44 +618,30 @@
       return s;
     }
 
-    // Metadatos biogeográficos y altitudinales por departamento para extrusión 3D
-    const DEPT_META = {
-      "ANTIOQUIA":          { reg: "Andina / Caribe", elev: 2.5, col: 0x15803d },
-      "BOYACA":             { reg: "Andina Oriental", elev: 2.9, col: 0x166534 },
-      "CALDAS":             { reg: "Andina Central", elev: 2.7, col: 0x15803d },
-      "CAUCA":              { reg: "Andina / Pacífico", elev: 2.4, col: 0x0f766e },
-      "CUNDINAMARCA":       { reg: "Andina Oriental (Páramos y Sabana)", elev: 3.1, col: 0x16a34a },
-      "BOGOTA D.C.":        { reg: "Andina Oriental", elev: 3.2, col: 0x22c55e },
-      "HUILA":              { reg: "Andina (Alto Magdalena)", elev: 2.5, col: 0x15803d },
-      "NARINO":             { reg: "Pacífico / Andina Suroccidental", elev: 2.4, col: 0x0d9488 },
-      "NORTE DE SANTANDER": { reg: "Andina Nororiental", elev: 2.5, col: 0x166534 },
-      "QUINDIO":            { reg: "Andina Central", elev: 2.7, col: 0x15803d },
-      "RISARALDA":          { reg: "Andina Occidental/Central", elev: 2.6, col: 0x15803d },
-      "SANTANDER":          { reg: "Andina / Magdalena Medio", elev: 2.4, col: 0x15803d },
-      "TOLIMA":             { reg: "Andina (Alto Magdalena)", elev: 2.6, col: 0x15803d },
-      "VALLE DEL CAUCA":    { reg: "Pacífico / Andina Occidental", elev: 2.2, col: 0x0f766e },
-      "CHOCO":              { reg: "Pacífico / Chocó Biogeográfico", elev: 1.5, col: 0x0d9488 },
-      "CORDOBA":            { reg: "Caribe (Cuenca del Río San Jorge)", elev: 1.3, col: 0x0284c7 },
-      "SUCRE":              { reg: "Caribe", elev: 1.1, col: 0x0369a1 },
-      "BOLIVAR":            { reg: "Caribe / Magdalena", elev: 1.2, col: 0x0369a1 },
-      "ATLANTICO":          { reg: "Caribe", elev: 1.0, col: 0x0284c7 },
-      "MAGDALENA":          { reg: "Caribe / Sierra Nevada", elev: 1.6, col: 0x0284c7 },
-      "CESAR":              { reg: "Caribe / Perijá", elev: 1.4, col: 0x0369a1 },
-      "LA GUAJIRA":         { reg: "Caribe Peninsular", elev: 1.1, col: 0x0284c7 },
-      "META":               { reg: "Orinoquía / Piedemonte Andino", elev: 1.5, col: 0xb45309 },
-      "CASANARE":           { reg: "Orinoquía", elev: 1.1, col: 0x92400e },
-      "ARAUCA":             { reg: "Orinoquía", elev: 1.1, col: 0x92400e },
-      "VICHADA":            { reg: "Orinoquía / Escudo Guayanés", elev: 1.0, col: 0x78350f },
-      "CAQUETA":            { reg: "Amazonía / Piedemonte", elev: 1.4, col: 0x047857 },
-      "PUTUMAYO":           { reg: "Amazonía / Piedemonte Andino-Amazónico", elev: 1.5, col: 0x059669 },
-      "AMAZONAS":           { reg: "Cuenca Amazónica", elev: 1.1, col: 0x065f46 },
-      "GUAINIA":            { reg: "Amazonía / Orinoquía", elev: 1.0, col: 0x064e3b },
-      "GUAVIARE":           { reg: "Amazonía Noroccidental", elev: 1.1, col: 0x065f46 },
-      "VAUPES":             { reg: "Amazonía", elev: 1.1, col: 0x064e3b }
+    const DEPT_REGIONS = {
+      "ANTIOQUIA": "Andina / Caribe",
+      "BOYACA": "Andina Oriental (Páramos)",
+      "CALDAS": "Andina Central",
+      "CAUCA": "Pacífico / Andina Suroccidental",
+      "CUNDINAMARCA": "Andina Oriental (Páramos y Sabana)",
+      "BOGOTA D.C.": "Andina Oriental",
+      "HUILA": "Andina (Alto Magdalena)",
+      "NARINO": "Chocó Biogeográfico / Andina",
+      "QUINDIO": "Andina Central",
+      "RISARALDA": "Andina Occidental / Central",
+      "SANTANDER": "Andina / Magdalena Medio",
+      "TOLIMA": "Andina (Alto Magdalena)",
+      "VALLE DEL CAUCA": "Pacífico / Andina Occidental",
+      "CHOCO": "Pacífico / Chocó Biogeográfico",
+      "CORDOBA": "Caribe (Cuenca del Río San Jorge)",
+      "META": "Orinoquía / Piedemonte Andino",
+      "CAQUETA": "Amazonía / Piedemonte",
+      "PUTUMAYO": "Amazonía / Piedemonte Andino-Amazónico",
+      "AMAZONAS": "Cuenca Amazónica"
     };
 
     // ============================================================================
-    // BASE DE DATOS CIENTÍFICA CON DISTRIBUCIÓN DEPARTAMENTAL EN COLOMBIA
+    // BASE DE DATOS CIENTÍFICA (7 ESPECIES NATIVAS Y ENDÉMICAS)
     // ============================================================================
     const SPECIES_DB = [
       {
@@ -591,11 +651,7 @@
         family: "Araceae • Sección Pachyneurium",
         status: "Endémica",
         depts: ["Córdoba", "Antioquia"],
-        locality: "Cuenca del río San Jorge y Serranía de San Jerónimo",
         altitude: "100 – 650 m s.n.m.",
-        elevMean: 380,
-        lat: 7.95,
-        lon: -75.55,
         morpho: "Espata cuculada coriácea vino-verdosa (80 mm); espádice péndulo (70 × 9.5 mm) sobre estípite de 3 mm.",
         reference: "Croat, T. B. (1991). Ann. Missouri Bot. Gard. 78(3): 539–855.",
         image: "images/anthurium_sanjorgense.jpg",
@@ -608,12 +664,8 @@
         family: "Araceae • Sección Calomystrium",
         status: "Nativa",
         depts: ["Nariño", "Cauca", "Chocó", "Valle del Cauca"],
-        locality: "Vertiente Pacífica / Reserva Natural Río Ñambí (Chocó Biogeográfico)",
         altitude: "400 – 1200 m s.n.m.",
-        elevMean: 800,
-        lat: 1.30,
-        lon: -78.08,
-        morpho: "Espata cordiforme bullada roja carmín (110 × 86 mm); espádice protógino erecto (70 × 9.2 mm) a 48°.",
+        morpho: "Espata cordiforme bullada roja carmín (116 × 104 mm); espádice protógino (80 × 9.2 mm) con filotaxis espiral 137.5°.",
         reference: "Linden (1877) Ill. Hort. 24: 43, Pl. 271; Elibox & Umaharan (2012) HortScience 47: 1234.",
         image: "images/anthurium_andraeanum.jpg",
         modelUrl: "models/anthurium_andraeanum.html"
@@ -625,12 +677,8 @@
         family: "Passifloraceae • Subgén. Passiflora",
         status: "Nativa",
         depts: ["Valle del Cauca", "Antioquia", "Huila", "Cundinamarca", "Caldas", "Risaralda", "Quindío", "Tolima", "Cauca", "Nariño", "Boyacá"],
-        locality: "Bosques montanos de las Cordilleras Occidental, Central y Oriental",
         altitude: "1500 – 2600 m s.n.m.",
-        elevMean: 2050,
-        lat: 3.65,
-        lon: -76.22,
-        morpho: "Perianto blanco-rosado (88 mm Ø); corona en 5 series con filamentos bandeados blanco-púrpura-azul (40 mm); androginóforo de 12 mm.",
+        morpho: "Perianto blanco-rosado (88 mm Ø); corona en 5 series con filamentos bandeados blanco-púrpura (40 mm); androginóforo de 12 mm.",
         reference: "Jussieu (1805) Ann. Mus. Hist. Nat. 6: 113; Ocampo Pérez et al. (2007) CIAT.",
         image: "images/passiflora_ligularis.jpg",
         modelUrl: "models/passiflora_ligularis.html"
@@ -642,11 +690,7 @@
         family: "Passifloraceae • Supersección Coccinea",
         status: "Nativa",
         depts: ["Chocó", "Santander", "Meta", "Caquetá", "Antioquia", "Valle del Cauca", "Putumayo", "Amazonas", "Córdoba"],
-        locality: "Bosques húmedos del Chocó Biogeográfico, Magdalena Medio y Amazonía",
         altitude: "50 – 1400 m s.n.m.",
-        elevMean: 600,
-        lat: 5.65,
-        lon: -76.60,
         morpho: "Flor escarlata adaptada a ornitofilia (120 mm Ø); filamentos de la corona rojos y blancos erectos; tubo calicino de 16 mm.",
         reference: "Kunth (1817) Nov. Gen. Sp. 2: 138; Ulmer & MacDougal (2004) Passiflora.",
         image: "images/passiflora_vitifolia.jpg",
@@ -659,11 +703,7 @@
         family: "Asteraceae • Subtribu Espeletiinae",
         status: "Endémica",
         depts: ["Cundinamarca", "Meta", "Boyacá"],
-        locality: "Complejos de Páramo de Chingaza, Sumapaz y Cruz Verde (Cordillera Oriental)",
         altitude: "3100 – 4100 m s.n.m.",
-        elevMean: 3600,
-        lat: 4.52,
-        lon: -73.85,
         morpho: "Capítulo radiado (55 mm Ø); involucro hemisférico lanuginoso; ~32 flores liguladas femeninas amarillas y ~120 flósculos del disco.",
         reference: "Humboldt & Bonpland (1809) Pl. Aequinoct. 2: 11; Mavárez (2021); Pouchon et al. (2018).",
         image: "images/espeletia_grandiflora.jpg",
@@ -676,11 +716,7 @@
         family: "Orchidaceae • Subfam. Epidendroideae",
         status: "Endémica",
         depts: ["Huila", "Tolima", "Cundinamarca"],
-        locality: "Cuenca alta del río Magdalena (Bosque húmedo premontano / subandino)",
         altitude: "1200 – 2000 m s.n.m.",
-        elevMean: 1600,
-        lat: 2.35,
-        lon: -75.55,
         morpho: "Flor zigomorfa resupinada (155 mm Ø); labelo tubular rizado con disco amarillo-oro y ápice púrpura carmesí; ginostemo de 28 mm.",
         reference: "Linden & Reichenbach f. (1860) Bot. Zeitung 18: 74; Sarmiento (2007).",
         image: "images/cattleya_trianae.jpg",
@@ -693,11 +729,7 @@
         family: "Heliconiaceae • Orden Zingiberales",
         status: "Nativa",
         depts: ["Putumayo", "Caquetá", "Amazonas"],
-        locality: "Cuenca Amazónica y Piedemonte Andino-Amazónico",
         altitude: "100 – 900 m s.n.m.",
-        elevMean: 350,
-        lat: -1.25,
-        lon: -72.80,
         morpho: "Inflorescencia péndula dística; brácteas cimbiformes rojas con margen amarillo y ápice verde (82 mm); flores tubulares ornitófilas.",
         reference: "Ruiz & Pavón (1802) Fl. Peruv. 3: 71, t. 305; Kress et al. (1999) Heliconia en Colombia.",
         image: "images/heliconia_rostrata.jpg",
@@ -709,7 +741,6 @@
       return SPECIES_DB.filter(sp => sp.depts.some(d => normDept(d) === deptNorm));
     }
 
-    // Proyección geográfica (Lon, Lat) -> Plano 3D (X, Z) centrada en Colombia (-73.8°, +4.3°)
     function geoToXZ(lon, lat) {
       const x = (lon + 73.8) * 4.4;
       const z = -(lat - 4.3) * 4.4;
@@ -717,7 +748,88 @@
     }
 
     // ============================================================================
-    // ESCENARIO 3D (THREE.JS) — MAPA DEPARTAMENTAL DE COLOMBIA
+    // GENERADOR DE MEDALLONES CIRCULARES CON LA FOTO DE LA ESPECIE (CANVAS -> SPRITE)
+    // ============================================================================
+    const speciesTextureCache = {};
+
+    function getSpeciesMedallionTexture(sp) {
+      if (speciesTextureCache[sp.id]) return speciesTextureCache[sp.id];
+
+      const size = 256;
+      const c = document.createElement("canvas");
+      c.width = size;
+      c.height = size;
+      const ctx = c.getContext("2d");
+      const tex = new THREE.CanvasTexture(c);
+
+      const isEndemic = sp.status === "Endémica";
+      const ringColor = isEndemic ? "#dfb15b" : "#52a37e";
+
+      function drawMedallion(imgObj) {
+        ctx.clearRect(0, 0, size, size);
+
+        // Punta inferior del pin (gota artesanal)
+        ctx.beginPath();
+        ctx.moveTo(size * 0.36, size * 0.74);
+        ctx.lineTo(size * 0.50, size * 0.98);
+        ctx.lineTo(size * 0.64, size * 0.74);
+        ctx.closePath();
+        ctx.fillStyle = ringColor;
+        ctx.fill();
+
+        // Sombra exterior y anillo de oro tumbaga / jade
+        const cx = size * 0.5, cy = size * 0.44, r = size * 0.37;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r + 8, 0, Math.PI * 2);
+        ctx.fillStyle = "#16100b";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
+        ctx.fillStyle = ringColor;
+        ctx.fill();
+
+        // Recorte circular para la foto de la flor
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, r - 3, 0, Math.PI * 2);
+        ctx.clip();
+
+        if (imgObj) {
+          ctx.drawImage(imgObj, cx - r, cy - r, r * 2, r * 2);
+        } else {
+          ctx.fillStyle = "#2b1e16";
+          ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+          ctx.fillStyle = ringColor;
+          ctx.font = "bold 46px Georgia";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("❀", cx, cy);
+        }
+        ctx.restore();
+
+        // Filete interior crema
+        ctx.beginPath();
+        ctx.arc(cx, cy, r - 3, 0, Math.PI * 2);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(244, 236, 225, 0.85)";
+        ctx.stroke();
+
+        tex.needsUpdate = true;
+      }
+
+      drawMedallion(null);
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onload = () => drawMedallion(img);
+      img.src = sp.image;
+
+      speciesTextureCache[sp.id] = tex;
+      return tex;
+    }
+
+    // ============================================================================
+    // ESCENARIO 3D (THREE.JS) — MAPA ESCULTÓRICO EN ARCILLA Y COBRE/ORO
     // ============================================================================
     const canvas = document.getElementById("colombia-map-canvas");
     const tooltip = document.getElementById("dept-tooltip");
@@ -731,29 +843,40 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
-    controls.maxPolarAngle = Math.PI * 0.45;
+    controls.maxPolarAngle = Math.PI * 0.44;
     controls.minDistance = 14;
     controls.maxDistance = 110;
     controls.target.set(0, 0, 2);
 
-    scene.add(new THREE.AmbientLight(0xdbeafe, 0.72));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1.18);
-    dirLight.position.set(25, 55, 35);
-    scene.add(dirLight);
+    // Iluminación cálida de museo/expedición
+    scene.add(new THREE.AmbientLight(0xf5e6d3, 0.72));
+    const sunLight = new THREE.DirectionalLight(0xffedd5, 1.22);
+    sunLight.position.set(24, 58, 34);
+    scene.add(sunLight);
 
-    const rimLight = new THREE.DirectionalLight(0x34d399, 0.45);
-    rimLight.position.set(-30, 25, -25);
-    scene.add(rimLight);
+    const warmRim = new THREE.DirectionalLight(0xd97742, 0.48);
+    warmRim.position.set(-32, 24, -22);
+    scene.add(warmRim);
 
-    const grid = new THREE.GridHelper(105, 35, 0x1e3a4c, 0x0f222f);
+    const grid = new THREE.GridHelper(105, 35, 0x3b2c20, 0x221912);
     grid.position.y = -0.25;
     scene.add(grid);
 
     const mapGroup = new THREE.Group();
     scene.add(mapGroup);
+
+    const dynamicPinsGroup = new THREE.Group();
+    scene.add(dynamicPinsGroup);
+
     const deptMeshes = [];
-    const pinMeshes = [];
+    const activeMedallionSprites = [];
     const deptCenters = {};
+
+    // Colores del mapa en estado neutro vs. elevado
+    const COL_NEUTRAL_WITH_SP = new THREE.Color(0x3b2e25); // Arcilla cálida reposo
+    const COL_NEUTRAL_EMPTY   = new THREE.Color(0x271e18); // Basalto oscuro reposo
+    const COL_ELEVATED_TERR   = new THREE.Color(0xc86446); // Terracota Quimbaya activo
+    const COL_ELEVATED_GOLD   = new THREE.Color(0xd49b4b); // Ocre dorado activo
 
     function buildDepartmentsFromGeoJSON(geojson) {
       const selectEl = document.getElementById("dept-select");
@@ -762,10 +885,8 @@
       geojson.features.forEach(feat => {
         const rawName = feat.properties.NOMBRE_DPT || feat.properties.name || "Departamento";
         const dNorm = normDept(rawName);
-        const prettyName = rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase();
         const spList = getSpeciesForDept(dNorm);
         const hasSpecies = spList.length > 0;
-        const meta = DEPT_META[dNorm] || { reg: "Territorio Nacional", elev: 1.2, col: 0x1e293b };
 
         deptNamesList.push({ dNorm, rawName, count: spList.length });
 
@@ -778,7 +899,6 @@
           const outerRing = polyCoords[0];
           if (!outerRing || outerRing.length < 3) return;
 
-          // Omitir islas ultramarinas muy lejanas o reubicar San Andrés cerca del Caribe para vista compacta
           const shape = new THREE.Shape();
           outerRing.forEach(([lon, lat], idx) => {
             let adjLon = lon, adjLat = lat;
@@ -793,25 +913,26 @@
           });
           shape.closePath();
 
-          const extrudeDepth = hasSpecies ? meta.elev : meta.elev * 0.65;
+          // En estado neutro todos los departamentos inician con grosor uniforme (1.15)
+          const baseDepth = 1.15;
           const geom = new THREE.ExtrudeGeometry(shape, {
-            depth: extrudeDepth,
+            depth: baseDepth,
             bevelEnabled: true,
-            bevelSegments: 1,
+            bevelSegments: 2,
             steps: 1,
-            bevelSize: 0.08,
-            bevelThickness: 0.08
+            bevelSize: 0.07,
+            bevelThickness: 0.07
           });
           geom.rotateX(-Math.PI / 2);
 
-          const baseColor = hasSpecies ? meta.col : 0x162634;
+          const initColor = hasSpecies ? COL_NEUTRAL_WITH_SP.clone() : COL_NEUTRAL_EMPTY.clone();
           const mat = new THREE.MeshPhysicalMaterial({
-            color: baseColor,
-            roughness: hasSpecies ? 0.38 : 0.62,
-            metalness: 0.08,
-            clearcoat: hasSpecies ? 0.5 : 0.1,
+            color: initColor,
+            roughness: 0.65,
+            metalness: 0.06,
+            clearcoat: 0.18,
             transparent: true,
-            opacity: hasSpecies ? 0.92 : 0.68
+            opacity: hasSpecies ? 0.96 : 0.78
           });
 
           const mesh = new THREE.Mesh(geom, mat);
@@ -819,87 +940,116 @@
             type: "dept",
             dNorm,
             rawName,
-            reg: meta.reg,
-            extrudeDepth,
-            baseColor,
             hasSpecies,
-            speciesCount: spList.length
+            speciesCount: spList.length,
+            targetY: 0.0,
+            targetColor: initColor.clone()
           };
           mapGroup.add(mesh);
           deptMeshes.push(mesh);
 
           const edges = new THREE.EdgesGeometry(geom, 25);
           const lineMat = new THREE.LineBasicMaterial({
-            color: hasSpecies ? 0x6ee7b7 : 0x334155,
+            color: hasSpecies ? 0x8c6d53 : 0x4a3a2c,
             transparent: true,
-            opacity: hasSpecies ? 0.55 : 0.30
+            opacity: hasSpecies ? 0.60 : 0.32
           });
           mesh.add(new THREE.LineSegments(edges, lineMat));
         });
 
         if (nPts > 0) {
-          deptCenters[dNorm] = [sumX / nPts, sumZ / nPts, meta.elev];
+          deptCenters[dNorm] = [sumX / nPts, sumZ / nPts];
         }
       });
 
-      // Poblar el selector de departamentos ordenado
       deptNamesList
         .sort((a, b) => b.count - a.count || a.dNorm.localeCompare(b.dNorm))
         .forEach(item => {
           const opt = document.createElement("option");
           opt.value = item.dNorm;
           opt.textContent = item.count > 0
-            ? `🌿 ${item.dNorm} (${item.count} esp.)`
+            ? `🏺 ${item.dNorm} (${item.count} esp.)`
             : `   ${item.dNorm} (0 esp.)`;
           selectEl.appendChild(opt);
         });
     }
 
-    // Construir Pines Botánicos 3D
-    function buildSpeciesPins() {
-      SPECIES_DB.forEach(sp => {
-        const [x, z] = geoToXZ(sp.lon, sp.lat);
-        const primaryDept = normDept(sp.depts[0]);
-        const baseElev = (DEPT_META[primaryDept] && DEPT_META[primaryDept].elev) || 2.0;
-        const stemHeight = 2.0 + (sp.elevMean / 1000.0) * 1.7;
+    // Limpiar y generar dinámicamente los medallones circulares con foto según la selección activa
+    function rebuildDynamicMedallions() {
+      while (dynamicPinsGroup.children.length > 0) {
+        dynamicPinsGroup.remove(dynamicPinsGroup.children[0]);
+      }
+      activeMedallionSprites.length = 0;
 
-        const stemGeom = new THREE.CylinderGeometry(0.11, 0.11, stemHeight, 10);
-        const stemMat = new THREE.MeshBasicMaterial({ color: 0x34d399 });
-        const stem = new THREE.Mesh(stemGeom, stemMat);
-        stem.position.set(x, baseElev + stemHeight / 2, z);
-        mapGroup.add(stem);
+      // CASO A: Hay una ESPECIE seleccionada -> Poner su medallón con foto en TODOS sus departamentos elevados
+      if (selectedSpeciesId) {
+        const sp = SPECIES_DB.find(s => s.id === selectedSpeciesId);
+        if (!sp) return;
+        const tex = getSpeciesMedallionTexture(sp);
 
-        const isEndemic = sp.status === "Endémica";
-        const pinColor = isEndemic ? 0xf59e0b : 0x38bdf8;
-        const headGeom = new THREE.OctahedronGeometry(0.88, 2);
-        const headMat = new THREE.MeshPhysicalMaterial({
-          color: pinColor,
-          emissive: pinColor,
-          emissiveIntensity: 0.45,
-          roughness: 0.15,
-          clearcoat: 1.0
+        sp.depts.forEach(dName => {
+          const dNorm = normDept(dName);
+          const center = deptCenters[dNorm];
+          if (!center) return;
+          const [cx, cz] = center;
+          spawnMedallionAt(cx, cz, 3.6, sp, dNorm, tex);
         });
-        const pin = new THREE.Mesh(headGeom, headMat);
-        pin.position.set(x, baseElev + stemHeight + 0.55, z);
-        pin.userData = { type: "pin", speciesData: sp };
-        mapGroup.add(pin);
-        pinMeshes.push(pin);
+        return;
+      }
 
-        const ringGeom = new THREE.RingGeometry(0.45, 0.95, 24);
-        ringGeom.rotateX(-Math.PI / 2);
-        const ringMat = new THREE.MeshBasicMaterial({
-          color: pinColor,
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0.70
+      // CASO B: Hay un DEPARTAMENTO seleccionado -> Desplegar en abanico los medallones de las especies de ese depto.
+      if (currentDept !== "ALL") {
+        const spList = getSpeciesForDept(currentDept);
+        const center = deptCenters[currentDept];
+        if (!center || spList.length === 0) return;
+        const [cx, cz] = center;
+
+        const n = spList.length;
+        const radiusFan = n === 1 ? 0.0 : 2.35;
+        spList.forEach((sp, idx) => {
+          const angle = (idx / n) * Math.PI * 2 - Math.PI / 2;
+          const px = cx + Math.cos(angle) * radiusFan;
+          const pz = cz + Math.sin(angle) * radiusFan;
+          const tex = getSpeciesMedallionTexture(sp);
+          spawnMedallionAt(px, pz, 3.8, sp, currentDept, tex);
         });
-        const ring = new THREE.Mesh(ringGeom, ringMat);
-        ring.position.set(x, baseElev + 0.15, z);
-        mapGroup.add(ring);
-      });
+      }
+      // CASO C: Estado neutro -> Cero pines (mapa limpio)
     }
 
-    // Cargar el GeoJSON local (o respaldo CDN de John Guerra)
+    function spawnMedallionAt(x, z, elevatedBaseY, sp, dNorm, texture) {
+      const stemH = 2.4;
+      const stemGeom = new THREE.CylinderGeometry(0.08, 0.08, stemH, 10);
+      const stemMat = new THREE.MeshBasicMaterial({
+        color: sp.status === "Endémica" ? 0xdfb15b : 0x52a37e
+      });
+      const stem = new THREE.Mesh(stemGeom, stemMat);
+      stem.position.set(x, elevatedBaseY + stemH * 0.5, z);
+      dynamicPinsGroup.add(stem);
+
+      // Halo circular sobre el departamento elevado
+      const ringGeom = new THREE.RingGeometry(0.35, 0.72, 24);
+      ringGeom.rotateX(-Math.PI / 2);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: sp.status === "Endémica" ? 0xdfb15b : 0x52a37e,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.85
+      });
+      const ring = new THREE.Mesh(ringGeom, ringMat);
+      ring.position.set(x, elevatedBaseY + 0.08, z);
+      dynamicPinsGroup.add(ring);
+
+      // Medallón con la fotografía circular de la especie
+      const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.position.set(x, elevatedBaseY + stemH + 1.35, z);
+      sprite.scale.set(3.2, 3.2, 1.0);
+      sprite.userData = { type: "medallion", speciesData: sp, dNorm };
+      dynamicPinsGroup.add(sprite);
+      activeMedallionSprites.push(sprite);
+    }
+
     fetch("colombia_departamentos.geojson")
       .then(r => {
         if (!r.ok) throw new Error("Fallback CDN");
@@ -908,19 +1058,18 @@
       .catch(() => fetch("https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/be6a6e239cd5b5b803c6e7c2ec405b793a9064dd/colombia.geo.json").then(r => r.json()))
       .then(geojson => {
         buildDepartmentsFromGeoJSON(geojson);
-        buildSpeciesPins();
-        renderCatalog();
+        updateMapAndCatalog();
       });
 
     // ============================================================================
-    // FILTRADO POR DEPARTAMENTO, ESTATUS Y BÚSQUEDA
+    // GESTIÓN DE LOS 3 ESTADOS: NEUTRO | POR DEPARTAMENTO | POR ESPECIE
     // ============================================================================
     let currentDept = "ALL";
     let currentStatus = "ALL";
     let currentSearch = "";
     let selectedSpeciesId = null;
 
-    function renderCatalog() {
+    function updateMapAndCatalog() {
       const container = document.getElementById("cards-container");
       container.innerHTML = "";
 
@@ -946,20 +1095,31 @@
 
       document.getElementById("catalog-count").textContent =
         `Mostrando ${filtered.length} de ${SPECIES_DB.length} especies`;
-      document.getElementById("catalog-sub").textContent =
-        currentDept === "ALL" ? "Departamento: Todos (Colombia)" : `Departamento: ${currentDept}`;
+
+      if (selectedSpeciesId) {
+        const selSp = SPECIES_DB.find(s => s.id === selectedSpeciesId);
+        document.getElementById("catalog-sub").textContent =
+          `Distribución activa: ${selSp.species} (${selSp.depts.length} deptos.)`;
+      } else if (currentDept !== "ALL") {
+        document.getElementById("catalog-sub").textContent =
+          `Departamento elevado: ${currentDept}`;
+      } else {
+        document.getElementById("catalog-sub").textContent =
+          `Mapa en reposo neutro`;
+      }
 
       if (filtered.length === 0) {
         container.innerHTML = `
           <div class="empty-dept-msg">
-            No hay especies modeladas aún para el departamento de <strong>${currentDept}</strong> con este filtro.<br/>
-            Haz clic en <strong>Vista General de Colombia</strong> o selecciona un departamento iluminado en verde/turquesa (p. ej. <em>Nariño, Cundinamarca, Valle del Cauca, Huila, Antioquia, Chocó, Córdoba o Putumayo</em>).
+            Aún no hay especies registradas en el Atlas para <strong>${currentDept}</strong> bajo este filtro.<br/>
+            Haz clic en <strong>Restaurar Mapa Neutro</strong> o selecciona otro departamento en el mapa.
           </div>
         `;
       } else {
         filtered.forEach(sp => {
+          const isSelected = selectedSpeciesId === sp.id;
           const card = document.createElement("article");
-          card.className = "species-card" + (selectedSpeciesId === sp.id ? " highlighted" : "");
+          card.className = "species-card" + (isSelected ? " highlighted" : "");
           card.id = `card-${sp.id}`;
 
           const statusClass = sp.status === "Endémica" ? "badge-endemic" : "badge-native";
@@ -967,12 +1127,14 @@
           const extraDepts = sp.depts.length > 4 ? `<span class="badge badge-id">+${sp.depts.length - 4} deptos.</span>` : "";
 
           card.innerHTML = `
-            <img class="card-thumb" src="${sp.image}" alt="${sp.species}" onerror="this.src='images/anthurium_andraeanum.jpg'" />
+            <div class="card-thumb-wrap">
+              <img class="card-thumb" src="${sp.image}" alt="${sp.species}" onerror="this.src='images/anthurium_andraeanum.jpg'" />
+            </div>
             <div class="card-body">
               <div>
                 <div class="card-badges">
                   <span class="badge badge-id">${sp.id}</span>
-                  <span class="badge ${statusClass}">${sp.status} de Colombia</span>
+                  <span class="badge ${statusClass}">${sp.status}</span>
                   ${deptBadges}${extraDepts}
                 </div>
                 <div class="card-title">
@@ -980,83 +1142,119 @@
                   <span class="card-author">${sp.author}</span>
                 </div>
                 <div class="card-family">${sp.family} • ${sp.altitude}</div>
-                <div class="card-corology"><strong>Departamentos:</strong> ${sp.depts.join(", ")}</div>
-                <div class="card-corology"><strong>Morfometría:</strong> ${sp.morpho}</div>
+                <div class="card-corology"><strong>Departamentos (${sp.depts.length}):</strong> ${sp.depts.join(", ")}</div>
+                <div class="card-corology"><strong>Diagnosis:</strong> ${sp.morpho}</div>
                 <div class="card-ref"><strong>Fuente:</strong> ${sp.reference}</div>
               </div>
               <div class="card-actions">
-                <button class="btn-locate" data-id="${sp.id}">📍 Ubicar en Mapa 3D</button>
-                <a class="btn-atlas" href="${sp.modelUrl}">Abrir Disección 3D →</a>
+                <button class="btn-locate" data-id="${sp.id}">
+                  ${isSelected ? "✦ Distribución Activa en Mapa" : "🏺 Elevar Deptos. en Mapa 3D"}
+                </button>
+                <a class="btn-atlas" href="${sp.modelUrl}" onclick="event.stopPropagation();">Abrir Disección 3D →</a>
               </div>
             </div>
           `;
 
-          card.querySelector(".btn-locate").addEventListener("click", (e) => {
-            e.stopPropagation();
-            focusOnSpecies(sp);
-          });
-          card.addEventListener("click", () => focusOnSpecies(sp));
+          card.addEventListener("click", () => selectSpeciesDistribution(sp));
           container.appendChild(card);
         });
       }
 
-      // Actualizar elevación y brillo de los departamentos en el mapa 3D
+      // Actualizar objetivos de elevación (targetY) y color (targetColor) de cada departamento
+      const selectedSpObj = selectedSpeciesId ? SPECIES_DB.find(s => s.id === selectedSpeciesId) : null;
+
       deptMeshes.forEach(m => {
-        const isSel = currentDept === m.userData.dNorm;
-        const haveSp = filtered.some(sp => sp.depts.some(d => normDept(d) === m.userData.dNorm));
-        m.position.y = isSel ? 1.15 : 0.0;
-        m.material.emissive.setHex(isSel ? 0x059669 : 0x000000);
-        m.material.opacity = isSel ? 1.0 : (haveSp ? 0.92 : 0.45);
+        const dNorm = m.userData.dNorm;
+
+        if (selectedSpObj) {
+          // MODO ESPECIE: Se elevan todos los departamentos donde habita la especie seleccionada
+          const inDistribution = selectedSpObj.depts.some(d => normDept(d) === dNorm);
+          m.userData.targetY = inDistribution ? 2.45 : 0.0;
+          m.userData.targetColor.copy(
+            inDistribution
+              ? (selectedSpObj.status === "Endémica" ? COL_ELEVATED_GOLD : COL_ELEVATED_TERR)
+              : COL_NEUTRAL_EMPTY
+          );
+          m.material.opacity = inDistribution ? 0.98 : 0.52;
+        } else if (currentDept !== "ALL") {
+          // MODO DEPARTAMENTO: Se eleva únicamente el departamento clicado
+          const isThisDept = dNorm === currentDept;
+          m.userData.targetY = isThisDept ? 2.65 : 0.0;
+          m.userData.targetColor.copy(isThisDept ? COL_ELEVATED_TERR : COL_NEUTRAL_EMPTY);
+          m.material.opacity = isThisDept ? 0.98 : 0.55;
+        } else {
+          // MODO NEUTRO: Todos los departamentos bajos y en arcilla uniforme
+          m.userData.targetY = 0.0;
+          m.userData.targetColor.copy(m.userData.hasSpecies ? COL_NEUTRAL_WITH_SP : COL_NEUTRAL_EMPTY);
+          m.material.opacity = m.userData.hasSpecies ? 0.95 : 0.75;
+        }
       });
 
-      pinMeshes.forEach(pin => {
-        const sp = pin.userData.speciesData;
-        const visible = filtered.some(f => f.id === sp.id);
-        pin.material.opacity = visible ? 1.0 : 0.18;
-        pin.material.transparent = !visible;
-        pin.scale.setScalar(selectedSpeciesId === sp.id ? 1.55 : (visible ? 1.0 : 0.55));
-      });
+      rebuildDynamicMedallions();
     }
 
     function selectDepartment(dNorm) {
-      currentDept = dNorm;
       selectedSpeciesId = null;
-      document.getElementById("map-popup").classList.remove("visible");
+      currentDept = dNorm;
       document.getElementById("dept-select").value = dNorm;
+      document.getElementById("map-popup").classList.remove("visible");
 
       if (dNorm === "ALL") {
-        document.getElementById("active-dept-title").textContent = "Colombia — 32 Departamentos y Distrito Capital";
+        document.getElementById("active-dept-title").textContent = "Territorio Colombiano — Estado Neutro";
         document.getElementById("active-dept-desc").innerHTML =
-          "Haz clic sobre cualquier <strong>departamento en el mapa 3D</strong> o sobre un <strong>pin botánico</strong> para consultar las especies distribuidas en su territorio.";
+          "Selecciona un <strong>departamento en el mapa</strong> para elevar su relieve y descubrir sus especies, o elige una <strong>especie del catálogo</strong> para elevar todos los departamentos donde se distribuye con su medallón floral.";
         targetCamLookAt.set(0, 0, 2);
         targetCamPos.set(0, 54, 46);
         isAnimatingCam = true;
       } else {
         const spInDept = getSpeciesForDept(dNorm);
-        const meta = DEPT_META[dNorm] || { reg: "Colombia" };
-        document.getElementById("active-dept-title").textContent = `Departamento: ${dNorm}`;
+        const regName = DEPT_REGIONS[dNorm] || "Territorio Colombiano";
+        document.getElementById("active-dept-title").textContent = `Departamento Elevado: ${dNorm}`;
         document.getElementById("active-dept-desc").innerHTML =
-          `<strong>Región Biogeográfica:</strong> ${meta.reg}<br/>` +
-          `<strong>Especies documentadas en el Atlas:</strong> ${spInDept.length} (${spInDept.map(s => "<em>" + s.species + "</em>").join(", ") || "Sin registros aún"})`;
+          `<strong>Biorregión:</strong> ${regName}<br/>` +
+          `<strong>Especies con medallón activo (${spInDept.length}):</strong> ${spInDept.map(s => "<em>" + s.species + "</em>").join(", ") || "Sin registros aún"}`;
 
         if (deptCenters[dNorm]) {
           const [cx, cz] = deptCenters[dNorm];
-          targetCamLookAt.set(cx, 1.5, cz);
-          targetCamPos.set(cx + 6, 30, cz + 22);
+          targetCamLookAt.set(cx, 2.0, cz);
+          targetCamPos.set(cx + 6, 32, cz + 24);
           isAnimatingCam = true;
         }
       }
 
-      renderCatalog();
+      updateMapAndCatalog();
     }
 
-    function focusOnSpecies(sp) {
-      selectedSpeciesId = sp.id;
-      const [x, z] = geoToXZ(sp.lon, sp.lat);
-      targetCamLookAt.set(x, 2.0, z);
-      targetCamPos.set(x + 7, 26, z + 20);
-      isAnimatingCam = true;
+    function selectSpeciesDistribution(sp) {
+      // Si ya estaba seleccionada la misma especie, volver al estado neutro
+      if (selectedSpeciesId === sp.id) {
+        selectDepartment("ALL");
+        return;
+      }
 
+      selectedSpeciesId = sp.id;
+      currentDept = "ALL";
+      document.getElementById("dept-select").value = "ALL";
+
+      document.getElementById("active-dept-title").innerHTML =
+        `Distribución Corológica: <em>${sp.species}</em>`;
+      document.getElementById("active-dept-desc").innerHTML =
+        `Se han elevado los <strong>${sp.depts.length} departamentos</strong> donde habita la especie, desplegando su medallón fotográfico en: <em>${sp.depts.join(", ")}</em>.`;
+
+      // Encuadrar cámara hacia el centro promedio de sus departamentos
+      let sx = 0, sz = 0, count = 0;
+      sp.depts.forEach(d => {
+        const c = deptCenters[normDept(d)];
+        if (c) { sx += c[0]; sz += c[1]; count++; }
+      });
+      if (count > 0) {
+        const mx = sx / count, mz = sz / count;
+        targetCamLookAt.set(mx, 2.2, mz);
+        targetCamPos.set(mx + 8, 42, mz + 32);
+        isAnimatingCam = true;
+      }
+
+      // Mostrar tarjeta emergente inferior derecha
       const popup = document.getElementById("map-popup");
       document.getElementById("pop-id").textContent = sp.id;
       const stEl = document.getElementById("pop-status");
@@ -1065,17 +1263,17 @@
       document.getElementById("pop-species").textContent = sp.species;
       document.getElementById("pop-meta").innerHTML = `
         <strong>${sp.family}</strong><br/>
-        <strong>Departamentos:</strong> ${sp.depts.join(", ")}<br/>
-        <strong>Piso altitudinal:</strong> ${sp.altitude}<br/>
-        <strong>Ref.:</strong> ${sp.reference}
+        <strong>Departamentos elevados (${sp.depts.length}):</strong> ${sp.depts.join(", ")}<br/>
+        <strong>Rango altitudinal:</strong> ${sp.altitude}<br/>
+        <strong>Fuente:</strong> ${sp.reference}
       `;
       document.getElementById("pop-url").href = sp.modelUrl;
       popup.classList.add("visible");
 
-      renderCatalog();
+      updateMapAndCatalog();
     }
 
-    // Eventos de controles superiores
+    // Eventos de barra superior
     document.getElementById("dept-select").addEventListener("change", (e) => {
       selectDepartment(e.target.value);
     });
@@ -1085,13 +1283,13 @@
         document.querySelectorAll(".pill-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         currentStatus = btn.dataset.status;
-        renderCatalog();
+        updateMapAndCatalog();
       });
     });
 
     document.getElementById("search-input").addEventListener("input", (e) => {
       currentSearch = e.target.value;
-      renderCatalog();
+      updateMapAndCatalog();
     });
 
     document.getElementById("reset-camera-btn").addEventListener("click", () => {
@@ -1099,11 +1297,10 @@
     });
 
     // ============================================================================
-    // INTERACCIÓN 3D: HOVER Y CLIC SOBRE DEPARTAMENTOS Y PINES
+    // INTERACCIÓN 3D: HOVER Y CLIC SOBRE DEPARTAMENTOS Y MEDALLONES CON FOTO
     // ============================================================================
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-    let hoveredDeptNorm = null;
     let isAnimatingCam = false;
     const targetCamPos = new THREE.Vector3().copy(camera.position);
     const targetCamLookAt = new THREE.Vector3().copy(controls.target);
@@ -1115,13 +1312,13 @@
 
       raycaster.setFromCamera(mouse, camera);
 
-      const hitPins = raycaster.intersectObjects(pinMeshes);
-      if (hitPins.length > 0) {
-        const sp = hitPins[0].object.userData.speciesData;
+      const hitMedallions = raycaster.intersectObjects(activeMedallionSprites);
+      if (hitMedallions.length > 0) {
+        const ud = hitMedallions[0].object.userData;
         tooltip.style.display = "block";
         tooltip.style.left = (e.clientX - rect.left + 14) + "px";
         tooltip.style.top = (e.clientY - rect.top + 14) + "px";
-        tooltip.innerHTML = `🌺 <em>${sp.species}</em> • ${sp.depts[0]}`;
+        tooltip.innerHTML = `🌺 <em>${ud.speciesData.species}</em> en <strong>${ud.dNorm}</strong> (Clic para ver distribución completa)`;
         canvas.style.cursor = "pointer";
         return;
       }
@@ -1129,14 +1326,12 @@
       const hitDepts = raycaster.intersectObjects(deptMeshes);
       if (hitDepts.length > 0) {
         const ud = hitDepts[0].object.userData;
-        hoveredDeptNorm = ud.dNorm;
         tooltip.style.display = "block";
         tooltip.style.left = (e.clientX - rect.left + 14) + "px";
         tooltip.style.top = (e.clientY - rect.top + 14) + "px";
-        tooltip.innerHTML = `📍 <strong>${ud.dNorm}</strong> (${ud.speciesCount} ${ud.speciesCount === 1 ? 'especie' : 'especies'})`;
+        tooltip.innerHTML = `🏺 <strong>${ud.dNorm}</strong> • ${ud.speciesCount} ${ud.speciesCount === 1 ? 'especie registrada' : 'especies registradas'}`;
         canvas.style.cursor = "pointer";
       } else {
-        hoveredDeptNorm = null;
         tooltip.style.display = "none";
         canvas.style.cursor = "grab";
       }
@@ -1155,19 +1350,21 @@
       mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
 
-      const hitPins = raycaster.intersectObjects(pinMeshes);
-      if (hitPins.length > 0) {
-        const sp = hitPins[0].object.userData.speciesData;
-        focusOnSpecies(sp);
+      // Si hace clic en un medallón fotográfico -> activar distribución de esa especie
+      const hitMedallions = raycaster.intersectObjects(activeMedallionSprites);
+      if (hitMedallions.length > 0) {
+        const sp = hitMedallions[0].object.userData.speciesData;
+        selectSpeciesDistribution(sp);
         const cardEl = document.getElementById(`card-${sp.id}`);
         if (cardEl) cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
 
+      // Si hace clic en un departamento -> elevar ese departamento y mostrar sus medallones
       const hitDepts = raycaster.intersectObjects(deptMeshes);
       if (hitDepts.length > 0) {
         const dNorm = hitDepts[0].object.userData.dNorm;
-        selectDepartment(currentDept === dNorm ? "ALL" : dNorm);
+        selectDepartment(currentDept === dNorm && !selectedSpeciesId ? "ALL" : dNorm);
       }
     });
 
@@ -1181,13 +1378,19 @@
     window.addEventListener("resize", resizeRenderer);
     resizeRenderer();
 
+    // Animación continua: interpolación suave de altura (lerp) y color de cada departamento
     let clock = new THREE.Clock();
     function animate() {
       requestAnimationFrame(animate);
       const t = clock.getElapsedTime();
 
-      pinMeshes.forEach((p, idx) => {
-        p.rotation.y = t * 1.2 + idx;
+      deptMeshes.forEach(m => {
+        m.position.y += (m.userData.targetY - m.position.y) * 0.12;
+        m.material.color.lerp(m.userData.targetColor, 0.12);
+      });
+
+      activeMedallionSprites.forEach((s, idx) => {
+        s.position.y += Math.sin(t * 2.5 + idx) * 0.006;
       });
 
       if (isAnimatingCam) {
@@ -1198,10 +1401,9 @@
         }
       }
 
-      controls.update();
+      controls.update(
       renderer.render(scene, camera);
     }
-    renderCatalog();
     animate();
   </script>
 </body>
