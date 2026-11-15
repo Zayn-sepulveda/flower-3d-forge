@@ -55,9 +55,9 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
     <div class="hud-panel">
         <h2>{sp_name}</h2>
         <div><strong>Familia:</strong> {fam}</div>
-        <div><strong>Muestra:</strong> {id_m}</div>
-        <div><strong>Localidad:</strong> {loc}</div>
-        <div><strong>Fecha:</strong> {fecha}</div>
+        <div><strong>Catálogo:</strong> {id_m}</div>
+        <div><strong>Distribución:</strong> {loc}</div>
+        <div><strong>Fuente:</strong> {fecha}</div>
         <div class="hud-hint">• Pasa el cursor sobre la flor para identificar cada órgano.<br>• Rotar: Clic izq | Zoom: Rueda | Mover: Clic der</div>
     </div>
 
@@ -90,7 +90,7 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
     <a href="../index.html" class="back-btn">⬅ Volver al catálogo</a>
     <div class="photo-panel">
         <img src="{foto_campo}" alt="{sp_name}" onerror="this.parentElement.style.display='none';">
-        <div class="photo-label">REGISTRO DE CAMPO</div>
+        <div class="photo-label">ESPÉCIMEN DE REFERENCIA</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

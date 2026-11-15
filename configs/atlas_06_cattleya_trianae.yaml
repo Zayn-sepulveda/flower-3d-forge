@@ -1,0 +1,51 @@
+colecta:
+  id_muestra: COL-ATL-006 | Endémica de Colombia (Flor Nacional)
+  familia: Orchidaceae (Subfam. Epidendroideae)
+  genero: Cattleya
+  especie: Cattleya trianae
+  localidad: Región Andina — Valle del Alto Magdalena (Huila, Tolima, Cundinamarca)
+    • 1200–2000 m s.n.m.
+  fecha: 'Linden & Reichenbach f. (1860) Bot. Zeitung 18: 74; Sarmiento (2007)'
+  foto_campo: images/cattleya_trianae.jpg
+arquitectura_floral:
+  simetria: zigomorfa
+  tipo_inflorescencia: racimo_paucifloro
+  disposicion: erecta
+perianto:
+  verticilos: homoclamideo_diferenciado
+  caliz:
+    sepalos_numero: 3
+    fusion: libres
+    longitud_tubo_mm: 75.0
+    ancho_sepalo_mm: 20.0
+    color_hex: '#E8A8D8'
+  corola:
+    petalos_numero: 3
+    fusion: labelo_tubular
+    longitud_tubo_mm: 38.0
+    longitud_limbo_mm: 78.0
+    ancho_petalo_mm: 52.0
+    diferenciacion_dorsoventral:
+      factor_tamano_dorsal: 1.0
+      factor_tamano_ventral: 1.35
+      curvatura_dorsal_grados: 25.0
+    grosor_pared_mm: 1.2
+    color_garganta_hex: '#F5B818'
+    color_limbo_hex: '#DF88CA'
+    color_labelo_apice_hex: '#8E1268'
+androceo:
+  estambres_numero: 1
+  fusion_filamentos: ginostemo
+  filamento_longitud_mm: 28.0
+  filamento_grosor_mm: 6.5
+  antera_longitud_mm: 4.0
+  color_filamento_hex: '#F7EBF4'
+  color_antera_hex: '#F5D020'
+gineceo:
+  posicion_ovario: infero_pedicelado
+  estilo_longitud_mm: 28.0
+  estilo_grosor_mm: 6.5
+  estigma_lobulos: 1
+  color_ovario_hex: '#6FA848'
+  color_estilo_hex: '#F7EBF4'
+  color_apice_hex: '#F5D020'

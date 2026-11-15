@@ -1,14 +1,10 @@
 colecta:
-  id_muestra: COL-NAR-002
-  nombre_cientifico: Anthurium andraeanum Linden ex André
-  familia: Araceae
-  subfamilia: Pothoideae
-  seccion: Calomystrium
+  id_muestra: COL-ATL-002 | Nativa de Colombia
+  familia: Araceae (Sección Calomystrium)
   genero: Anthurium
   especie: Anthurium andraeanum
-  origen: Nativa (Andes Suroccidentales / Chocó Biogeográfico)
-  localidad: Reserva Natural Río Ñambí, Barbacoas, Nariño, Colombia
-  fecha: '2026-11-06'
+  localidad: Pacífico / Chocó Biogeográfico (Nariño, Cauca, Chocó) • 400–1200 m s.n.m.
+  fecha: 'Linden ex André (1877) Ill. Hort. 24: 43, Pl. 271; Elibox & Umaharan (2012)'
   foto_campo: images/anthurium_andraeanum.jpg
 arquitectura_floral:
   simetria: zigomorfa

@@ -1,0 +1,51 @@
+colecta:
+  id_muestra: COL-ATL-005 | Endémica de Colombia (Páramos)
+  familia: Asteraceae (Subtribu Espeletiinae)
+  genero: Espeletia
+  especie: Espeletia grandiflora
+  localidad: Región Andina — Páramos de Chingaza, Sumapaz y Cruz Verde (Cundinamarca,
+    Meta) • 3100–4100 m s.n.m.
+  fecha: 'Humboldt & Bonpland (1809) Pl. Aequinoct. 2: 11; Mavárez (2021); Pouchon
+    et al. (2018)'
+  foto_campo: images/espeletia_grandiflora.jpg
+arquitectura_floral:
+  simetria: actinomorfa_capituliforme
+  tipo_inflorescencia: capitulo
+  disposicion: inclinada_a_pendula
+perianto:
+  verticilos: involucro_y_ligulas
+  caliz:
+    sepalos_numero: 28
+    fusion: involucro_lanuginoso
+    longitud_tubo_mm: 18.0
+    color_hex: '#7F8F62'
+  corola:
+    petalos_numero: 32
+    fusion: ligulada
+    longitud_tubo_mm: 5.0
+    longitud_limbo_mm: 22.0
+    ancho_petalo_mm: 5.8
+    diferenciacion_dorsoventral:
+      factor_tamano_dorsal: 1.0
+      factor_tamano_ventral: 1.0
+      curvatura_dorsal_grados: 14.0
+    grosor_pared_mm: 0.9
+    color_garganta_hex: '#C98A00'
+    color_limbo_hex: '#F5C400'
+androceo:
+  estambres_numero: 120
+  fusion_filamentos: singenesicos
+  filamento_longitud_mm: 3.8
+  filamento_grosor_mm: 0.5
+  antera_longitud_mm: 2.5
+  color_filamento_hex: '#D99B00'
+  color_antera_hex: '#7A4908'
+gineceo:
+  posicion_ovario: infero_cipsela
+  estilo_longitud_mm: 5.5
+  estilo_grosor_mm: 22.0
+  diametro_receptaculo_mm: 22.0
+  estigma_lobulos: 2
+  color_ovario_hex: '#4F3A1D'
+  color_estilo_hex: '#E0A800'
+  color_apice_hex: '#B87800'

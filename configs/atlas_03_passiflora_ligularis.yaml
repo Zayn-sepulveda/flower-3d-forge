@@ -1,0 +1,61 @@
+colecta:
+  id_muestra: COL-ATL-003 | Nativa de Colombia (Andes)
+  familia: Passifloraceae (Subgén. Passiflora)
+  genero: Passiflora
+  especie: Passiflora ligularis
+  localidad: Región Andina (Cordilleras Occidental, Central y Oriental) • 1500–2600
+    m s.n.m.
+  fecha: 'Jussieu (1805) Ann. Mus. Hist. Nat. 6: 113; Ocampo Pérez et al. (2007)'
+  foto_campo: images/passiflora_ligularis.jpg
+arquitectura_floral:
+  simetria: actinomorfa
+  tipo_inflorescencia: solitaria_axilar
+  disposicion: pendula_a_horizontal
+perianto:
+  verticilos: diclamideo_con_corona
+  caliz:
+    sepalos_numero: 5
+    fusion: libres_hipanto
+    longitud_tubo_mm: 12.0
+    longitud_limbo_mm: 44.0
+    ancho_sepalo_mm: 15.0
+    color_hex: '#E8F2D8'
+  corola:
+    petalos_numero: 5
+    fusion: libres
+    longitud_tubo_mm: 0.0
+    longitud_limbo_mm: 43.0
+    ancho_petalo_mm: 13.0
+    diferenciacion_dorsoventral:
+      factor_tamano_dorsal: 1.0
+      factor_tamano_ventral: 1.0
+      curvatura_dorsal_grados: 12.0
+    grosor_pared_mm: 1.2
+    color_garganta_hex: '#5B1E6E'
+    color_limbo_hex: '#F7EFFA'
+  corona:
+    series_numero: 5
+    filamentos_externos_numero: 64
+    longitud_externos_mm: 40.0
+    color_base_hex: '#4A1259'
+    color_medio_hex: '#FFFFFF'
+    color_apice_hex: '#6C3BAA'
+androceo:
+  estambres_numero: 5
+  fusion_filamentos: androginoforo
+  androginoforo_longitud_mm: 12.0
+  filamento_longitud_mm: 9.5
+  filamento_grosor_mm: 1.3
+  antera_longitud_mm: 9.0
+  color_filamento_hex: '#CBE09E'
+  color_antera_hex: '#F5D033'
+gineceo:
+  posicion_ovario: supero_en_androginoforo
+  ovario_longitud_mm: 9.0
+  ovario_grosor_mm: 6.0
+  estilo_longitud_mm: 10.5
+  estilo_grosor_mm: 1.2
+  estigma_lobulos: 3
+  color_ovario_hex: '#9CC97F'
+  color_estilo_hex: '#E2D5E8'
+  color_apice_hex: '#82B366'
