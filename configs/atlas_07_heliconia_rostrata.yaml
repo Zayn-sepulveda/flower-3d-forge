@@ -1,6 +1,6 @@
 colecta:
   id_muestra: COL-ATL-007 | Nativa de Colombia (Amazonía)
-  familia: Heliconiaceae (Orden Zingiberales)
+  familia: Heliconiaceae
   genero: Heliconia
   especie: Heliconia rostrata
   localidad: Región Amazónica y Piedemonte Andino-Amazónico (Putumayo, Caquetá, Amazonas)
@@ -9,41 +9,40 @@ colecta:
   foto_campo: images/heliconia_rostrata.jpg
 arquitectura_floral:
   simetria: zigomorfa
-  tipo_inflorescencia: tirso_cincinado_pendulo
+  tipo_inflorescencia: tirso_pendulo
   disposicion: pendula
 perianto:
-  verticilos: bracteas_cimbiformes
+  verticilos: bracteada
   caliz:
-    sepalos_numero: 3
-    fusion: tubular
-    longitud_tubo_mm: 48.0
-    color_hex: '#2E6F21'
+    sepalos_numero: 0
+    fusion: nulo
+    longitud_tubo_mm: 50.0
+    color_hex: '#B00020'
   corola:
-    petalos_numero: 7
-    fusion: bracteas_distica
-    longitud_tubo_mm: 18.0
-    longitud_limbo_mm: 82.0
-    ancho_petalo_mm: 38.0
+    petalos_numero: 14
+    fusion: cimbiforme
+    longitud_tubo_mm: 60.0
+    longitud_limbo_mm: 120.0
+    ancho_petalo_mm: 45.0
     diferenciacion_dorsoventral:
       factor_tamano_dorsal: 1.0
       factor_tamano_ventral: 1.0
-      curvatura_dorsal_grados: 30.0
-    grosor_pared_mm: 2.2
-    color_garganta_hex: '#F2D01B'
-    color_limbo_hex: '#D9141E'
+      curvatura_dorsal_grados: 0.0
+    grosor_pared_mm: 3.0
+    color_garganta_hex: '#E6192B'
+    color_limbo_hex: '#FFD700'
 androceo:
   estambres_numero: 5
-  fusion_filamentos: adnatos_base
-  filamento_longitud_mm: 42.0
-  filamento_grosor_mm: 1.2
-  antera_longitud_mm: 9.0
-  color_filamento_hex: '#FFF9D6'
-  color_antera_hex: '#E8C538'
+  fusion_filamentos: libres
+  filamento_longitud_mm: 40.0
+  filamento_grosor_mm: 2.0
+  antera_longitud_mm: 12.0
+  color_filamento_hex: '#008B45'
+  color_antera_hex: '#FFFFFF'
 gineceo:
-  posicion_ovario: infero_trilocular
-  estilo_longitud_mm: 44.0
-  estilo_grosor_mm: 1.1
-  estigma_lobulos: 3
-  color_ovario_hex: '#82B541'
-  color_estilo_hex: '#F5E878'
-  color_apice_hex: '#599E2A'
+  posicion_ovario: infero
+  estilo_longitud_mm: 50.0
+  estilo_grosor_mm: 3.0
+  estigma_lobulos: 1
+  color_ovario_hex: '#F5F5DC'
+  color_estilo_hex: '#FFFFFF'

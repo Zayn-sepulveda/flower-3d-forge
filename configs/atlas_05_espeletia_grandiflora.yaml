@@ -1,6 +1,6 @@
 colecta:
   id_muestra: COL-ATL-005 | Endémica de Colombia (Páramos)
-  familia: Asteraceae (Subtribu Espeletiinae)
+  familia: Asteraceae
   genero: Espeletia
   especie: Espeletia grandiflora
   localidad: Región Andina — Páramos de Chingaza, Sumapaz y Cruz Verde (Cundinamarca,
@@ -9,43 +9,41 @@ colecta:
     et al. (2018)'
   foto_campo: images/espeletia_grandiflora.jpg
 arquitectura_floral:
-  simetria: actinomorfa_capituliforme
+  simetria: actinomorfa
   tipo_inflorescencia: capitulo
-  disposicion: inclinada_a_pendula
+  disposicion: inclinada
 perianto:
-  verticilos: involucro_y_ligulas
+  verticilos: diclamidea
   caliz:
-    sepalos_numero: 28
-    fusion: involucro_lanuginoso
-    longitud_tubo_mm: 18.0
+    sepalos_numero: 48
+    fusion: dialisepalo
+    longitud_tubo_mm: 28.0
     color_hex: '#7F8F62'
   corola:
-    petalos_numero: 32
-    fusion: ligulada
-    longitud_tubo_mm: 5.0
-    longitud_limbo_mm: 22.0
-    ancho_petalo_mm: 5.8
+    petalos_numero: 42
+    fusion: gamopetala
+    longitud_tubo_mm: 5.5
+    longitud_limbo_mm: 72.0
+    ancho_petalo_mm: 21.0
     diferenciacion_dorsoventral:
-      factor_tamano_dorsal: 1.0
-      factor_tamano_ventral: 1.0
-      curvatura_dorsal_grados: 14.0
-    grosor_pared_mm: 0.9
+      factor_tamano_dorsal: 1.15
+      factor_tamano_ventral: 0.88
+      curvatura_dorsal_grados: 25.0
+    grosor_pared_mm: 1.1
     color_garganta_hex: '#C98A00'
     color_limbo_hex: '#F5C400'
 androceo:
-  estambres_numero: 120
-  fusion_filamentos: singenesicos
-  filamento_longitud_mm: 3.8
-  filamento_grosor_mm: 0.5
-  antera_longitud_mm: 2.5
-  color_filamento_hex: '#D99B00'
-  color_antera_hex: '#7A4908'
+  estambres_numero: 5
+  fusion_filamentos: singenesico
+  filamento_longitud_mm: 4.2
+  filamento_grosor_mm: 0.6
+  antera_longitud_mm: 4.8
+  color_filamento_hex: '#4E3629'
+  color_antera_hex: '#6E4208'
 gineceo:
-  posicion_ovario: infero_cipsela
-  estilo_longitud_mm: 5.5
-  estilo_grosor_mm: 22.0
-  diametro_receptaculo_mm: 22.0
+  posicion_ovario: infero
+  estilo_longitud_mm: 9.8
+  estilo_grosor_mm: 0.85
   estigma_lobulos: 2
-  color_ovario_hex: '#4F3A1D'
-  color_estilo_hex: '#E0A800'
-  color_apice_hex: '#B87800'
+  color_ovario_hex: '#3D2012'
+  color_estilo_hex: '#F4D03F'

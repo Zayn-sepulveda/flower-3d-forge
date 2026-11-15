@@ -1,6 +1,6 @@
 colecta:
   id_muestra: COL-ATL-004 | Nativa de Colombia
-  familia: Passifloraceae (Supersección Coccinea)
+  familia: Passifloraceae
   genero: Passiflora
   especie: Passiflora vitifolia
   localidad: Chocó Biogeográfico, Magdalena Medio y Amazonía • 50–1400 m s.n.m.
@@ -9,42 +9,39 @@ colecta:
 arquitectura_floral:
   simetria: actinomorfa
   tipo_inflorescencia: solitaria
-  disposicion: erecta_a_patente
+  disposicion: horizontal
 perianto:
-  verticilos: diclamideo_con_corona
+  verticilos: diclamidea
   caliz:
     sepalos_numero: 5
-    fusion: tubo_corto
-    longitud_tubo_mm: 16.0
-    longitud_limbo_mm: 62.0
-    ancho_sepalo_mm: 16.0
-    color_hex: '#D9141E'
+    fusion: dialisepalo
+    longitud_tubo_mm: 15.0
+    color_hex: '#D62828'
   corola:
     petalos_numero: 5
-    fusion: libres
-    longitud_tubo_mm: 0.0
-    longitud_limbo_mm: 58.0
-    ancho_petalo_mm: 14.0
+    fusion: dialipetala
+    longitud_tubo_mm: 22.0
+    longitud_limbo_mm: 65.0
+    ancho_petalo_mm: 18.0
     diferenciacion_dorsoventral:
       factor_tamano_dorsal: 1.0
       factor_tamano_ventral: 1.0
-      curvatura_dorsal_grados: 18.0
-    grosor_pared_mm: 1.4
+      curvatura_dorsal_grados: 90.0
+    grosor_pared_mm: 1.2
     color_garganta_hex: '#FFFFFF'
-    color_limbo_hex: '#E61924'
+    color_limbo_hex: '#E6192E'
 androceo:
   estambres_numero: 5
-  fusion_filamentos: androginoforo
-  filamento_longitud_mm: 11.0
-  filamento_grosor_mm: 1.4
-  antera_longitud_mm: 10.0
-  color_filamento_hex: '#F5E6EB'
-  color_antera_hex: '#E5C647'
+  fusion_filamentos: monadelfo
+  filamento_longitud_mm: 32.0
+  filamento_grosor_mm: 3.5
+  antera_longitud_mm: 11.0
+  color_filamento_hex: '#F9EBEA'
+  color_antera_hex: '#C6C16D'
 gineceo:
   posicion_ovario: supero
-  estilo_longitud_mm: 12.0
-  estilo_grosor_mm: 1.3
+  estilo_longitud_mm: 14.0
+  estilo_grosor_mm: 2.5
   estigma_lobulos: 3
-  color_ovario_hex: '#B8D49E'
-  color_estilo_hex: '#F7D4D8'
-  color_apice_hex: '#E0B84C'
+  color_ovario_hex: '#F9EBEA'
+  color_estilo_hex: '#D62828'

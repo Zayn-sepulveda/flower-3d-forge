@@ -1,43 +1,43 @@
 # Materiales generados automaticamente
 
 newmtl Mat_Caliz
-Kd 0.9098 0.9490 0.8471
+Kd 0.8941 0.9412 0.8157
 Ka 0.2 0.2 0.2
 Ks 0.15 0.15 0.15
 Ns 12
 
 newmtl Mat_CorolaGarganta
-Kd 0.3569 0.1176 0.4314
+Kd 0.2902 0.0706 0.3490
 Ka 0.2 0.2 0.2
 Ks 0.15 0.15 0.15
 Ns 12
 
 newmtl Mat_CorolaLimbo
-Kd 0.9686 0.9373 0.9804
+Kd 0.9647 0.9255 0.9804
 Ka 0.2 0.2 0.2
 Ks 0.15 0.15 0.15
 Ns 12
 
 newmtl Mat_Filamento
-Kd 0.7961 0.8784 0.6196
+Kd 0.8314 0.8627 0.7216
 Ka 0.2 0.2 0.2
 Ks 0.15 0.15 0.15
 Ns 12
 
 newmtl Mat_Antera
-Kd 0.9608 0.8157 0.2000
+Kd 0.8235 0.7922 0.3059
 Ka 0.2 0.2 0.2
 Ks 0.15 0.15 0.15
 Ns 12
 
 newmtl Mat_Ovario
-Kd 0.6118 0.7882 0.4980
+Kd 0.5529 0.7216 0.2902
 Ka 0.2 0.2 0.2
 Ks 0.15 0.15 0.15
 Ns 12
 
 newmtl Mat_Estilo
-Kd 0.8863 0.8353 0.9098
+Kd 0.8314 0.8627 0.7216
 Ka 0.2 0.2 0.2
 Ks 0.15 0.15 0.15
 Ns 12
