@@ -1,0 +1,99 @@
+name: Validar Atlas Morfométrico 3D
+
+on:
+  push:
+    branches: [ "main", "feat/**", "test/**" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  auditoria-botanica-y-3d:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: 3. Instalar dependencias (PyYAML, NumPy)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 4. Auditar caracteres invisibles (\xa0) y sintaxis Python
+        run: |
+          python -c "
+          import pathlib, sys, py_compile
+
+          errores = []
+          for folder in ['src', 'configs']:
+              for p in pathlib.Path(folder).rglob('*'):
+                  if p.is_file() and p.suffix in {'.py', '.yaml', '.yml'}:
+                      raw = p.read_bytes()
+                      if b'\xc2\xa0' in raw:
+                          errores.append(f'Carácter invisible \\xa0 detectado en: {p}')
+                      if p.suffix == '.py':
+                          try:
+                              py_compile.compile(str(p), doraise=True)
+                          except Exception as e:
+                              errores.append(f'Error de sintaxis en {p}: {e}')
+
+          idx = pathlib.Path('index.html')
+          if idx.exists() and b'\xc2\xa0' in idx.read_bytes():
+              errores.append('Carácter invisible \\xa0 detectado en: index.html')
+
+          if errores:
+              print('\n'.join(errores))
+              sys.exit(1)
+          print('✔ Sintaxis limpia y cero caracteres invisibles.')
+          "
+
+      - name: 5. Validar taxonomía canónica, compilar modelos y auditar grupos g
+        run: |
+          python -c "
+          import glob, subprocess, sys, yaml, pathlib, re
+
+          familias_validas = {'Araceae', 'Passifloraceae', 'Asteraceae', 'Orchidaceae', 'Heliconiaceae'}
+          viewer_txt = pathlib.Path('src/viewer.py').read_text(encoding='utf-8')
+          errores = []
+
+          fichas = sorted(glob.glob('configs/atlas_*.yaml'))
+          if not fichas:
+              print('No se encontraron fichas configs/atlas_*.yaml')
+              sys.exit(1)
+
+          for cfg_path in fichas:
+              data = yaml.safe_load(pathlib.Path(cfg_path).read_text(encoding='utf-8'))
+              fam = str(data.get('colecta', {}).get('familia', '')).strip()
+              if fam not in familias_validas:
+                  errores.append(f'{cfg_path}: familia no canónica \"{fam}\" (debe ser una de {sorted(familias_validas)})')
+
+              res = subprocess.run([sys.executable, 'src/flower_generator.py', cfg_path], capture_output=True, text=True)
+              if res.returncode != 0:
+                  errores.append(f'Fallo compilando {cfg_path}:\n{res.stderr}')
+                  continue
+
+              especie = data.get('colecta', {}).get('especie', '').strip().lower().replace(' ', '_')
+              obj_path = pathlib.Path(f'models/{especie}.obj')
+              if not obj_path.exists():
+                  errores.append(f'No se generó el archivo esperado: {obj_path}')
+                  continue
+
+              grupos = set(re.findall(r'^g\s+(\S+)', obj_path.read_text(encoding='utf-8'), flags=re.M))
+              if not grupos:
+                  errores.append(f'{obj_path}: no contiene grupos anatómicos (^g )')
+
+              for g in sorted(grupos):
+                  if f'\"{g}\"' not in viewer_txt and f\"'{g}'\" not in viewer_txt:
+                      errores.append(f'{obj_path}: grupo \"{g}\" no está registrado en ANATOMY_DB de src/viewer.py')
+
+          if errores:
+              print('ERRORES DE AUDITORÍA DETECTADOS:\n' + '\n'.join(errores))
+              sys.exit(1)
+          print(f'✔ {len(fichas)} fichas compiladas y auditadas con éxito.')
+          "
