@@ -1050,26 +1050,17 @@
       activeMedallionSprites.push(sprite);
     }
 
-    const _cachedGeo = sessionStorage.getItem("colombia_geojson_v2");
-    if (_cachedGeo) {
-      try {
-        buildDepartmentsFromGeoJSON(JSON.parse(_cachedGeo));
+    fetch("colombia_departamentos.geojson")
+      .then(r => {
+        if (!r.ok) throw new Error("Fallback CDN");
+        return r.json();
+      })
+      .catch(() => fetch("https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/be6a6e239cd5b5b803c6e7c2ec405b793a9064dd/colombia.geo.json").then(r => r.json()))
+      .then(geojson => {
+        buildDepartmentsFromGeoJSON(geojson);
         updateMapAndCatalog();
-      } catch (e) { sessionStorage.removeItem("colombia_geojson_v2"); }
-    }
-    if (!sessionStorage.getItem("colombia_geojson_v2")) {
-      fetch("colombia_departamentos.geojson")
-        .then(r => {
-          if (!r.ok) throw new Error("Fallback CDN");
-          return r.json();
-        })
-        .catch(() => fetch("https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/be6a6e239cd5b5b803c6e7c2ec405b793a9064dd/colombia.geo.json").then(r => r.json()))
-        .then(geojson => {
-          try { sessionStorage.setItem("colombia_geojson_v2", JSON.stringify(geojson)); } catch (e) {}
-          buildDepartmentsFromGeoJSON(geojson);
-          updateMapAndCatalog();
-        });
-    }
+      })
+      .catch(err => { console.error("Error cargando mapa:", err); updateMapAndCatalog(); });
 
     // ============================================================================
     // GESTIÓN DE LOS 3 ESTADOS: NEUTRO | POR DEPARTAMENTO | POR ESPECIE
