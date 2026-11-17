@@ -59,7 +59,6 @@ jobs:
         run: |
           import glob, subprocess, sys, yaml, pathlib, re
 
-          # 1. Auto-detectar familias válidas desde src/families/*.py
           familias_validas = {
               p.stem.capitalize()
               for p in pathlib.Path('src/families').glob('*.py')
@@ -81,19 +80,16 @@ jobs:
               colecta = data.get('colecta', {})
               fam = str(colecta.get('familia', '')).strip()
 
-              # Acepta cualquier familia cuyo módulo exista en src/families/ (sin paréntesis)
               if '(' in fam or ')' in fam:
                   errores.append(f'{cfg_path}: familia "{fam}" contiene paréntesis no permitidos.')
               elif fam not in familias_validas:
                   avisos.append(f'ℹ️ {cfg_path}: familia "{fam}" usa generador genérico (aún no existe src/families/{fam.lower()}.py).')
 
-              # Compilar ficha YAML
               res = subprocess.run([sys.executable, 'src/flower_generator.py', cfg_path], capture_output=True, text=True)
               if res.returncode != 0:
                   errores.append(f'Fallo compilando {cfg_path}:\n{res.stderr}')
                   continue
 
-              # Verificar salida 3D (.obj y .html)
               especie = str(colecta.get('especie', '')).strip().lower().replace(' ', '_')
               obj_path = pathlib.Path(f'models/{especie}.obj')
               html_path = pathlib.Path(f'models/{especie}.html')
@@ -103,13 +99,22 @@ jobs:
                   continue
 
               obj_txt = obj_path.read_text(encoding='utf-8')
-              grupos = set(re.findall(r'^g\s+(\S+)', obj_txt, flags=re.M))
-              if not grupos:
-                  errores.append(f'{obj_path}: el modelo 3D no contiene grupos anatómicos (^g )')
+              tiene_caras = bool(re.search(r'^f\s+\d+', obj_txt, flags=re.M))
+              if not tiene_caras:
+                  errores.append(f'{obj_path}: el modelo 3D está vacío (no contiene caras ^f )')
+                  continue
 
-              sin_ficha_manual = [g for g in sorted(grupos) if f'"{g}"' not in viewer_txt and f"'{g}'" not in viewer_txt]
+              # Replica la lógica de src/viewer.py: usa grupos (g) o materiales (usemtl)
+              grupos = set(re.findall(r'^g\s+(\S+)', obj_txt, flags=re.M))
+              materiales = set(re.findall(r'^usemtl\s+(\S+)', obj_txt, flags=re.M))
+              claves_visor = grupos if grupos else materiales
+
+              if not grupos and materiales:
+                  avisos.append(f'ℹ️ {especie}: segmentado por materiales usemtl ({sorted(materiales)})')
+
+              sin_ficha_manual = [k for k in sorted(claves_visor) if f'"{k}"' not in viewer_txt and f"'{k}'" not in viewer_txt]
               if sin_ficha_manual:
-                  avisos.append(f'ℹ️ {especie}: {len(sin_ficha_manual)} grupo(s) usan tooltip dinámico automático: {sin_ficha_manual}')
+                  avisos.append(f'ℹ️ {especie}: {len(sin_ficha_manual)} órgano(s) usan tooltip dinámico automático: {sin_ficha_manual}')
 
           if avisos:
               print('\n--- AVISOS ADAPTATIVOS (NO BLOQUEANTES) ---')
