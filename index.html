@@ -1050,16 +1050,26 @@
       activeMedallionSprites.push(sprite);
     }
 
-    fetch("colombia_departamentos.geojson")
-      .then(r => {
-        if (!r.ok) throw new Error("Fallback CDN");
-        return r.json();
-      })
-      .catch(() => fetch("https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/be6a6e239cd5b5b803c6e7c2ec405b793a9064dd/colombia.geo.json").then(r => r.json()))
-      .then(geojson => {
-        buildDepartmentsFromGeoJSON(geojson);
+    const _cachedGeo = sessionStorage.getItem("colombia_geojson_v2");
+    if (_cachedGeo) {
+      try {
+        buildDepartmentsFromGeoJSON(JSON.parse(_cachedGeo));
         updateMapAndCatalog();
-      });
+      } catch (e) { sessionStorage.removeItem("colombia_geojson_v2"); }
+    }
+    if (!sessionStorage.getItem("colombia_geojson_v2")) {
+      fetch("colombia_departamentos.geojson")
+        .then(r => {
+          if (!r.ok) throw new Error("Fallback CDN");
+          return r.json();
+        })
+        .catch(() => fetch("https://gist.githubusercontent.com/john-guerra/43c7656821069d00dcbc/raw/be6a6e239cd5b5b803c6e7c2ec405b793a9064dd/colombia.geo.json").then(r => r.json()))
+        .then(geojson => {
+          try { sessionStorage.setItem("colombia_geojson_v2", JSON.stringify(geojson)); } catch (e) {}
+          buildDepartmentsFromGeoJSON(geojson);
+          updateMapAndCatalog();
+        });
+    }
 
     // ============================================================================
     // GESTIÓN DE LOS 3 ESTADOS: NEUTRO | POR DEPARTAMENTO | POR ESPECIE
@@ -1150,12 +1160,13 @@
                 <button class="btn-locate" data-id="${sp.id}">
                   ${isSelected ? "✦ Distribución Activa en Mapa" : "🏺 Elevar Deptos. en Mapa 3D"}
                 </button>
-                <a class="btn-atlas" href="${sp.modelUrl}" onclick="event.stopPropagation();">Abrir Disección 3D →</a>
+                <a class="btn-atlas" href="${sp.modelUrl}" onclick="event.stopPropagation(); event.preventDefault(); window.openAtlasModal(this.getAttribute('href'));">Abrir Disección 3D →</a>
               </div>
             </div>
           `;
 
-          card.addEventListener("click", () => selectSpeciesDistribution(sp));
+          card.addEventListener("mouseenter", () => window.prefetchAtlasModel && window.prefetchAtlasModel(sp.modelUrl));
+          card.addEventListener("click", () => { if (window.prefetchAtlasModel) window.prefetchAtlasModel(sp.modelUrl); selectSpeciesDistribution(sp); });
           container.appendChild(card);
         });
       }
@@ -1267,7 +1278,10 @@
         <strong>Rango altitudinal:</strong> ${sp.altitude}<br/>
         <strong>Fuente:</strong> ${sp.reference}
       `;
-      document.getElementById("pop-url").href = sp.modelUrl;
+      const _popLink = document.getElementById("pop-url");
+      _popLink.href = sp.modelUrl;
+      if (window.prefetchAtlasModel) window.prefetchAtlasModel(sp.modelUrl);
+      _popLink.onclick = function(ev) { ev.preventDefault(); window.openAtlasModal(sp.modelUrl); };
       popup.classList.add("visible");
 
       updateMapAndCatalog();
@@ -1405,6 +1419,70 @@
       renderer.render(scene, camera);
     }
     animate();
+  </script>
+
+  <!-- VISOR MODAL SUPERPUESTO (0ms retorno al mapa + liberacion WebGL) -->
+  <div id="atlas-modal-overlay" style="display:none;position:fixed;inset:0;z-index:99999;background:#090d16;opacity:0;transition:opacity 0.18s ease;">
+    <div id="atlas-modal-loader" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#e2e8f0;font-family:system-ui,sans-serif;pointer-events:none;z-index:2;">
+      <div style="width:42px;height:42px;border:3px solid rgba(56,189,248,0.25);border-top-color:#38bdf8;border-radius:50%;animation:atlasSpin 0.7s linear infinite;margin-bottom:12px;"></div>
+      <div style="font-size:14px;letter-spacing:0.04em;color:#94a3b8;">Cargando modelo morfométrico 3D...</div>
+    </div>
+    <iframe id="atlas-modal-frame" src="about:blank" style="width:100%;height:100%;border:0;display:block;position:relative;z-index:1;"></iframe>
+  </div>
+  <style>@keyframes atlasSpin { to { transform: rotate(360deg); } }</style>
+  <script>
+    (function() {
+      const prefetched = new Set();
+      window.prefetchAtlasModel = function(url) {
+        if (!url || prefetched.has(url)) return;
+        prefetched.add(url);
+        const link = document.createElement("link");
+        link.rel = "prefetch";
+        link.href = url;
+        document.head.appendChild(link);
+        fetch(url, { cache: "force-cache" }).catch(() => {});
+      };
+
+      const overlay = document.getElementById("atlas-modal-overlay");
+      const frame = document.getElementById("atlas-modal-frame");
+      const loader = document.getElementById("atlas-modal-loader");
+
+      frame.addEventListener("load", function() {
+        if (frame.src && !frame.src.endsWith("about:blank")) {
+          loader.style.display = "none";
+        }
+      });
+
+      window.openAtlasModal = function(url) {
+        if (!url) return;
+        loader.style.display = "flex";
+        overlay.style.display = "block";
+        requestAnimationFrame(() => { overlay.style.opacity = "1"; });
+        frame.src = url;
+      };
+
+      window.closeAtlasModal = function() {
+        if (overlay.style.display === "none") return;
+        overlay.style.opacity = "0";
+        setTimeout(() => {
+          overlay.style.display = "none";
+          try {
+            if (frame.contentWindow && frame.contentWindow.disposeAtlasScene) {
+              frame.contentWindow.disposeAtlasScene();
+            }
+          } catch (e) {}
+          frame.src = "about:blank";
+        }, 160);
+      };
+
+      window.addEventListener("message", function(ev) {
+        if (ev.data === "close-atlas-modal") window.closeAtlasModal();
+      });
+
+      window.addEventListener("keydown", function(ev) {
+        if (ev.key === "Escape" && overlay.style.display !== "none") window.closeAtlasModal();
+      });
+    })();
   </script>
 </body>
 </html>

@@ -71,7 +71,7 @@
         <div class="tt-desc" id="tt-desc">Descripción</div>
     </div>
 
-    <a href="../index.html" class="back-btn">⬅ Volver al catálogo</a>
+    <a href="../index.html" class="back-btn" onclick="if(window.parent && window.parent !== window){ event.preventDefault(); if(window.disposeAtlasScene) window.disposeAtlasScene(); window.parent.postMessage('close-atlas-modal', '*'); } else if(document.referrer && document.referrer.indexOf(location.host) !== -1 && history.length > 1){ event.preventDefault(); history.back(); }">⬅ Volver al catálogo</a>
     <div class="photo-panel">
         <img src="../images/espeletia_grandiflora.jpg" alt="Espeletia grandiflora" onerror="this.parentElement.style.display='none';">
         <div class="photo-label">ESPÉCIMEN DE REFERENCIA</div>
@@ -156,39 +156,74 @@
 
         const sagittalPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
 
-        const vertices = [];
-        const vColors = [];
+        const vx = [], vy = [], vz = [];
+        const vr = [], vg = [], vb = [], hasCol = [];
         const organMap = {};
         let currentGroup = "";
         let currentMat = "Mat_CorolaLimbo";
-        const NL_CHAR = String.fromCharCode(10);
+        let activeBucket = null;
+        const lines = objRaw.split(String.fromCharCode(10));
 
-        objRaw.split(NL_CHAR).forEach(line => {
-            const parts = line.trim().split(' ').filter(Boolean);
-            if (!parts.length) return;
-            if (parts[0] === 'v') {
-                vertices.push([parseFloat(parts[1]), parseFloat(parts[2]), parseFloat(parts[3])]);
-                if (parts.length >= 7) {
-                    vColors.push([parseFloat(parts[4]), parseFloat(parts[5]), parseFloat(parts[6])]);
+        for (let i = 0, n = lines.length; i < n; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const c0 = line.charCodeAt(0);
+            if (c0 === 118 && line.charCodeAt(1) === 32) {
+                const p = line.split(' ');
+                vx.push(+p[1]); vy.push(+p[2]); vz.push(+p[3]);
+                if (p.length >= 7) {
+                    vr.push(+p[4]); vg.push(+p[5]); vb.push(+p[6]);
+                    hasCol.push(1);
                 } else {
-                    vColors.push(null);
+                    vr.push(0); vg.push(0); vb.push(0);
+                    hasCol.push(0);
                 }
-            } else if (parts[0] === 'g') {
-                currentGroup = parts[1] || "Organo_Floral";
-            } else if (parts[0] === 'usemtl') {
-                currentMat = parts[1];
-            } else if (parts[0] === 'f') {
-                const key = currentGroup || currentMat || "Estructura_Base";
-                if (!organMap[key]) organMap[key] = { pos: [], col: [], mat: currentMat };
-                const idx = parts.slice(1).map(p => parseInt(p.split('/')[0], 10) - 1);
-                if (idx.length >= 3 && vertices[idx[0]] && vertices[idx[1]] && vertices[idx[2]]) {
-                    organMap[key].pos.push(...vertices[idx[0]], ...vertices[idx[1]], ...vertices[idx[2]]);
-                    if (vColors[idx[0]]) {
-                        organMap[key].col.push(...vColors[idx[0]], ...vColors[idx[1]], ...vColors[idx[2]]);
+            } else if (c0 === 102 && line.charCodeAt(1) === 32) {
+                if (!activeBucket) {
+                    const key = currentGroup || currentMat || "Estructura_Base";
+                    if (!organMap[key]) organMap[key] = { pos: [], col: [], mat: currentMat };
+                    activeBucket = organMap[key];
+                }
+                const p = line.split(' ');
+                const i0 = parseInt(p[1], 10) - 1;
+                const i1 = parseInt(p[2], 10) - 1;
+                const i2 = parseInt(p[3], 10) - 1;
+                if (i0 >= 0 && i1 >= 0 && i2 >= 0 && i0 < vx.length) {
+                    activeBucket.pos.push(
+                        vx[i0], vy[i0], vz[i0],
+                        vx[i1], vy[i1], vz[i1],
+                        vx[i2], vy[i2], vz[i2]
+                    );
+                    if (hasCol[i0]) {
+                        activeBucket.col.push(
+                            vr[i0], vg[i0], vb[i0],
+                            vr[i1], vg[i1], vb[i1],
+                            vr[i2], vg[i2], vb[i2]
+                        );
                     }
                 }
+            } else if (c0 === 103 && line.charCodeAt(1) === 32) {
+                currentGroup = line.slice(2).trim() || "Organo_Floral";
+                const key = currentGroup || currentMat || "Estructura_Base";
+                if (!organMap[key]) organMap[key] = { pos: [], col: [], mat: currentMat };
+                activeBucket = organMap[key];
+            } else if (line.startsWith("usemtl ")) {
+                currentMat = line.slice(7).trim();
+                const key = currentGroup || currentMat || "Estructura_Base";
+                if (!organMap[key]) organMap[key] = { pos: [], col: [], mat: currentMat };
+                activeBucket = organMap[key];
             }
-        });
+        }
+
+        window.disposeAtlasScene = function() {
+            try {
+                interactMeshes.forEach(m => {
+                    if (m.geometry) m.geometry.dispose();
+                    if (m.material) m.material.dispose();
+                });
+                renderer.dispose();
+            } catch(e) {}
+        };
 
         const flowerGroup = new THREE.Group();
         const interactMeshes = [];
