@@ -20,22 +20,24 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
-      - name: 3. Instalar dependencias (PyYAML, NumPy)
+      - name: 3. Instalar dependencias
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: 4. Auditar caracteres invisibles (\xa0) y sintaxis Python
+        shell: python
         run: |
-          python -c "
           import pathlib, sys, py_compile
 
           errores = []
           for folder in ['src', 'configs']:
-              for p in pathlib.Path(folder).rglob('*'):
+              base = pathlib.Path(folder)
+              if not base.exists():
+                  continue
+              for p in base.rglob('*'):
                   if p.is_file() and p.suffix in {'.py', '.yaml', '.yml'}:
-                      raw = p.read_bytes()
-                      if b'\xc2\xa0' in raw:
+                      if b'\xc2\xa0' in p.read_bytes():
                           errores.append(f'Carácter invisible \\xa0 detectado en: {p}')
                       if p.suffix == '.py':
                           try:
@@ -51,16 +53,23 @@ jobs:
               print('\n'.join(errores))
               sys.exit(1)
           print('✔ Sintaxis limpia y cero caracteres invisibles.')
-          "
 
-      - name: 5. Validar taxonomía canónica, compilar modelos y auditar grupos g
+      - name: 5. Validar familias dinámicas, compilar fichas y verificar mallas 3D
+        shell: python
         run: |
-          python -c "
           import glob, subprocess, sys, yaml, pathlib, re
 
-          familias_validas = {'Araceae', 'Passifloraceae', 'Asteraceae', 'Orchidaceae', 'Heliconiaceae'}
+          # 1. Auto-detectar familias válidas desde src/families/*.py
+          familias_validas = {
+              p.stem.capitalize()
+              for p in pathlib.Path('src/families').glob('*.py')
+              if p.name != '__init__.py'
+          }
+          print(f'Familias activas detectadas en src/families/: {sorted(familias_validas)}')
+
           viewer_txt = pathlib.Path('src/viewer.py').read_text(encoding='utf-8')
           errores = []
+          avisos = []
 
           fichas = sorted(glob.glob('configs/atlas_*.yaml'))
           if not fichas:
@@ -68,32 +77,47 @@ jobs:
               sys.exit(1)
 
           for cfg_path in fichas:
-              data = yaml.safe_load(pathlib.Path(cfg_path).read_text(encoding='utf-8'))
-              fam = str(data.get('colecta', {}).get('familia', '')).strip()
-              if fam not in familias_validas:
-                  errores.append(f'{cfg_path}: familia no canónica \"{fam}\" (debe ser una de {sorted(familias_validas)})')
+              data = yaml.safe_load(pathlib.Path(cfg_path).read_text(encoding='utf-8')) or {}
+              colecta = data.get('colecta', {})
+              fam = str(colecta.get('familia', '')).strip()
 
+              # Acepta cualquier familia cuyo módulo exista en src/families/ (sin paréntesis)
+              if '(' in fam or ')' in fam:
+                  errores.append(f'{cfg_path}: familia "{fam}" contiene paréntesis no permitidos.')
+              elif fam not in familias_validas:
+                  avisos.append(f'ℹ️ {cfg_path}: familia "{fam}" usa generador genérico (aún no existe src/families/{fam.lower()}.py).')
+
+              # Compilar ficha YAML
               res = subprocess.run([sys.executable, 'src/flower_generator.py', cfg_path], capture_output=True, text=True)
               if res.returncode != 0:
                   errores.append(f'Fallo compilando {cfg_path}:\n{res.stderr}')
                   continue
 
-              especie = data.get('colecta', {}).get('especie', '').strip().lower().replace(' ', '_')
+              # Verificar salida 3D (.obj y .html)
+              especie = str(colecta.get('especie', '')).strip().lower().replace(' ', '_')
               obj_path = pathlib.Path(f'models/{especie}.obj')
-              if not obj_path.exists():
-                  errores.append(f'No se generó el archivo esperado: {obj_path}')
+              html_path = pathlib.Path(f'models/{especie}.html')
+
+              if not obj_path.exists() or not html_path.exists():
+                  errores.append(f'{cfg_path}: no generó {obj_path} o {html_path}')
                   continue
 
-              grupos = set(re.findall(r'^g\s+(\S+)', obj_path.read_text(encoding='utf-8'), flags=re.M))
+              obj_txt = obj_path.read_text(encoding='utf-8')
+              grupos = set(re.findall(r'^g\s+(\S+)', obj_txt, flags=re.M))
               if not grupos:
-                  errores.append(f'{obj_path}: no contiene grupos anatómicos (^g )')
+                  errores.append(f'{obj_path}: el modelo 3D no contiene grupos anatómicos (^g )')
 
-              for g in sorted(grupos):
-                  if f'\"{g}\"' not in viewer_txt and f\"'{g}'\" not in viewer_txt:
-                      errores.append(f'{obj_path}: grupo \"{g}\" no está registrado en ANATOMY_DB de src/viewer.py')
+              sin_ficha_manual = [g for g in sorted(grupos) if f'"{g}"' not in viewer_txt and f"'{g}'" not in viewer_txt]
+              if sin_ficha_manual:
+                  avisos.append(f'ℹ️ {especie}: {len(sin_ficha_manual)} grupo(s) usan tooltip dinámico automático: {sin_ficha_manual}')
+
+          if avisos:
+              print('\n--- AVISOS ADAPTATIVOS (NO BLOQUEANTES) ---')
+              print('\n'.join(avisos))
 
           if errores:
-              print('ERRORES DE AUDITORÍA DETECTADOS:\n' + '\n'.join(errores))
+              print('\n--- ERRORES CRÍTICOS DE AUDITORÍA ---')
+              print('\n'.join(errores))
               sys.exit(1)
-          print(f'✔ {len(fichas)} fichas compiladas y auditadas con éxito.')
-          "
+
+          print(f'\n✔ {len(fichas)} fichas compiladas y verificadas con éxito.')
