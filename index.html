@@ -1041,7 +1041,7 @@
       dynamicPinsGroup.add(ring);
 
       // Medallón con la fotografía circular de la especie
-      const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true, alphaTest: 0.08, depthWrite: false });
       const sprite = new THREE.Sprite(spriteMat);
       sprite.position.set(x, elevatedBaseY + stemH + 1.35, z);
       sprite.scale.set(3.2, 3.2, 1.0);
