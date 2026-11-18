@@ -528,6 +528,63 @@
       .map-stage { height: 480px; border-right: none; border-bottom: 1px solid var(--border-warm); }
       .catalog-panel { height: auto; }
     }
+
+    .hud-mini-btn {
+      background: rgba(223, 177, 91, 0.14);
+      border: 1px solid rgba(223, 177, 91, 0.45);
+      color: var(--gold-tumbaga);
+      border-radius: 6px;
+      width: 24px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .map-overlay-head, .map-legend-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .map-legend-head {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--gold-tumbaga);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .map-overlay-top.minimized p { display: none; }
+    .map-overlay-top.minimized h3 { margin-bottom: 0; font-size: 0.96rem; }
+    .map-legend.minimized .legend-rows { display: none; }
+    .map-legend:not(.minimized) .legend-rows { margin-top: 7px; }
+
+    @media (max-width: 768px) {
+      .map-overlay-top {
+        top: 10px !important;
+        left: 10px !important;
+        right: 10px !important;
+        max-width: none !important;
+        padding: 10px 12px !important;
+      }
+      .map-reset-btn {
+        top: auto !important;
+        bottom: 12px !important;
+        right: 12px !important;
+        padding: 8px 11px !important;
+        font-size: 0.74rem !important;
+      }
+      .map-legend {
+        bottom: 12px !important;
+        left: 12px !important;
+        padding: 8px 11px !important;
+        max-width: calc(56vw - 14px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -567,8 +624,11 @@
       <canvas id="colombia-map-canvas"></canvas>
       <div id="dept-tooltip" class="dept-tooltip"></div>
 
-      <div class="map-overlay-top">
-        <h3 id="active-dept-title">Territorio Colombiano — Estado Neutro</h3>
+      <div class="map-overlay-top" id="map-info-box">
+        <div class="map-overlay-head" onclick="toggleMapBox('map-info-box', 'btn-min-mapinfo')">
+          <h3 id="active-dept-title">Territorio Colombiano — Estado Neutro</h3>
+          <button type="button" class="hud-mini-btn" id="btn-min-mapinfo" aria-label="Minimizar guía">−</button>
+        </div>
         <p id="active-dept-desc">
           Selecciona un <strong>departamento en el mapa</strong> para elevar su relieve y descubrir sus especies, o elige una <strong>especie del catálogo</strong> para elevar todos los departamentos donde se distribuye con su medallón floral.
         </p>
@@ -576,11 +636,17 @@
 
       <button class="map-reset-btn" id="reset-camera-btn">Restaurar Mapa Neutro</button>
 
-      <div class="map-legend">
-        <div class="legend-row"><span class="dot" style="background:#3b2e25;"></span> Reposo Neutro: Arcilla basal sin pines</div>
-        <div class="legend-row"><span class="dot" style="background:#c86446;"></span> Depto. Elevado: Territorio activo seleccionado</div>
-        <div class="legend-row"><span class="dot" style="background:#dfb15b;"></span> Medallón Oro Tumbaga: Especie Endémica</div>
-        <div class="legend-row"><span class="dot" style="background:#52a37e;"></span> Medallón Jade: Especie Nativa</div>
+      <div class="map-legend" id="map-legend-box">
+        <div class="map-legend-head" onclick="toggleMapBox('map-legend-box', 'btn-min-legend')">
+          <span>🗺️ Leyenda</span>
+          <button type="button" class="hud-mini-btn" id="btn-min-legend" aria-label="Minimizar leyenda">−</button>
+        </div>
+        <div class="legend-rows">
+          <div class="legend-row"><span class="dot" style="background:#3b2e25;"></span> Reposo Neutro: Arcilla basal sin pines</div>
+          <div class="legend-row"><span class="dot" style="background:#c86446;"></span> Depto. Elevado: Territorio activo seleccionado</div>
+          <div class="legend-row"><span class="dot" style="background:#dfb15b;"></span> Medallón Oro Tumbaga: Especie Endémica</div>
+          <div class="legend-row"><span class="dot" style="background:#52a37e;"></span> Medallón Jade: Especie Nativa</div>
+        </div>
       </div>
 
       <div class="map-popup" id="map-popup">
@@ -1310,7 +1376,19 @@
     const targetCamPos = new THREE.Vector3().copy(camera.position);
     const targetCamLookAt = new THREE.Vector3().copy(controls.target);
 
+    window.toggleMapBox = function(boxId, btnId) {
+      const box = document.getElementById(boxId);
+      const btn = document.getElementById(btnId);
+      if (!box || !btn) return;
+      box.classList.toggle("minimized");
+      btn.textContent = box.classList.contains("minimized") ? "+" : "−";
+    };
+    if (window.innerWidth <= 768) {
+      toggleMapBox("map-legend-box", "btn-min-legend");
+    }
+
     canvas.addEventListener("pointermove", (e) => {
+      if (e.pointerType && e.pointerType !== "mouse") return;
       const rect = canvas.getBoundingClientRect();
       mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -1348,7 +1426,7 @@
     });
 
     canvas.addEventListener("pointerup", (e) => {
-      if (Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y) > 6) return;
+      if (Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y) > 9) return;
 
       const rect = canvas.getBoundingClientRect();
       mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;

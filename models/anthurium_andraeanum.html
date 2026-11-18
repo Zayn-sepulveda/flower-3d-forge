@@ -6,75 +6,129 @@
     <title>Visor Botánico 3D - Anthurium andraeanum</title>
     <style>
         html, body { width: 100vw; height: 100vh; margin: 0; padding: 0; overflow: hidden; background-color: #0f1218; background-image: radial-gradient(circle at center, #1e2430 0%, #0f1218 100%); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; user-select: none; }
-        .hud-panel { position: absolute; top: 18px; left: 18px; background: rgba(15, 20, 28, 0.90); color: #e2e8f0; padding: 16px 20px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); z-index: 10; font-size: 0.86rem; line-height: 1.55; backdrop-filter: blur(8px); max-width: 310px; }
-        .hud-panel h2 { margin: 0 0 6px 0; font-style: italic; color: #58a6ff; font-size: 1.3rem; }
-        .hud-hint { color: #79c0ff; font-size: 0.76rem; margin-top: 8px; }
+        .hud-panel { position: absolute; top: 16px; left: 16px; background: rgba(15, 20, 28, 0.92); color: #e2e8f0; padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.14); z-index: 15; font-size: 0.85rem; line-height: 1.5; backdrop-filter: blur(8px); max-width: 315px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); transition: all 0.2s ease; }
+        .hud-panel h2 { margin: 0; font-style: italic; color: #58a6ff; font-size: 1.18rem; line-height: 1.2; }
+        .hud-hint { color: #79c0ff; font-size: 0.75rem; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px; }
 
-        .dissect-panel { position: absolute; top: 18px; right: 18px; background: rgba(15, 20, 28, 0.92); color: #e2e8f0; padding: 16px 18px; border-radius: 10px; border: 1px solid rgba(88, 166, 255, 0.28); z-index: 10; width: 280px; backdrop-filter: blur(8px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
-        .dissect-panel h3 { margin: 0 0 10px 0; font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.8px; color: #58a6ff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; }
+        .dissect-panel { position: absolute; top: 16px; right: 16px; background: rgba(15, 20, 28, 0.92); color: #e2e8f0; padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(88, 166, 255, 0.30); z-index: 15; width: 285px; backdrop-filter: blur(8px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); transition: all 0.2s ease; }
+        .dissect-panel h3 { margin: 0; font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.7px; color: #58a6ff; }
+
+        .panel-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; }
+        .panel-body { margin-top: 10px; }
+        .dissect-panel .panel-header { border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; }
+        .minimized .panel-body { display: none !important; }
+        .minimized .panel-header { border-bottom: none; padding-bottom: 0; }
+        .hud-panel.minimized, .dissect-panel.minimized { width: auto; max-width: none; padding: 9px 12px; }
+
+        .panel-toggle-btn { background: rgba(88, 166, 255, 0.14); color: #79c0ff; border: 1px solid rgba(88, 166, 255, 0.35); border-radius: 6px; width: 26px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+        .panel-toggle-btn:hover { background: rgba(88, 166, 255, 0.28); }
+
         .control-group { margin-bottom: 12px; }
         .control-group label { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e0; margin-bottom: 4px; }
-        .slider { width: 100%; accent-color: #58a6ff; cursor: pointer; }
+        .slider { width: 100%; accent-color: #58a6ff; cursor: pointer; height: 22px; }
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
-        .action-btn { background: #1f2937; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 7px 8px; font-size: 0.76rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .action-btn { background: #1f2937; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 8px; font-size: 0.76rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .action-btn:hover { background: #374151; border-color: #58a6ff; }
         .action-btn.active { background: #1d4ed8; border-color: #79c0ff; color: #ffffff; }
-        .whorl-toggles { display: flex; flex-direction: column; gap: 4px; font-size: 0.78rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; }
-        .whorl-toggles label { display: flex; align-items: center; gap: 6px; cursor: pointer; color: #cbd5e0; }
+        .whorl-toggles { display: flex; flex-direction: column; gap: 6px; font-size: 0.78rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; }
+        .whorl-toggles label { display: flex; align-items: center; gap: 7px; cursor: pointer; color: #cbd5e0; }
 
-        #organ-tooltip { position: fixed; pointer-events: none; display: none; background: rgba(10, 14, 20, 0.95); color: #f8fafc; border: 1px solid #58a6ff; border-radius: 8px; padding: 10px 14px; font-size: 0.8rem; max-width: 260px; z-index: 30; box-shadow: 0 8px 20px rgba(0,0,0,0.75); line-height: 1.4; }
-        #organ-tooltip .tt-title { color: #79c0ff; font-weight: 700; font-size: 0.9rem; margin-bottom: 3px; }
+        #organ-tooltip { position: fixed; pointer-events: none; display: none; background: rgba(10, 14, 20, 0.96); color: #f8fafc; border: 1px solid #58a6ff; border-radius: 10px; padding: 11px 14px; font-size: 0.82rem; max-width: 280px; z-index: 35; box-shadow: 0 10px 28px rgba(0,0,0,0.8); line-height: 1.42; }
+        #organ-tooltip.pinned { pointer-events: auto; left: 50% !important; top: auto !important; bottom: 68px !important; transform: translateX(-50%); width: min(92vw, 350px); max-width: none; border-width: 1.5px; }
+        #organ-tooltip .tt-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+        #organ-tooltip .tt-close { display: none; background: rgba(255,255,255,0.1); border: none; color: #cbd5e1; border-radius: 5px; padding: 2px 7px; font-size: 0.85rem; cursor: pointer; }
+        #organ-tooltip.pinned .tt-close { display: inline-block; }
+        #organ-tooltip .tt-title { color: #79c0ff; font-weight: 700; font-size: 0.92rem; margin-bottom: 2px; }
         #organ-tooltip .tt-whorl { color: #fbbf24; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; }
-        #organ-tooltip .tt-desc { color: #cbd5e1; font-size: 0.77rem; }
+        #organ-tooltip .tt-desc { color: #cbd5e1; font-size: 0.78rem; }
 
-        .photo-panel { position: absolute; bottom: 20px; right: 20px; width: 200px; background: rgba(15, 20, 28, 0.92); border: 2px solid #58a6ff; border-radius: 10px; overflow: hidden; z-index: 10; box-shadow: 0 8px 24px rgba(0,0,0,0.6); transform-origin: bottom right; transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease; cursor: pointer; }
-        .photo-panel:hover { transform: scale(1.4); box-shadow: 0 16px 36px rgba(0,0,0,0.85), 0 0 16px rgba(88, 166, 255, 0.35); }
-        .photo-panel img { width: 100%; height: 155px; object-fit: cover; display: block; }
-        .photo-label { background: #161b22; color: #cbd5e0; text-align: center; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; padding: 6px 0; text-transform: uppercase; }
-        .back-btn { position: absolute; bottom: 20px; left: 20px; background: #238636; color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; z-index: 10; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+        .photo-panel { position: absolute; bottom: 16px; right: 16px; width: 195px; background: rgba(15, 20, 28, 0.94); border: 1.5px solid #58a6ff; border-radius: 10px; overflow: hidden; z-index: 15; box-shadow: 0 8px 24px rgba(0,0,0,0.6); transform-origin: bottom right; transition: all 0.25s ease; }
+        @media (hover: hover) {
+            .photo-panel:not(.minimized):hover { transform: scale(1.38); box-shadow: 0 16px 36px rgba(0,0,0,0.85), 0 0 16px rgba(88, 166, 255, 0.35); }
+        }
+        .photo-panel img { width: 100%; height: 145px; object-fit: cover; display: block; }
+        .photo-label { background: #161b22; color: #cbd5e0; display: flex; align-items: center; justify-content: space-between; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.7px; padding: 6px 9px; text-transform: uppercase; cursor: pointer; gap: 6px; }
+        .photo-panel.minimized { width: auto; border-radius: 999px; }
+        .photo-panel.minimized img { display: none; }
+        .photo-panel.minimized .photo-label { padding: 8px 13px; background: rgba(15, 20, 28, 0.94); color: #79c0ff; }
+
+        .back-btn { position: absolute; bottom: 16px; left: 16px; background: #238636; color: #ffffff; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-size: 0.84rem; font-weight: 600; z-index: 15; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
         .back-btn:hover { background: #2ea043; }
+
+        @media (max-width: 768px) {
+            .hud-panel { top: 10px; left: 10px; max-width: calc(50vw - 14px); padding: 9px 11px; font-size: 0.78rem; }
+            .hud-panel:not(.minimized) { max-width: calc(100vw - 20px); right: 10px; z-index: 22; }
+            .hud-panel h2 { font-size: 0.96rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .hud-panel:not(.minimized) h2 { white-space: normal; }
+
+            .dissect-panel { top: 10px; right: 10px; width: auto; max-width: calc(50vw - 14px); padding: 9px 11px; }
+            .dissect-panel:not(.minimized) { width: calc(100vw - 20px); max-width: none; left: 10px; z-index: 22; }
+            .dissect-panel h3 { font-size: 0.76rem; letter-spacing: 0.3px; }
+
+            .back-btn { bottom: 12px; left: 12px; padding: 9px 13px; font-size: 0.8rem; }
+            .photo-panel { bottom: 12px; right: 12px; width: 150px; }
+            .photo-panel img { height: 112px; }
+        }
     </style>
 </head>
 <body>
-    <div class="hud-panel">
-        <h2>Anthurium andraeanum</h2>
-        <div><strong>Familia:</strong> Araceae</div>
-        <div><strong>Catálogo:</strong> COL-ATL-002 | Nativa de Colombia (Sección Calomystrium)</div>
-        <div><strong>Distribución:</strong> Pacífico / Chocó Biogeográfico (Reserva Natural Río Ñambí, Barbacoas, Nariño; Cauca, Chocó) • 400–1200 m s.n.m.</div>
-        <div><strong>Fuente:</strong> Linden ex André (1877) Ill. Hort. 24: 43, Pl. 271; Elibox & Umaharan (2012)</div>
-        <div class="hud-hint">• Pasa el cursor sobre la flor para identificar cada órgano.<br>• Rotar: Clic izq | Zoom: Rueda | Mover: Clic der</div>
+    <div class="hud-panel" id="hud-info-panel">
+        <div class="panel-header" onclick="toggleViewerPanel('hud-info-panel', 'hud-dissect-panel')">
+            <h2>Anthurium andraeanum</h2>
+            <button type="button" class="panel-toggle-btn" id="btn-toggle-info" aria-label="Minimizar ficha">−</button>
+        </div>
+        <div class="panel-body">
+            <div><strong>Familia:</strong> Araceae</div>
+            <div><strong>Catálogo:</strong> COL-ATL-002 | Nativa de Colombia (Sección Calomystrium)</div>
+            <div><strong>Distribución:</strong> Pacífico / Chocó Biogeográfico (Reserva Natural Río Ñambí, Barbacoas, Nariño; Cauca, Chocó) • 400–1200 m s.n.m.</div>
+            <div><strong>Fuente:</strong> Linden ex André (1877) Ill. Hort. 24: 43, Pl. 271; Elibox & Umaharan (2012)</div>
+            <div class="hud-hint" id="hud-controls-hint">• Cursor / Toque en órgano: Identificar estructura.<br>• Rotar: Clic izq / 1 dedo | Zoom: Rueda / Pellizco</div>
+        </div>
     </div>
 
-    <div class="dissect-panel">
-        <h3>🔬 Disección Botánica</h3>
-        <div class="control-group">
-            <label><span>Separar Verticilos (Explosión)</span><span id="exp-val">0%</span></label>
-            <input type="range" id="explode-slider" class="slider" min="0" max="100" value="0">
+    <div class="dissect-panel" id="hud-dissect-panel">
+        <div class="panel-header" onclick="toggleViewerPanel('hud-dissect-panel', 'hud-info-panel')">
+            <h3>🔬 Disección</h3>
+            <button type="button" class="panel-toggle-btn" id="btn-toggle-dissect" aria-label="Minimizar disección">−</button>
         </div>
-        <div class="btn-grid">
-            <button id="btn-plate" class="action-btn">📐 Modo Plantilla</button>
-            <button id="btn-xray" class="action-btn">🔍 Rayos X Ovario</button>
-            <button id="btn-cut" class="action-btn">🔪 Corte Sagital</button>
-            <button id="btn-reset" class="action-btn">🔄 Ensamblar</button>
-        </div>
-        <div class="whorl-toggles">
-            <label><input type="checkbox" class="whorl-cb" data-whorl="caliz" checked> Cáliz (Sépalos / Filarias)</label>
-            <label><input type="checkbox" class="whorl-cb" data-whorl="corola" checked> Corola (Pétalos / Labelo)</label>
-            <label><input type="checkbox" class="whorl-cb" data-whorl="reproductivo" checked> Androceo y Gineceo (Columna)</label>
-            <label><input type="checkbox" class="whorl-cb" data-whorl="ovario" checked> Ovario y Óvulos Internos</label>
+        <div class="panel-body">
+            <div class="control-group">
+                <label><span>Separar Verticilos (Explosión)</span><span id="exp-val">0%</span></label>
+                <input type="range" id="explode-slider" class="slider" min="0" max="100" value="0">
+            </div>
+            <div class="btn-grid">
+                <button id="btn-plate" class="action-btn">📐 Modo Plantilla</button>
+                <button id="btn-xray" class="action-btn">🔍 Rayos X Ovario</button>
+                <button id="btn-cut" class="action-btn">🔪 Corte Sagital</button>
+                <button id="btn-reset" class="action-btn">🔄 Ensamblar</button>
+            </div>
+            <div class="whorl-toggles">
+                <label><input type="checkbox" class="whorl-cb" data-whorl="caliz" checked> Cáliz (Sépalos / Filarias)</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="corola" checked> Corola (Pétalos / Labelo)</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="reproductivo" checked> Androceo y Gineceo (Columna)</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="ovario" checked> Ovario y Óvulos Internos</label>
+            </div>
         </div>
     </div>
 
     <div id="organ-tooltip">
-        <div class="tt-title" id="tt-title">Órgano</div>
-        <div class="tt-whorl" id="tt-whorl">Verticilo</div>
+        <div class="tt-head">
+            <div>
+                <div class="tt-title" id="tt-title">Órgano</div>
+                <div class="tt-whorl" id="tt-whorl">Verticilo</div>
+            </div>
+            <button type="button" class="tt-close" id="tt-close-btn" aria-label="Cerrar">✕</button>
+        </div>
         <div class="tt-desc" id="tt-desc">Descripción</div>
     </div>
 
     <a href="../index.html" class="back-btn" onclick="if(window.parent && window.parent !== window){ event.preventDefault(); if(window.disposeAtlasScene) window.disposeAtlasScene(); window.parent.postMessage('close-atlas-modal', '*'); } else if(document.referrer && document.referrer.indexOf(location.host) !== -1 && history.length > 1){ event.preventDefault(); history.back(); }">⬅ Volver al catálogo</a>
-    <div class="photo-panel">
+    <div class="photo-panel" id="hud-photo-panel">
         <img src="../images/anthurium_andraeanum.jpg" alt="Anthurium andraeanum" onerror="this.parentElement.style.display='none';">
-        <div class="photo-label">ESPÉCIMEN DE REFERENCIA</div>
+        <div class="photo-label" onclick="togglePhotoPanel()">
+            <span id="photo-label-text">📷 Referencia</span>
+            <span id="photo-toggle-icon">−</span>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -404,6 +458,45 @@
             });
         });
 
+        // Gestión de paneles minimizables y adaptación móvil/tablet
+        function syncPanelIcons() {
+            const infoP = document.getElementById('hud-info-panel');
+            const dissP = document.getElementById('hud-dissect-panel');
+            const photoP = document.getElementById('hud-photo-panel');
+            if (infoP) document.getElementById('btn-toggle-info').textContent = infoP.classList.contains('minimized') ? '+' : '−';
+            if (dissP) document.getElementById('btn-toggle-dissect').textContent = dissP.classList.contains('minimized') ? '+' : '−';
+            if (photoP) {
+                const isMin = photoP.classList.contains('minimized');
+                document.getElementById('photo-toggle-icon').textContent = isMin ? '+' : '−';
+                document.getElementById('photo-label-text').textContent = isMin ? '📷 Referencia' : 'ESPÉCIMEN';
+            }
+        }
+
+        window.toggleViewerPanel = function(targetId, otherId) {
+            const target = document.getElementById(targetId);
+            const other = document.getElementById(otherId);
+            const willOpen = target.classList.contains('minimized');
+            target.classList.toggle('minimized');
+            if (willOpen && window.innerWidth <= 768 && other) {
+                other.classList.add('minimized');
+            }
+            syncPanelIcons();
+        };
+
+        window.togglePhotoPanel = function() {
+            const photoP = document.getElementById('hud-photo-panel');
+            if (!photoP) return;
+            photoP.classList.toggle('minimized');
+            syncPanelIcons();
+        };
+
+        if (window.innerWidth <= 768) {
+            document.getElementById('hud-info-panel').classList.add('minimized');
+            document.getElementById('hud-dissect-panel').classList.add('minimized');
+            document.getElementById('hud-photo-panel').classList.add('minimized');
+        }
+        syncPanelIcons();
+
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         const tooltip = document.getElementById('organ-tooltip');
@@ -411,14 +504,26 @@
         const ttWhorl = document.getElementById('tt-whorl');
         const ttDesc = document.getElementById('tt-desc');
         let hoveredMesh = null;
+        let pinnedTouch = false;
 
-        window.addEventListener('mousemove', e => {
-            if (e.target !== renderer.domElement) {
-                tooltip.style.display = 'none';
-                return;
+        function clearOrganHighlight() {
+            if (hoveredMesh) {
+                hoveredMesh.material.emissive.setHex(0x000000);
+                hoveredMesh = null;
             }
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            pinnedTouch = false;
+            tooltip.classList.remove('pinned');
+            tooltip.style.display = 'none';
+        }
+
+        document.getElementById('tt-close-btn').addEventListener('click', e => {
+            e.stopPropagation();
+            clearOrganHighlight();
+        });
+
+        function inspectAtClientXY(clientX, clientY, isTapPin) {
+            mouse.x = (clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
 
             const visibleMeshes = interactMeshes.filter(m => m.visible && (!xrayMode || m.material.opacity > 0.5));
@@ -437,10 +542,38 @@
                 ttWhorl.textContent = info.whorl;
                 ttDesc.textContent = info.desc;
                 tooltip.style.display = 'block';
-                tooltip.style.left = (e.clientX + 16) + 'px';
-                tooltip.style.top = (e.clientY + 16) + 'px';
+
+                if (isTapPin || window.innerWidth <= 768) {
+                    pinnedTouch = true;
+                    tooltip.classList.add('pinned');
+                } else {
+                    pinnedTouch = false;
+                    tooltip.classList.remove('pinned');
+                    const leftPos = Math.min(window.innerWidth - 295, Math.max(12, clientX + 16));
+                    const topPos = Math.min(window.innerHeight - 130, Math.max(12, clientY + 16));
+                    tooltip.style.left = leftPos + 'px';
+                    tooltip.style.top = topPos + 'px';
+                }
             } else {
-                tooltip.style.display = 'none';
+                clearOrganHighlight();
+            }
+        }
+
+        renderer.domElement.addEventListener('pointermove', e => {
+            if (e.pointerType !== 'mouse' || pinnedTouch) return;
+            inspectAtClientXY(e.clientX, e.clientY, false);
+        });
+
+        let downPt = { x: 0, y: 0, t: 0 };
+        renderer.domElement.addEventListener('pointerdown', e => {
+            downPt = { x: e.clientX, y: e.clientY, t: performance.now() };
+        });
+
+        renderer.domElement.addEventListener('pointerup', e => {
+            const dist = Math.hypot(e.clientX - downPt.x, e.clientY - downPt.y);
+            const dt = performance.now() - downPt.t;
+            if (dist < 9 && dt < 380) {
+                inspectAtClientXY(e.clientX, e.clientY, e.pointerType !== 'mouse');
             }
         });
 
