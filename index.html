@@ -585,6 +585,146 @@
         max-width: calc(56vw - 14px);
       }
     }
+
+    /* POPUP DE DISTRIBUCIÓN MINIMIZABLE Y COMPACTO */
+    .map-popup {
+      transition: all 0.22s ease;
+      z-index: 25 !important;
+    }
+    .map-popup.minimized {
+      padding: 8px 12px !important;
+      width: auto !important;
+      max-width: 260px !important;
+    }
+    .map-popup.minimized .pop-meta,
+    .map-popup.minimized .pop-btn {
+      display: none !important;
+    }
+    .map-popup.minimized h4 {
+      margin: 4px 0 0 0 !important;
+      font-size: 0.95rem !important;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* RUEDA / CARRUSEL CIRCULAR DE ESPECIES */
+    .species-wheel-bar {
+      position: absolute;
+      left: 50%;
+      bottom: 14px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: rgba(22, 16, 11, 0.92);
+      border: 1px solid rgba(223, 177, 91, 0.38);
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      z-index: 20;
+      max-width: calc(100% - 24px);
+      overflow-x: auto;
+      scrollbar-width: none;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.65);
+    }
+    .species-wheel-bar::-webkit-scrollbar { display: none; }
+    .wheel-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+      flex-shrink: 0;
+      width: 62px;
+      text-align: center;
+      transition: transform 0.18s ease;
+    }
+    .wheel-item:hover { transform: translateY(-2px); }
+    .wheel-avatar-wrap {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      padding: 2px;
+      border: 2px solid rgba(223, 177, 91, 0.45);
+      background: #1c140f;
+      transition: all 0.2s ease;
+    }
+    .wheel-item.active .wheel-avatar-wrap {
+      border-color: #dfb15b;
+      box-shadow: 0 0 12px rgba(223, 177, 91, 0.75);
+      transform: scale(1.08);
+    }
+    .wheel-avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+    .wheel-3d-pill {
+      position: absolute;
+      bottom: -3px;
+      right: -4px;
+      background: #c86446;
+      color: #fff;
+      font-size: 0.56rem;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 999px;
+      border: 1px solid #f4ece1;
+      line-height: 1.1;
+    }
+    .wheel-name {
+      font-size: 0.63rem;
+      color: #e6d7c3;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+    .wheel-common {
+      font-size: 0.56rem;
+      color: #b8a38c;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      margin-top: -2px;
+    }
+
+    @media (min-width: 901px) {
+      .species-wheel-bar { display: none; }
+    }
+    @media (max-width: 900px) {
+      .map-stage { height: 58vh !important; min-height: 390px !important; }
+      .map-popup {
+        bottom: 92px !important;
+        right: 10px !important;
+        left: 10px !important;
+        width: auto !important;
+        max-width: none !important;
+        padding: 10px 13px !important;
+      }
+      .map-legend {
+        bottom: 92px !important;
+        left: 10px !important;
+        z-index: 18;
+      }
+      .map-reset-btn {
+        top: 10px !important;
+        right: 10px !important;
+        bottom: auto !important;
+        padding: 6px 10px !important;
+        font-size: 0.7rem !important;
+        z-index: 22;
+      }
+      .map-overlay-top {
+        padding-right: 138px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -649,10 +789,18 @@
         </div>
       </div>
 
+      <div class="species-wheel-bar" id="species-wheel-bar"></div>
+
       <div class="map-popup" id="map-popup">
-        <div class="pop-head">
-          <span class="badge badge-id" id="pop-id">COL-ATL-002</span>
-          <span class="badge" id="pop-status">Nativa</span>
+        <div class="pop-head" style="justify-content: space-between;">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span class="badge badge-id" id="pop-id">COL-ATL-002</span>
+            <span class="badge" id="pop-status">Nativa</span>
+          </div>
+          <div style="display:flex; gap:5px;">
+            <button type="button" class="hud-mini-btn" id="btn-min-popup" onclick="togglePopupMinimize(event)" title="Minimizar">−</button>
+            <button type="button" class="hud-mini-btn" onclick="closeSpeciesPopup(event)" title="Cerrar">✕</button>
+          </div>
         </div>
         <h4 id="pop-species">Anthurium andraeanum</h4>
         <div class="pop-meta" id="pop-meta"></div>
@@ -1136,7 +1284,114 @@
     let currentSearch = "";
     let selectedSpeciesId = null;
 
+
+    // ============================================================================
+    // PERFILES BIO-ECOLÓGICOS CONSOLIDADOS (SIN MEDIDAS DE INGENIERÍA 3D)
+    // ============================================================================
+    const BIO_PROFILES = {
+      "COL-ATL-001": {
+        common: "Anturio del San Jorge",
+        shortName: "A. sanjorgense",
+        bio: "Hierba epífita o rupícola de bosque húmedo tropical. Endémica de la cuenca del río San Jorge; inflorescencia péndula polinizada por pequeños coleópteros."
+      },
+      "COL-ATL-002": {
+        common: "Anturio rojo / Capote",
+        shortName: "A. andraeanum",
+        bio: "Hierba epífita de selvas nubladas andino-pacíficas. Reconocida por su espata acorazonada rojo carmín brillante que guía polinizadores hacia el espádice."
+      },
+      "COL-ATL-003": {
+        common: "Granadilla",
+        shortName: "P. ligularis",
+        bio: "Bejuco trepador con zarcillos de los Andes colombianos. Cultivada por sus frutos dulces y su llamativa corona floral bandeada adaptada a abejorros (Xylocopa)."
+      },
+      "COL-ATL-004": {
+        common: "Pasiflora escarlata",
+        shortName: "P. vitifolia",
+        bio: "Liana trepadora de sotobosque húmedo tropical. Sus flores rojo escarlata intenso están especializadas en la polinización por colibríes ermitaños."
+      },
+      "COL-ATL-005": {
+        common: "Frailejón mayor",
+        shortName: "E. grandiflora",
+        bio: "Roseta caulescente lanuginosa emblemática de los páramos orientales. Regula el agua de alta montaña y sustenta abejorros y colibríes altoandinos."
+      },
+      "COL-ATL-006": {
+        common: "Flor de Mayo",
+        shortName: "C. trianae",
+        bio: "Orquídea epífita del bosque seco y subandino del Alto Magdalena. Flor Nacional de Colombia, célebre por su labelo rizado amarillo-oro y carmesí."
+      },
+      "COL-ATL-007": {
+        common: "Platanillo / Pico de loro",
+        shortName: "H. rostrata",
+        bio: "Hierba rizomatosa de bordes de selva húmeda. Su inflorescencia péndula de brácteas rojas y amarillas está coevolucionada con colibríes de pico curvo."
+      }
+    };
+
+    SPECIES_DB.forEach(sp => {
+      const prof = BIO_PROFILES[sp.id];
+      if (prof) {
+        sp.commonName = prof.common;
+        sp.shortName = prof.shortName;
+        sp.diagnosis = prof.bio;
+      }
+    });
+
+    window.togglePopupMinimize = function(e) {
+      if (e) e.stopPropagation();
+      const pop = document.getElementById("map-popup");
+      const btn = document.getElementById("btn-min-popup");
+      if (!pop) return;
+      pop.classList.toggle("minimized");
+      if (btn) btn.textContent = pop.classList.contains("minimized") ? "+" : "−";
+    };
+
+    window.closeSpeciesPopup = function(e) {
+      if (e) e.stopPropagation();
+      const pop = document.getElementById("map-popup");
+      if (pop) pop.style.display = "none";
+      selectDepartment("ALL");
+    };
+
+    function renderSpeciesWheel() {
+      const wheel = document.getElementById("species-wheel-bar");
+      if (!wheel) return;
+      const list = SPECIES_DB.filter(sp => {
+        const matchStatus = currentStatus === "ALL" || sp.status === currentStatus;
+        const q = currentSearch.trim().toLowerCase();
+        const matchSearch = !q ||
+          sp.species.toLowerCase().includes(q) ||
+          sp.family.toLowerCase().includes(q) ||
+          (sp.commonName && sp.commonName.toLowerCase().includes(q)) ||
+          sp.depts.some(d => d.toLowerCase().includes(q));
+        return matchStatus && matchSearch;
+      });
+
+      wheel.innerHTML = list.map(sp => {
+        const isAct = selectedSpeciesId === sp.id;
+        return `
+          <div class="wheel-item ${isAct ? 'active' : ''}" onclick="handleWheelTap('${sp.id}')">
+            <div class="wheel-avatar-wrap">
+              <img src="${sp.image}" alt="${sp.species}">
+              <span class="wheel-3d-pill" onclick="event.stopPropagation(); openAtlasModal('${sp.viewerUrl}')">3D</span>
+            </div>
+            <div class="wheel-name">${sp.shortName || sp.species}</div>
+            <div class="wheel-common">${sp.commonName || ''}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    window.handleWheelTap = function(spId) {
+      const sp = SPECIES_DB.find(s => s.id === spId);
+      if (!sp) return;
+      if (selectedSpeciesId === spId) {
+        openAtlasModal(sp.viewerUrl);
+      } else {
+        selectSpeciesDistribution(sp);
+      }
+    };
+
     function updateMapAndCatalog() {
+      renderSpeciesWheel();
       const container = document.getElementById("cards-container");
       container.innerHTML = "";
 
@@ -1323,17 +1578,26 @@
       }
 
       // Mostrar tarjeta emergente inferior derecha
+      const infoBox = document.getElementById("map-info-box");
+      const infoBtn = document.getElementById("btn-min-mapinfo");
+      if (infoBox && !infoBox.classList.contains("minimized")) {
+        infoBox.classList.add("minimized");
+        if (infoBtn) infoBtn.textContent = "+";
+      }
       const popup = document.getElementById("map-popup");
+      if (popup) {
+        popup.classList.remove("minimized");
+        const minBtn = document.getElementById("btn-min-popup");
+        if (minBtn) minBtn.textContent = "−";
+      }
       document.getElementById("pop-id").textContent = sp.id;
       const stEl = document.getElementById("pop-status");
       stEl.textContent = sp.status + " de Colombia";
       stEl.className = "badge " + (sp.status === "Endémica" ? "badge-endemic" : "badge-native");
       document.getElementById("pop-species").textContent = sp.species;
       document.getElementById("pop-meta").innerHTML = `
-        <strong>${sp.family}</strong><br/>
-        <strong>Departamentos elevados (${sp.depts.length}):</strong> ${sp.depts.join(", ")}<br/>
-        <strong>Rango altitudinal:</strong> ${sp.altitude}<br/>
-        <strong>Fuente:</strong> ${sp.reference}
+        <strong>${sp.commonName || sp.family}</strong> • ${sp.family}<br/>
+        <strong>Departamentos (${sp.depts.length}):</strong> ${sp.depts.join(", ")}
       `;
       const _popLink = document.getElementById("pop-url");
       _popLink.href = sp.modelUrl;
@@ -1439,7 +1703,7 @@
         const sp = hitMedallions[0].object.userData.speciesData;
         selectSpeciesDistribution(sp);
         const cardEl = document.getElementById(`card-${sp.id}`);
-        if (cardEl) cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (cardEl && window.innerWidth > 900) cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
 

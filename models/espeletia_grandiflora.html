@@ -10,7 +10,7 @@
         .hud-panel h2 { margin: 0; font-style: italic; color: #58a6ff; font-size: 1.18rem; line-height: 1.2; }
         .hud-hint { color: #79c0ff; font-size: 0.75rem; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 6px; }
 
-        .dissect-panel { position: absolute; top: 16px; right: 16px; background: rgba(15, 20, 28, 0.92); color: #e2e8f0; padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(88, 166, 255, 0.30); z-index: 15; width: 285px; backdrop-filter: blur(8px); box-shadow: 0 8px 24px rgba(0,0,0,0.5); transition: all 0.2s ease; }
+        .dissect-panel { position: absolute; top: 14px; right: 14px; background: rgba(15, 20, 28, 0.90); color: #e2e8f0; padding: 11px 12px; border-radius: 12px; border: 1px solid rgba(88, 166, 255, 0.32); z-index: 18; width: 190px; backdrop-filter: blur(10px); box-shadow: 0 8px 24px rgba(0,0,0,0.55); transition: all 0.2s ease; }
         .dissect-panel h3 { margin: 0; font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.7px; color: #58a6ff; }
 
         .panel-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; }
@@ -26,11 +26,11 @@
         .control-group { margin-bottom: 12px; }
         .control-group label { display: flex; justify-content: space-between; font-size: 0.8rem; color: #cbd5e0; margin-bottom: 4px; }
         .slider { width: 100%; accent-color: #58a6ff; cursor: pointer; height: 22px; }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+        .btn-grid { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
         .action-btn { background: #1f2937; color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; padding: 8px 8px; font-size: 0.76rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
         .action-btn:hover { background: #374151; border-color: #58a6ff; }
         .action-btn.active { background: #1d4ed8; border-color: #79c0ff; color: #ffffff; }
-        .whorl-toggles { display: flex; flex-direction: column; gap: 6px; font-size: 0.78rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; }
+        .whorl-toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; font-size: 0.73rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 7px; }
         .whorl-toggles label { display: flex; align-items: center; gap: 7px; cursor: pointer; color: #cbd5e0; }
 
         #organ-tooltip { position: fixed; pointer-events: none; display: none; background: rgba(10, 14, 20, 0.96); color: #f8fafc; border: 1px solid #58a6ff; border-radius: 10px; padding: 11px 14px; font-size: 0.82rem; max-width: 280px; z-index: 35; box-shadow: 0 10px 28px rgba(0,0,0,0.8); line-height: 1.42; }
@@ -62,7 +62,7 @@
             .hud-panel:not(.minimized) h2 { white-space: normal; }
 
             .dissect-panel { top: 10px; right: 10px; width: auto; max-width: calc(50vw - 14px); padding: 9px 11px; }
-            .dissect-panel:not(.minimized) { width: calc(100vw - 20px); max-width: none; left: 10px; z-index: 22; }
+            .dissect-panel:not(.minimized) { width: 168px; max-width: 46vw; left: auto !important; right: 10px; z-index: 22; padding: 10px; }
             .dissect-panel h3 { font-size: 0.76rem; letter-spacing: 0.3px; }
 
             .back-btn { bottom: 12px; left: 12px; padding: 9px 13px; font-size: 0.8rem; }
@@ -93,20 +93,20 @@
         </div>
         <div class="panel-body">
             <div class="control-group">
-                <label><span>Separar Verticilos (Explosión)</span><span id="exp-val">0%</span></label>
+                <label><span>💥 Explosión</span><span id="exp-val">0%</span></label>
                 <input type="range" id="explode-slider" class="slider" min="0" max="100" value="0">
             </div>
             <div class="btn-grid">
-                <button id="btn-plate" class="action-btn">📐 Modo Plantilla</button>
-                <button id="btn-xray" class="action-btn">🔍 Rayos X Ovario</button>
+                <button id="btn-plate" class="action-btn">📐 Plantilla</button>
+                <button id="btn-xray" class="action-btn">🔍 Rayos X</button>
                 <button id="btn-cut" class="action-btn">🔪 Corte Sagital</button>
                 <button id="btn-reset" class="action-btn">🔄 Ensamblar</button>
             </div>
             <div class="whorl-toggles">
-                <label><input type="checkbox" class="whorl-cb" data-whorl="caliz" checked> Cáliz (Sépalos / Filarias)</label>
-                <label><input type="checkbox" class="whorl-cb" data-whorl="corola" checked> Corola (Pétalos / Labelo)</label>
-                <label><input type="checkbox" class="whorl-cb" data-whorl="reproductivo" checked> Androceo y Gineceo (Columna)</label>
-                <label><input type="checkbox" class="whorl-cb" data-whorl="ovario" checked> Ovario y Óvulos Internos</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="caliz" checked> Cáliz</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="corola" checked> Corola</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="reproductivo" checked> Reprod.</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="ovario" checked> Ovario</label>
             </div>
         </div>
     </div>
