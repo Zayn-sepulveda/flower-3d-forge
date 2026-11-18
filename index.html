@@ -529,20 +529,19 @@
       .catalog-panel { height: auto; }
     }
 
-    .hud-mini-btn {
-      background: rgba(223, 177, 91, 0.14);
-      border: 1px solid rgba(223, 177, 91, 0.45);
-      color: var(--gold-tumbaga);
-      border-radius: 6px;
-      width: 24px;
-      height: 22px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
-      flex-shrink: 0;
+    .map-overlay-top {
+      pointer-events: auto !important;
+      z-index: 22 !important;
+      max-width: 390px !important;
+      transition: all 0.2s ease;
+    }
+    .map-reset-btn {
+      pointer-events: auto !important;
+      z-index: 25 !important;
+    }
+    .map-legend {
+      pointer-events: auto !important;
+      z-index: 20 !important;
     }
     .map-overlay-head, .map-legend-head {
       display: flex;
@@ -551,6 +550,11 @@
       gap: 10px;
       cursor: pointer;
     }
+    .map-overlay-head h3 {
+      margin-bottom: 0 !important;
+      font-size: 1.08rem;
+      line-height: 1.25;
+    }
     .map-legend-head {
       font-size: 0.74rem;
       font-weight: 700;
@@ -558,12 +562,230 @@
       letter-spacing: 0.04em;
       text-transform: uppercase;
     }
-    .map-overlay-top.minimized p { display: none; }
-    .map-overlay-top.minimized h3 { margin-bottom: 0; font-size: 0.96rem; }
-    .map-legend.minimized .legend-rows { display: none; }
-    .map-legend:not(.minimized) .legend-rows { margin-top: 7px; }
+    .hud-mini-btn {
+      background: rgba(223, 177, 91, 0.16);
+      border: 1px solid rgba(223, 177, 91, 0.55);
+      color: var(--gold-tumbaga);
+      border-radius: 6px;
+      width: 26px;
+      height: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+      pointer-events: auto !important;
+    }
+    .hud-mini-btn:hover {
+      background: var(--gold-tumbaga);
+      color: #16100b;
+    }
+    .map-info-body {
+      margin-top: 7px;
+    }
+    .map-overlay-top.minimized .map-info-body {
+      display: none !important;
+    }
+    .map-legend.minimized .legend-rows {
+      display: none !important;
+    }
+    .map-legend:not(.minimized) .legend-rows {
+      margin-top: 7px;
+    }
 
-    @media (max-width: 768px) {
+    /* INTEGRACIÓN DE #map-popup DENTRO DEL RECUADRO SUPERIOR */
+    .map-overlay-top .map-popup {
+      position: static !important;
+      bottom: auto !important;
+      right: auto !important;
+      width: 100% !important;
+      max-width: none !important;
+      margin-top: 8px !important;
+      padding: 10px 0 2px 0 !important;
+      background: transparent !important;
+      border: none !important;
+      border-top: 1px solid rgba(223, 177, 91, 0.28) !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+    .map-overlay-top .map-popup h4#pop-species {
+      display: none !important;
+    }
+    .map-overlay-top.has-species-popup #active-dept-desc {
+      display: none !important;
+    }
+    .map-overlay-top .map-popup .pop-link {
+      margin-top: 8px !important;
+      padding: 8px 12px !important;
+      font-size: 0.78rem !important;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* RUEDA FUERA DEL MAPA */
+    .workspace {
+      transition: grid-template-columns 0.25s ease;
+    }
+    body.wheel-minimized .workspace {
+      grid-template-columns: 1fr 122px !important;
+    }
+    .catalog-status {
+      display: flex !important;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .catalog-header-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .catalog-mode-btn {
+      background: rgba(223, 177, 91, 0.14);
+      border: 1px solid var(--gold-tumbaga);
+      color: var(--gold-tumbaga);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .catalog-mode-btn:hover {
+      background: var(--gold-tumbaga);
+      color: #16100b;
+    }
+    .species-wheel-bar {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      background: rgba(20, 14, 10, 0.96);
+      border: 1px solid var(--border-warm);
+      border-radius: 10px;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+    .wheel-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+      width: 76px;
+      text-align: center;
+      padding: 4px;
+      border-radius: 10px;
+      transition: all 0.18s ease;
+    }
+    .wheel-item.active {
+      background: rgba(223, 177, 91, 0.12);
+      border: 1px solid rgba(223, 177, 91, 0.38);
+    }
+    .wheel-avatar-wrap {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      padding: 2px;
+      border: 2px solid rgba(223, 177, 91, 0.45);
+      background: #1c140f;
+      transition: all 0.2s ease;
+    }
+    .wheel-item.active .wheel-avatar-wrap {
+      border-color: #dfb15b;
+      box-shadow: 0 0 12px rgba(223, 177, 91, 0.7);
+      transform: scale(1.06);
+    }
+    .wheel-avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+    .wheel-name {
+      font-size: 0.65rem;
+      color: #f4ece1;
+      font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+    .wheel-common {
+      font-size: 0.58rem;
+      color: #b8a38c;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+      margin-top: -2px;
+    }
+    .wheel-open-3d-btn {
+      display: none;
+      margin-top: 2px;
+      background: #c86446;
+      color: #ffffff;
+      border: 1px solid #f4ece1;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.45);
+    }
+    .wheel-open-3d-btn:hover {
+      background: #dfb15b;
+      color: #16100b;
+    }
+    .wheel-item.active .wheel-open-3d-btn {
+      display: inline-block;
+    }
+
+    @media (min-width: 901px) {
+      body:not(.wheel-minimized) .species-wheel-bar {
+        display: none !important;
+      }
+      body.wheel-minimized .catalog-header-meta,
+      body.wheel-minimized #cards-container {
+        display: none !important;
+      }
+      body.wheel-minimized .catalog-status {
+        justify-content: center;
+        padding: 8px 4px !important;
+      }
+      body.wheel-minimized .catalog-mode-btn {
+        font-size: 0.66rem;
+        padding: 5px 8px;
+        width: 100%;
+        text-align: center;
+      }
+      body.wheel-minimized .species-wheel-bar {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 10px 4px !important;
+        gap: 12px !important;
+        border: none !important;
+        background: transparent !important;
+        height: calc(100vh - 145px);
+      }
+      body.wheel-minimized .wheel-item {
+        width: 98px !important;
+      }
+    }
+
+    @media (max-width: 900px) {
       .map-overlay-top {
         top: 10px !important;
         left: 10px !important;
@@ -582,347 +804,7 @@
         bottom: 12px !important;
         left: 12px !important;
         padding: 8px 11px !important;
-        max-width: calc(56vw - 14px);
-      }
-    }
-
-    /* POPUP DE DISTRIBUCIÓN MINIMIZABLE Y COMPACTO */
-    .map-popup {
-      transition: all 0.22s ease;
-      z-index: 25 !important;
-    }
-    .map-popup.minimized {
-      padding: 8px 12px !important;
-      width: auto !important;
-      max-width: 260px !important;
-    }
-    .map-popup.minimized .pop-meta,
-    .map-popup.minimized .pop-btn {
-      display: none !important;
-    }
-    .map-popup.minimized h4 {
-      margin: 4px 0 0 0 !important;
-      font-size: 0.95rem !important;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* RUEDA / CARRUSEL CIRCULAR DE ESPECIES */
-    .species-wheel-bar {
-      position: absolute;
-      left: 50%;
-      bottom: 14px;
-      transform: translateX(-50%);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      background: rgba(22, 16, 11, 0.92);
-      border: 1px solid rgba(223, 177, 91, 0.38);
-      border-radius: 999px;
-      backdrop-filter: blur(10px);
-      z-index: 20;
-      max-width: calc(100% - 24px);
-      overflow-x: auto;
-      scrollbar-width: none;
-      box-shadow: 0 10px 28px rgba(0,0,0,0.65);
-    }
-    .species-wheel-bar::-webkit-scrollbar { display: none; }
-    .wheel-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      cursor: pointer;
-      flex-shrink: 0;
-      width: 62px;
-      text-align: center;
-      transition: transform 0.18s ease;
-    }
-    .wheel-item:hover { transform: translateY(-2px); }
-    .wheel-avatar-wrap {
-      position: relative;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      padding: 2px;
-      border: 2px solid rgba(223, 177, 91, 0.45);
-      background: #1c140f;
-      transition: all 0.2s ease;
-    }
-    .wheel-item.active .wheel-avatar-wrap {
-      border-color: #dfb15b;
-      box-shadow: 0 0 12px rgba(223, 177, 91, 0.75);
-      transform: scale(1.08);
-    }
-    .wheel-avatar-wrap img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      display: block;
-    }
-    .wheel-3d-pill {
-      position: absolute;
-      bottom: -3px;
-      right: -4px;
-      background: #c86446;
-      color: #fff;
-      font-size: 0.56rem;
-      font-weight: 700;
-      padding: 1px 4px;
-      border-radius: 999px;
-      border: 1px solid #f4ece1;
-      line-height: 1.1;
-    }
-    .wheel-name {
-      font-size: 0.63rem;
-      color: #e6d7c3;
-      font-style: italic;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 100%;
-    }
-    .wheel-common {
-      font-size: 0.56rem;
-      color: #b8a38c;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      width: 100%;
-      margin-top: -2px;
-    }
-
-    @media (min-width: 901px) {
-      .species-wheel-bar { display: none; }
-    }
-    @media (max-width: 900px) {
-      .map-stage { height: 58vh !important; min-height: 390px !important; }
-      .map-popup {
-        bottom: 92px !important;
-        right: 10px !important;
-        left: 10px !important;
-        width: auto !important;
-        max-width: none !important;
-        padding: 10px 13px !important;
-      }
-      .map-legend {
-        bottom: 92px !important;
-        left: 10px !important;
-        z-index: 18;
-      }
-      .map-reset-btn {
-        top: 10px !important;
-        right: 10px !important;
-        bottom: auto !important;
-        padding: 6px 10px !important;
-        font-size: 0.7rem !important;
-        z-index: 22;
-      }
-      .map-overlay-top {
-        padding-right: 138px !important;
-      }
-    }
-
-    /* === LAYOUT DE MAPA CON CABECERA COROLÓGICA FUERA DEL LIENZO === */
-    .workspace {
-      transition: grid-template-columns 0.25s ease;
-    }
-    body.wheel-minimized .workspace {
-      grid-template-columns: 1fr 112px !important;
-    }
-    .map-stage {
-      display: flex !important;
-      flex-direction: column !important;
-      position: relative;
-      overflow: hidden;
-    }
-    .map-overlay-top {
-      position: relative !important;
-      top: auto !important;
-      left: auto !important;
-      right: auto !important;
-      max-width: none !important;
-      width: 100% !important;
-      border-radius: 0 !important;
-      border: none !important;
-      border-bottom: 1px solid var(--border-warm) !important;
-      border-left: 4px solid var(--gold-tumbaga) !important;
-      background: rgba(24, 17, 12, 0.96) !important;
-      padding: 10px 16px !important;
-      flex-shrink: 0;
-      z-index: 20;
-    }
-    .map-overlay-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .map-overlay-head h3 {
-      margin: 0 !important;
-      cursor: pointer;
-      font-size: 1.08rem !important;
-    }
-    .map-head-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-    .map-reset-btn {
-      position: static !important;
-      padding: 5px 11px !important;
-      font-size: 0.74rem !important;
-      border-radius: 6px !important;
-      white-space: nowrap;
-    }
-    .map-info-body {
-      margin-top: 6px;
-    }
-    .map-overlay-top.minimized .map-info-body {
-      display: none !important;
-    }
-
-    /* DETALLE DE ESPECIE INTEGRADO DENTRO DE LA CABECERA COROLÓGICA */
-    .map-popup {
-      position: static !important;
-      width: 100% !important;
-      max-width: none !important;
-      margin-top: 8px !important;
-      padding: 9px 12px !important;
-      background: rgba(14, 10, 7, 0.65) !important;
-      border: 1px solid rgba(223, 177, 91, 0.32) !important;
-      border-radius: 8px !important;
-      box-shadow: none !important;
-    }
-    .map-popup .pop-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 4px;
-    }
-
-    .map-canvas-wrap {
-      position: relative;
-      flex: 1;
-      min-height: 0;
-      width: 100%;
-      height: 100%;
-    }
-    #colombia-map-canvas {
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-    }
-
-    /* === CABECERA DEL CATÁLOGO Y RUEDA CONMUTABLE === */
-    .catalog-header {
-      display: flex !important;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .catalog-header-top {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .catalog-mode-btn {
-      background: rgba(223, 177, 91, 0.14);
-      border: 1px solid var(--gold-tumbaga);
-      color: var(--gold-tumbaga);
-      padding: 6px 11px;
-      border-radius: 999px;
-      font-size: 0.73rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-    .catalog-mode-btn:hover {
-      background: var(--gold-tumbaga);
-      color: #16100b;
-    }
-
-    /* RUEDA FUERA DEL MAPA */
-    .species-wheel-bar {
-      position: static !important;
-      transform: none !important;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 14px;
-      background: rgba(20, 14, 10, 0.95);
-      border-bottom: 1px solid var(--border-warm);
-      overflow-x: auto;
-      max-width: 100%;
-      border-radius: 0;
-      box-shadow: none;
-    }
-
-    /* MODO RUEDA VERTICAL EN ESCRITORIO (> 900px) */
-    @media (min-width: 901px) {
-      body:not(.wheel-minimized) .species-wheel-bar {
-        display: none !important;
-      }
-      body.wheel-minimized .catalog-header-top,
-      body.wheel-minimized #cards-container {
-        display: none !important;
-      }
-      body.wheel-minimized .catalog-header {
-        justify-content: center;
-        padding: 10px 6px !important;
-      }
-      body.wheel-minimized .catalog-mode-btn {
-        font-size: 0.66rem;
-        padding: 5px 8px;
-        width: 100%;
-        text-align: center;
-      }
-      body.wheel-minimized .species-wheel-bar {
-        display: flex !important;
-        flex-direction: column !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
-        padding: 12px 6px !important;
-        gap: 14px !important;
-        border-bottom: none !important;
-        height: calc(100vh - 135px);
-      }
-      body.wheel-minimized .wheel-item {
-        width: 88px !important;
-      }
-      body.wheel-minimized .wheel-avatar-wrap {
-        width: 54px !important;
-        height: 54px !important;
-      }
-    }
-
-    /* MODO MÓVIL Y TABLET (<= 900px) */
-    @media (max-width: 900px) {
-      .map-stage {
-        height: auto !important;
-        min-height: 0 !important;
-      }
-      .map-canvas-wrap {
-        height: 46vh !important;
-        min-height: 320px !important;
-      }
-      .map-legend {
-        bottom: 10px !important;
-        left: 10px !important;
-      }
-      .species-wheel-bar {
-        display: flex !important;
-        flex-direction: row !important;
-        border-top: 1px solid rgba(223, 177, 91, 0.28);
-        border-bottom: 1px solid rgba(223, 177, 91, 0.28);
+        max-width: calc(55vw - 14px);
       }
       body.mobile-cards-hidden #cards-container {
         display: none !important;
@@ -964,72 +846,59 @@
   <main class="workspace">
     <!-- LIENZO DEL MAPA ESCULTÓRICO 3D DE COLOMBIA -->
     <section class="map-stage">
-      <!-- BARRA COROLÓGICA UNIFICADA FUERA Y ENCIMA DEL LIENZO 3D -->
-      <div class="map-overlay-top" id="map-info-box">
-        <div class="map-overlay-head">
-          <h3 id="active-dept-title" onclick="toggleMapBox('map-info-box', 'btn-min-mapinfo')">Territorio Colombiano — Estado Neutro</h3>
-          <div class="map-head-actions">
-            <button type="button" class="map-reset-btn" id="reset-camera-btn">Restaurar Mapa Neutro</button>
-            <button type="button" class="hud-mini-btn" id="btn-min-mapinfo" onclick="toggleMapBox('map-info-box', 'btn-min-mapinfo')" title="Minimizar / Expandir">−</button>
-          </div>
-        </div>
+      <canvas id="colombia-map-canvas"></canvas>
+      <div id="dept-tooltip" class="dept-tooltip"></div>
 
+      <div class="map-overlay-top" id="map-info-box">
+        <div class="map-overlay-head" onclick="toggleMapBox(event, 'map-info-box', 'btn-min-mapinfo')">
+          <h3 id="active-dept-title">Territorio Colombiano — Estado Neutro</h3>
+          <button type="button" class="hud-mini-btn" id="btn-min-mapinfo" title="Minimizar / Expandir recuadro">−</button>
+        </div>
         <div class="map-info-body" id="map-info-body">
           <p id="active-dept-desc">
             Selecciona un <strong>departamento en el mapa</strong> para elevar su relieve y descubrir sus especies, o elige una <strong>especie del catálogo</strong> para elevar todos los departamentos donde se distribuye con su medallón floral.
           </p>
-
-          <!-- DETALLE UNIFICADO DE LA ESPECIE SELECCIONADA DENTRO DEL MISMO RECUADRO -->
           <div class="map-popup" id="map-popup">
-            <div class="pop-head">
-              <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
-                <span class="badge badge-id" id="pop-id">COL-ATL-002</span>
-                <span class="badge" id="pop-status">Nativa</span>
-                <strong id="pop-species" style="font-style:italic; color:#f4ece1; font-size:0.95rem; margin-left:4px;">Anthurium andraeanum</strong>
-              </div>
-              <a href="#" class="pop-btn" id="pop-link" style="margin:0; padding:6px 12px; width:auto; font-size:0.76rem;">🔬 Abrir Atlas de Disección 3D →</a>
-            </div>
-            <div class="pop-meta" id="pop-meta" style="margin-top:6px; margin-bottom:0;"></div>
-          </div>
+        <div class="pop-head">
+          <span class="badge badge-id" id="pop-id">COL-ATL-002</span>
+          <span class="badge" id="pop-status">Nativa</span>
+        </div>
+        <h4 id="pop-species">Anthurium andraeanum</h4>
+        <div class="pop-meta" id="pop-meta"></div>
+        <a href="#" class="pop-link" id="pop-url">Abrir Atlas de Disección 3D →</a>
+      </div>
         </div>
       </div>
 
-      <!-- CONTENEDOR DEL LIENZO 3D DEL MAPA -->
-      <div class="map-canvas-wrap" id="map-canvas-wrap">
-        <canvas id="colombia-map-canvas"></canvas>
-        <div id="dept-tooltip" class="dept-tooltip"></div>
+      <button type="button" class="map-reset-btn" id="reset-camera-btn">Restaurar Mapa Neutro</button>
 
-        <div class="map-legend" id="map-legend-box">
-          <div class="map-legend-head" onclick="toggleMapBox('map-legend-box', 'btn-min-legend')">
-            <span>🗺️ Leyenda</span>
-            <button type="button" class="hud-mini-btn" id="btn-min-legend" aria-label="Minimizar leyenda">−</button>
-          </div>
-          <div class="legend-rows">
-            <div class="legend-row"><span class="dot" style="background:#3b2e25;"></span> Reposo Neutro: Arcilla basal sin pines</div>
-            <div class="legend-row"><span class="dot" style="background:#c86446;"></span> Depto. Elevado: Territorio activo seleccionado</div>
-            <div class="legend-row"><span class="dot" style="background:#dfb15b;"></span> Medallón Oro Tumbaga: Especie Endémica</div>
-            <div class="legend-row"><span class="dot" style="background:#52a37e;"></span> Medallón Jade: Especie Nativa</div>
-          </div>
+      <div class="map-legend" id="map-legend-box">
+        <div class="map-legend-head" onclick="toggleMapBox(event, 'map-legend-box', 'btn-min-legend')">
+          <span>🗺️ Leyenda</span>
+          <button type="button" class="hud-mini-btn" id="btn-min-legend" title="Minimizar leyenda">−</button>
+        </div>
+        <div class="legend-rows">
+          <div class="legend-row"><span class="dot" style="background:#3b2e25;"></span> Reposo Neutro: Arcilla basal sin pines</div>
+          <div class="legend-row"><span class="dot" style="background:#c86446;"></span> Depto. Elevado: Territorio activo seleccionado</div>
+          <div class="legend-row"><span class="dot" style="background:#dfb15b;"></span> Medallón Oro Tumbaga: Especie Endémica</div>
+          <div class="legend-row"><span class="dot" style="background:#52a37e;"></span> Medallón Jade: Especie Nativa</div>
         </div>
       </div>
     </section>
 
     <!-- CATÁLOGO CIENTÍFICO LATERAL -->
-    <section class="catalog-panel" id="catalog-panel">
-      <div class="catalog-header">
-        <div class="catalog-header-top">
-          <span id="catalog-count">Mostrando 7 de 7 especies</span>
-          <span id="catalog-sub">Mapa en reposo neutro</span>
+    <section class="catalog-panel">
+      <div class="catalog-status">
+        <div class="catalog-header-meta">
+          <span id="catalog-count">7 especies documentadas</span>
+          <span id="catalog-sub">Modo: Vista General Neutra</span>
         </div>
         <button type="button" class="catalog-mode-btn" id="btn-toggle-wheel-mode" onclick="toggleCatalogWheelMode()">
-          🛞 Vista Rueda Compacta
+          🛞 Minimizar a Rueda
         </button>
       </div>
-
-      <!-- RUEDA DE ESPECIES (HORIZONTAL FUERA DEL MAPA EN MÓVIL / VERTICAL EN ESCRITORIO AL MINIMIZAR) -->
       <div class="species-wheel-bar" id="species-wheel-bar"></div>
-
-      <div class="cards-list" id="cards-container"></div>
+      <div id="cards-container" style="display:flex; flex-direction:column; gap:14px;"></div>
     </section>
   </main>
 
@@ -1074,7 +943,7 @@
     // ============================================================================
     const SPECIES_DB = [
       {
-        id: "COL-ATL-001",
+        id: "COL-ATL-001", commonName: "Anturio del San Jorge", shortName: "A. sanjorgense", viewerUrl: "models/anthurium_sanjorgense.html",
         species: "Anthurium sanjorgense",
         author: "Croat (1991)",
         family: "Araceae • Sección Pachyneurium",
@@ -1087,7 +956,7 @@
         modelUrl: "models/anthurium_sanjorgense.html"
       },
       {
-        id: "COL-ATL-002",
+        id: "COL-ATL-002", commonName: "Anturio rojo / Capote", shortName: "A. andraeanum", viewerUrl: "models/anthurium_andraeanum.html",
         species: "Anthurium andraeanum",
         author: "Linden ex André (1877)",
         family: "Araceae • Sección Calomystrium",
@@ -1100,59 +969,59 @@
         modelUrl: "models/anthurium_andraeanum.html"
       },
       {
-        id: "COL-ATL-003",
+        id: "COL-ATL-003", commonName: "Granadilla", shortName: "P. ligularis", viewerUrl: "models/passiflora_ligularis.html",
         species: "Passiflora ligularis",
         author: "Juss. (1805)",
         family: "Passifloraceae • Subgén. Passiflora",
         status: "Nativa",
         depts: ["Valle del Cauca", "Antioquia", "Huila", "Cundinamarca", "Caldas", "Risaralda", "Quindío", "Tolima", "Cauca", "Nariño", "Boyacá"],
         altitude: "1500 – 2600 m s.n.m.",
-        morpho: "Granadilla • Bejuco trepador con zarcillos de los Andes colombianos. Reconocida por sus frutos dulces y su corona floral bandeada adaptada a abejorros (Xylocopa).",
+        morpho: "Perianto blanco-rosado (88 mm Ø); corona en 5 series con filamentos bandeados blanco-púrpura (40 mm); androginóforo de 12 mm.",
         reference: "Jussieu (1805) Ann. Mus. Hist. Nat. 6: 113; Ocampo Pérez et al. (2007) CIAT.",
         image: "images/passiflora_ligularis.jpg",
         modelUrl: "models/passiflora_ligularis.html"
       },
       {
-        id: "COL-ATL-004",
+        id: "COL-ATL-004", commonName: "Pasiflora escarlata", shortName: "P. vitifolia", viewerUrl: "models/passiflora_vitifolia.html",
         species: "Passiflora vitifolia",
         author: "Kunth (1817)",
         family: "Passifloraceae • Supersección Coccinea",
         status: "Nativa",
         depts: ["Chocó", "Santander", "Meta", "Caquetá", "Antioquia", "Valle del Cauca", "Putumayo", "Amazonas", "Córdoba"],
         altitude: "50 – 1400 m s.n.m.",
-        morpho: "Pasiflora escarlata • Liana trepadora de sotobosque húmedo tropical. Sus flores rojo escarlata intenso están especializadas en la polinización por colibríes ermitaños.",
+        morpho: "Flor escarlata adaptada a ornitofilia (120 mm Ø); filamentos de la corona rojos y blancos erectos; tubo calicino de 16 mm.",
         reference: "Kunth (1817) Nov. Gen. Sp. 2: 138; Ulmer & MacDougal (2004) Passiflora.",
         image: "images/passiflora_vitifolia.jpg",
         modelUrl: "models/passiflora_vitifolia.html"
       },
       {
-        id: "COL-ATL-005",
+        id: "COL-ATL-005", commonName: "Frailejón mayor", shortName: "E. grandiflora", viewerUrl: "models/espeletia_grandiflora.html",
         species: "Espeletia grandiflora",
         author: "Humb. & Bonpl. (1809)",
         family: "Asteraceae • Subtribu Espeletiinae",
         status: "Endémica",
         depts: ["Cundinamarca", "Meta", "Boyacá"],
         altitude: "3100 – 4100 m s.n.m.",
-        morpho: "Frailejón mayor • Roseta caulescente lanuginosa emblemática de los páramos orientales. Regula el ciclo hídrico de alta montaña y sustenta abejorros y colibríes.",
+        morpho: "Capítulo radiado (55 mm Ø); involucro hemisférico lanuginoso; ~32 flores liguladas femeninas amarillas y ~120 flósculos del disco.",
         reference: "Humboldt & Bonpland (1809) Pl. Aequinoct. 2: 11; Mavárez (2021); Pouchon et al. (2018).",
         image: "images/espeletia_grandiflora.jpg",
         modelUrl: "models/espeletia_grandiflora.html"
       },
       {
-        id: "COL-ATL-006",
+        id: "COL-ATL-006", commonName: "Flor de Mayo", shortName: "C. trianae", viewerUrl: "models/cattleya_trianae.html",
         species: "Cattleya trianae",
         author: "Linden & Rchb. f. (1860)",
         family: "Orchidaceae • Subfam. Epidendroideae",
         status: "Endémica",
         depts: ["Huila", "Tolima", "Cundinamarca"],
         altitude: "1200 – 2000 m s.n.m.",
-        morpho: "Flor de Mayo • Orquídea epífita del bosque subandino del Alto Magdalena. Flor Nacional de Colombia, célebre por su labelo rizado amarillo-oro y púrpura carmesí.",
+        morpho: "Flor zigomorfa resupinada (155 mm Ø); labelo tubular rizado con disco amarillo-oro y ápice púrpura carmesí; ginostemo de 28 mm.",
         reference: "Linden & Reichenbach f. (1860) Bot. Zeitung 18: 74; Sarmiento (2007).",
         image: "images/cattleya_trianae.jpg",
         modelUrl: "models/cattleya_trianae.html"
       },
       {
-        id: "COL-ATL-007",
+        id: "COL-ATL-007", commonName: "Platanillo / Pico de loro", shortName: "H. rostrata", viewerUrl: "models/heliconia_rostrata.html",
         species: "Heliconia rostrata",
         author: "Ruiz & Pav. (1802)",
         family: "Heliconiaceae • Orden Zingiberales",
@@ -1500,53 +1369,21 @@
     let selectedSpeciesId = null;
 
 
-    // ============================================================================
-    // PERFILES BIO-ECOLÓGICOS Y RUTAS 3D VERIFICADAS (CERO ERROR 404)
-    // ============================================================================
-    const BIO_PROFILES = {
-      "COL-ATL-001": {
-        common: "Anturio del San Jorge",
-        shortName: "A. sanjorgense",
-        viewerUrl: "models/anthurium_sanjorgense.html"
-      },
-      "COL-ATL-002": {
-        common: "Anturio rojo / Capote",
-        shortName: "A. andraeanum",
-        viewerUrl: "models/anthurium_andraeanum.html"
-      },
-      "COL-ATL-003": {
-        common: "Granadilla",
-        shortName: "P. ligularis",
-        viewerUrl: "models/passiflora_ligularis.html"
-      },
-      "COL-ATL-004": {
-        common: "Pasiflora escarlata",
-        shortName: "P. vitifolia",
-        viewerUrl: "models/passiflora_vitifolia.html"
-      },
-      "COL-ATL-005": {
-        common: "Frailejón mayor",
-        shortName: "E. grandiflora",
-        viewerUrl: "models/espeletia_grandiflora.html"
-      },
-      "COL-ATL-006": {
-        common: "Flor de Mayo",
-        shortName: "C. trianae",
-        viewerUrl: "models/cattleya_trianae.html"
-      },
-      "COL-ATL-007": {
-        common: "Platanillo / Pico de loro",
-        shortName: "H. rostrata",
-        viewerUrl: "models/heliconia_rostrata.html"
-      }
+    window.toggleMapBox = function(e, boxId, btnId) {
+      if (e) e.stopPropagation();
+      const box = document.getElementById(boxId);
+      const btn = document.getElementById(btnId);
+      if (!box) return;
+      box.classList.toggle("minimized");
+      if (btn) btn.textContent = box.classList.contains("minimized") ? "+" : "−";
     };
 
-    SPECIES_DB.forEach(sp => {
-      const prof = BIO_PROFILES[sp.id] || {};
-      sp.commonName = prof.common || "";
-      sp.shortName = prof.shortName || sp.species;
-      sp.viewerUrl = prof.viewerUrl || sp.viewer || sp.url || sp.modelUrl || ("models/" + sp.species.toLowerCase().replace(/\s+/g, "_") + ".html");
-    });
+    if (window.innerWidth <= 900) {
+      const legBox = document.getElementById("map-legend-box");
+      const legBtn = document.getElementById("btn-min-legend");
+      if (legBox) legBox.classList.add("minimized");
+      if (legBtn) legBtn.textContent = "+";
+    }
 
     window.toggleCatalogWheelMode = function() {
       const isMobile = window.innerWidth <= 900;
@@ -1558,7 +1395,7 @@
       } else {
         document.body.classList.toggle("wheel-minimized");
         const min = document.body.classList.contains("wheel-minimized");
-        if (btn) btn.textContent = min ? "📋 Catálogo" : "🛞 Minimizar a Rueda";
+        if (btn) btn.textContent = min ? "📋 Ver Catálogo" : "🛞 Minimizar a Rueda";
         setTimeout(() => window.dispatchEvent(new Event("resize")), 60);
         setTimeout(() => window.dispatchEvent(new Event("resize")), 260);
       }
@@ -1570,41 +1407,39 @@
       const list = SPECIES_DB.filter(sp => {
         const matchStatus = currentStatus === "ALL" || sp.status === currentStatus;
         const q = currentSearch.trim().toLowerCase();
-        const matchSearch = !q ||
+        return matchStatus && (!q ||
           sp.species.toLowerCase().includes(q) ||
           sp.family.toLowerCase().includes(q) ||
           (sp.commonName && sp.commonName.toLowerCase().includes(q)) ||
-          sp.depts.some(d => d.toLowerCase().includes(q));
-        return matchStatus && matchSearch;
+          sp.depts.some(d => d.toLowerCase().includes(q)));
       });
 
       wheel.innerHTML = list.map(sp => {
         const isAct = selectedSpeciesId === sp.id;
+        const vUrl = sp.viewerUrl || sp.viewer || ("models/" + sp.species.toLowerCase().replace(/\s+/g, "_") + ".html");
         return `
-          <div class="wheel-item ${isAct ? 'active' : ''}" onclick="handleWheelTap('${sp.id}')">
+          <div class="wheel-item ${isAct ? 'active' : ''}" onclick="handleWheelSelect('${sp.id}')">
             <div class="wheel-avatar-wrap">
               <img src="${sp.image}" alt="${sp.species}">
-              <span class="wheel-3d-pill" onclick="event.stopPropagation(); openAtlasModal('${sp.viewerUrl}')">3D</span>
             </div>
-            <div class="wheel-name">${sp.shortName}</div>
-            <div class="wheel-common">${sp.commonName}</div>
+            <div class="wheel-name">${sp.shortName || sp.species}</div>
+            <div class="wheel-common">${sp.commonName || ''}</div>
+            <button type="button" class="wheel-open-3d-btn" onclick="event.stopPropagation(); openAtlasModal('${vUrl}')">🔬 Abrir 3D</button>
           </div>
         `;
       }).join("");
     }
 
-    window.handleWheelTap = function(spId) {
+    window.handleWheelSelect = function(spId) {
       const sp = SPECIES_DB.find(s => s.id === spId);
       if (!sp) return;
-      if (selectedSpeciesId === spId) {
-        openAtlasModal(sp.viewerUrl);
-      } else {
-        selectSpeciesDistribution(sp);
-      }
+      selectSpeciesDistribution(sp);
     };
 
     function updateMapAndCatalog() {
       renderSpeciesWheel();
+      const infoBox = document.getElementById("map-info-box");
+      if (infoBox) infoBox.classList.toggle("has-species-popup", Boolean(selectedSpeciesId));
       const container = document.getElementById("cards-container");
       container.innerHTML = "";
 
@@ -1678,7 +1513,7 @@
                 </div>
                 <div class="card-family">${sp.family} • ${sp.altitude}</div>
                 <div class="card-corology"><strong>Departamentos (${sp.depts.length}):</strong> ${sp.depts.join(", ")}</div>
-                <div class="card-corology"><strong>Hábito y ecología:</strong> ${sp.morpho}</div>
+                <div class="card-corology"><strong>Descripción general:</strong> ${sp.morpho}</div>
                 <div class="card-ref"><strong>Fuente:</strong> ${sp.reference}</div>
               </div>
               <div class="card-actions">
@@ -1762,6 +1597,12 @@
     }
 
     function selectSpeciesDistribution(sp) {
+      const infoBox = document.getElementById("map-info-box");
+      const infoBtn = document.getElementById("btn-min-mapinfo");
+      if (infoBox && infoBox.classList.contains("minimized")) {
+        infoBox.classList.remove("minimized");
+        if (infoBtn) infoBtn.textContent = "−";
+      }
       // Si ya estaba seleccionada la misma especie, volver al estado neutro
       if (selectedSpeciesId === sp.id) {
         selectDepartment("ALL");
@@ -1791,27 +1632,17 @@
       }
 
       // Mostrar tarjeta emergente inferior derecha
-      const infoBox = document.getElementById("map-info-box");
-      const infoBtn = document.getElementById("btn-min-mapinfo");
-      if (infoBox && infoBox.classList.contains("minimized")) {
-        infoBox.classList.remove("minimized");
-        if (infoBtn) infoBtn.textContent = "−";
-      }
       const popup = document.getElementById("map-popup");
-      if (popup) {
-        popup.classList.remove("minimized");
-        const minBtn = document.getElementById("btn-min-popup");
-        if (minBtn) minBtn.textContent = "−";
-      }
       document.getElementById("pop-id").textContent = sp.id;
       const stEl = document.getElementById("pop-status");
       stEl.textContent = sp.status + " de Colombia";
       stEl.className = "badge " + (sp.status === "Endémica" ? "badge-endemic" : "badge-native");
       document.getElementById("pop-species").textContent = sp.species;
       document.getElementById("pop-meta").innerHTML = `
-        <div><strong>${sp.commonName ? sp.commonName + " • " : ""}</strong>${sp.family} • ${sp.subfamily || sp.taxGroup || ""} • <strong>Rango altitudinal:</strong> ${sp.altitude || sp.elevation || ""}</div>
-        <div style="margin-top:3px;"><strong>Hábito y ecología:</strong> ${sp.diagnosis || sp.desc || ""}</div>
-        <div style="margin-top:3px; color:#b8a38c; font-size:0.72rem;"><strong>Fuente:</strong> ${sp.source || sp.citation || ""}</div>
+        <strong>${sp.family}</strong><br/>
+        <strong>Departamentos elevados (${sp.depts.length}):</strong> ${sp.depts.join(", ")}<br/>
+        <strong>Rango altitudinal:</strong> ${sp.altitude}<br/>
+        <strong>Fuente:</strong> ${sp.reference}
       `;
       const _popLink = document.getElementById("pop-url");
       _popLink.href = sp.modelUrl;
@@ -1854,19 +1685,7 @@
     const targetCamPos = new THREE.Vector3().copy(camera.position);
     const targetCamLookAt = new THREE.Vector3().copy(controls.target);
 
-    window.toggleMapBox = function(boxId, btnId) {
-      const box = document.getElementById(boxId);
-      const btn = document.getElementById(btnId);
-      if (!box || !btn) return;
-      box.classList.toggle("minimized");
-      btn.textContent = box.classList.contains("minimized") ? "+" : "−";
-    };
-    if (window.innerWidth <= 768) {
-      toggleMapBox("map-legend-box", "btn-min-legend");
-    }
-
     canvas.addEventListener("pointermove", (e) => {
-      if (e.pointerType && e.pointerType !== "mouse") return;
       const rect = canvas.getBoundingClientRect();
       mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -1904,7 +1723,7 @@
     });
 
     canvas.addEventListener("pointerup", (e) => {
-      if (Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y) > 9) return;
+      if (Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y) > 6) return;
 
       const rect = canvas.getBoundingClientRect();
       mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -1917,7 +1736,7 @@
         const sp = hitMedallions[0].object.userData.speciesData;
         selectSpeciesDistribution(sp);
         const cardEl = document.getElementById(`card-${sp.id}`);
-        if (cardEl && window.innerWidth > 900) cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (cardEl && window.innerWidth > 900 && !document.body.classList.contains("wheel-minimized")) cardEl.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
 
