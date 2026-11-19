@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+title: "Atlas Morfométrico Floral de Colombia (flower-3d-forge): Herbario Digital 3D Paramétrico y Corología Interactiva"
+message: "Si utilizas este software, los modelos 3D o las fichas morfométricas en investigación, docencia o divulgación, por favor cítalo usando estos metadatos."
+type: software
+authors:
+  - family-names: "Sepúlveda Murillo"
+    given-names: "Sain Alexis"
+    affiliation: "Programa de Biología, Facultad de Ciencias Naturales y Exactas, Universidad del Valle"
+    city: "Cali"
+    country: "CO"
+repository-code: "https://github.com/Zayn-sepulveda/flower-3d-forge"
+url: "https://zayn-sepulveda.github.io/flower-3d-forge/"
+keywords:
+  - "botánica"
+  - "morfometría floral"
+  - "herbario digital 3D"
+  - "flora de Colombia"
+  - "taxonomía vegetal"
+  - "Three.js"
+  - "GBIF"
+license: GPL-3.0-only
+version: "1.0.0"
+date-released: "2026-11-19"

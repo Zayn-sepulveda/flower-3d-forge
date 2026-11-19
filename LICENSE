@@ -1,0 +1,21 @@
+LICENCIA DUAL — ATLAS MORFOMÉTRICO FLORAL DE COLOMBIA (flower-3d-forge)
+Copyright (c) 2026 Sain Alexis Sepúlveda Murillo. Todos los derechos reservados.
+
+Este repositorio se distribuye bajo un esquema de licencia dual según el tipo de archivo:
+
+1. CÓDIGO FUENTE (archivos en src/, index.html, scripts de compilación y validación):
+   Licenciado bajo GNU General Public License v3.0 (GNU GPLv3).
+   - Se permite estudiar, modificar y compartir el código fuente manteniendo intactos
+     los avisos de autoría original y distribuyendo cualquier obra derivada bajo la
+     misma licencia GPLv3 (copyleft fuerte; prohibida su apropiación en software cerrado).
+   - Texto completo: https://www.gnu.org/licenses/gpl-3.0.html
+
+2. MODELOS 3D, FICHAS MORFOMÉTRICAS Y CONTENIDO BOTÁNICO (models/, configs/, textos):
+   Licenciado bajo Creative Commons Atribución-NoComercial-CompartirIgual 4.0
+   Internacional (CC BY-NC-SA 4.0).
+   - Atribución obligatoria: Debe citarse explícitamente a Sain Alexis Sepúlveda Murillo
+     y el enlace/DOI del repositorio original.
+   - No Comercial (NC): Queda estrictamente prohibido el uso comercial, venta o
+     explotación lucrativa de las mallas 3D, renders o fichas sin autorización escrita.
+   - Compartir Igual (SA): Cualquier adaptación debe distribuirse bajo CC BY-NC-SA 4.0.
+   - Texto completo: https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es
