@@ -810,6 +810,164 @@
         display: none !important;
       }
     }
+
+    /* === MÓDULO ANALÍTICO GBIF / SiB COLOMBIA (COMPACTO Y DESPLEGABLE) === */
+    .gbif-eco-box {
+      margin-top: 8px;
+      padding-top: 7px;
+      border-top: 1px solid rgba(223, 177, 91, 0.22);
+      font-size: 0.72rem;
+      color: #e6d7c3;
+    }
+    .gbif-eco-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .gbif-eco-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .gbif-verified-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(82, 163, 126, 0.16);
+      border: 1px solid rgba(82, 163, 126, 0.5);
+      color: #8ce0b8;
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .gbif-count-text {
+      color: #d6c5b0;
+      font-size: 0.7rem;
+    }
+    .gbif-eco-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .gbif-toggle-btn {
+      background: rgba(223, 177, 91, 0.12);
+      border: 1px solid rgba(223, 177, 91, 0.45);
+      color: var(--gold-tumbaga, #dfb15b);
+      border-radius: 999px;
+      padding: 2px 9px;
+      font-size: 0.66rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .gbif-toggle-btn:hover, .gbif-toggle-btn.open {
+      background: var(--gold-tumbaga, #dfb15b);
+      color: #16100b;
+    }
+    .gbif-ext-link {
+      color: #8ce0b8;
+      text-decoration: none;
+      font-size: 0.67rem;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+    .gbif-ext-link:hover {
+      text-decoration: underline;
+      opacity: 1;
+    }
+    .gbif-eco-panel {
+      display: none;
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: rgba(16, 11, 8, 0.72);
+      border: 1px solid rgba(223, 177, 91, 0.22);
+      border-radius: 8px;
+    }
+    .gbif-eco-panel.open {
+      display: block;
+    }
+    .gbif-pheno-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.65rem;
+      color: #b8a38c;
+      margin-bottom: 6px;
+    }
+    .gbif-pheno-peak {
+      color: var(--gold-tumbaga, #dfb15b);
+      font-weight: 700;
+    }
+    .gbif-bars {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 3px;
+      align-items: end;
+      height: 32px;
+      padding-bottom: 2px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .gbif-bar-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      height: 100%;
+    }
+    .gbif-bar-fill {
+      width: 100%;
+      max-width: 12px;
+      border-radius: 2px 2px 0 0;
+      background: rgba(82, 163, 126, 0.62);
+      transition: height 0.25s ease;
+    }
+    .gbif-bar-fill.peak {
+      background: var(--gold-tumbaga, #dfb15b);
+      box-shadow: 0 0 6px rgba(223, 177, 91, 0.45);
+    }
+    .gbif-bar-fill.zero {
+      background: rgba(255, 255, 255, 0.10);
+    }
+    .gbif-bar-labels {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 3px;
+      margin-top: 3px;
+      text-align: center;
+      font-size: 0.57rem;
+      color: #9e8a74;
+    }
+    .gbif-top-depts {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-top: 7px;
+      font-size: 0.65rem;
+      color: #c8b6a2;
+    }
+    .gbif-dept-chip {
+      background: rgba(223, 177, 91, 0.10);
+      border: 1px solid rgba(223, 177, 91, 0.26);
+      color: #f4ece1;
+      padding: 1px 6px;
+      border-radius: 5px;
+      font-size: 0.63rem;
+    }
+    .gbif-meta-foot {
+      margin-top: 6px;
+      font-size: 0.61rem;
+      color: #96816b;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
   </style>
 </head>
 <body>
@@ -1849,6 +2007,170 @@
         if (ev.key === "Escape" && overlay.style.display !== "none") window.closeAtlasModal();
       });
     })();
+  
+    // =========================================================================
+    // INTEGRACIÓN LIGERA CON API ABIERTA DE GBIF / SiB COLOMBIA (SIN IMÁGENES)
+    // Validación taxonómica Backbone + Fenología mensual + Top departamentos CO
+    // =========================================================================
+    const GBIF_MONTH_SHORT = ["E", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+    const GBIF_MONTH_FULL = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+    window.toggleGbifEcoPanel = function(e) {
+      if (e) e.stopPropagation();
+      const panel = document.getElementById("gbif-eco-panel");
+      const btn = document.getElementById("gbif-toggle-btn");
+      if (!panel || !btn) return;
+      const isOpen = panel.classList.toggle("open");
+      btn.classList.toggle("open", isOpen);
+      btn.textContent = isOpen ? "📊 Fenología ▴" : "📊 Fenología ▾";
+    };
+
+    function getOrCreateGbifBox() {
+      const popup = document.getElementById("map-popup");
+      if (!popup) return null;
+      let box = document.getElementById("gbif-eco-box");
+      if (!box) {
+        box = document.createElement("div");
+        box.id = "gbif-eco-box";
+        box.className = "gbif-eco-box";
+        const linkEl = document.getElementById("pop-url") || popup.querySelector(".pop-link, .pop-btn");
+        if (linkEl) popup.insertBefore(box, linkEl);
+        else popup.appendChild(box);
+      }
+      return box;
+    }
+
+    function renderGbifEcoBox(box, sp, data) {
+      const statusLabel = data.status === "ACCEPTED" ? "Aceptado" : (data.status === "SYNONYM" ? "Sinónimo" : "Validado");
+      const gbifUrl = data.usageKey
+        ? `https://www.gbif.org/species/${data.usageKey}`
+        : `https://www.gbif.org/occurrence/search?country=CO&q=${encodeURIComponent(sp.species)}`;
+
+      const maxM = Math.max(...data.months, 0);
+      let peakText = "Sin estacionalidad registrada";
+      if (maxM > 0) {
+        const peakIdxs = data.months.map((v, i) => v === maxM ? GBIF_MONTH_FULL[i] : null).filter(Boolean);
+        peakText = `Pico: ${peakIdxs.slice(0, 2).join("–")} (${maxM})`;
+      }
+
+      const barsHtml = data.months.map((cnt, idx) => {
+        const pct = maxM > 0 ? Math.max(cnt > 0 ? 14 : 6, Math.round((cnt / maxM) * 100)) : 8;
+        const cls = cnt === 0 ? "zero" : (cnt === maxM ? "peak" : "");
+        return `<div class="gbif-bar-col" title="${GBIF_MONTH_FULL[idx]}: ${cnt} registros en Colombia"><div class="gbif-bar-fill ${cls}" style="height:${pct}%;"></div></div>`;
+      }).join("");
+
+      const labelsHtml = GBIF_MONTH_SHORT.map(m => `<span>${m}</span>`).join("");
+
+      const topDeptsHtml = data.topDepts.length > 0
+        ? `<div class="gbif-top-depts"><span>Top SiB CO:</span>${data.topDepts.map(d => `<span class="gbif-dept-chip">${d.name} (${d.count})</span>`).join("")}</div>`
+        : `<div class="gbif-top-depts"><span>Vacío de datos georreferenciados en SiB Colombia para este taxón.</span></div>`;
+
+      const countStr = data.totalCO > 0
+        ? `${data.totalCO.toLocaleString("es-CO")} reg. en CO`
+        : `Sin reg. públicos CO`;
+
+      box.innerHTML = `
+        <div class="gbif-eco-bar">
+          <div class="gbif-eco-left">
+            <span class="gbif-verified-tag" title="Validación en vivo contra GBIF Backbone Taxonomy">✓ GBIF ${statusLabel}</span>
+            <span class="gbif-count-text">SiB CO · ${countStr}</span>
+          </div>
+          <div class="gbif-eco-actions">
+            <button type="button" class="gbif-toggle-btn" id="gbif-toggle-btn" onclick="toggleGbifEcoPanel(event)">📊 Fenología ▾</button>
+            <a class="gbif-ext-link" href="${gbifUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()">GBIF ↗</a>
+          </div>
+        </div>
+        <div class="gbif-eco-panel" id="gbif-eco-panel">
+          <div class="gbif-pheno-head">
+            <span>Registros mensuales en Colombia (Ene–Dic)</span>
+            <span class="gbif-pheno-peak">${peakText}</span>
+          </div>
+          <div class="gbif-bars">${barsHtml}</div>
+          <div class="gbif-bar-labels">${labelsHtml}</div>
+          ${topDeptsHtml}
+          <div class="gbif-meta-foot">
+            <span>TaxonKey: ${data.usageKey || "N/D"}</span>
+            <span>Datos abiertos · API GBIF v1 / SiB Colombia</span>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadGbifEcoMetrics(sp) {
+      const box = getOrCreateGbifBox();
+      if (!box) return;
+
+      const cacheKey = "gbif_eco_v1_" + sp.id;
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        try {
+          renderGbifEcoBox(box, sp, JSON.parse(cached));
+          return;
+        } catch (e) {}
+      }
+
+      box.innerHTML = `<div class="gbif-eco-bar"><span class="gbif-count-text">⏳ Validando taxón y fenología en GBIF / SiB Colombia...</span></div>`;
+
+      try {
+        const matchRes = await fetch(
+          `https://api.gbif.org/v1/species/match?kingdom=Plantae&name=${encodeURIComponent(sp.species)}`
+        ).then(r => r.json());
+
+        const usageKey = matchRes && matchRes.usageKey ? matchRes.usageKey : null;
+        const status = matchRes && matchRes.status ? matchRes.status : "VALIDATED";
+        const queryParam = usageKey
+          ? `taxonKey=${usageKey}`
+          : `scientificName=${encodeURIComponent(sp.species)}`;
+
+        const occRes = await fetch(
+          `https://api.gbif.org/v1/occurrence/search?country=CO&kingdomKey=6&${queryParam}&limit=0&facet=month&facet=stateProvince&facetLimit=15`
+        ).then(r => r.json());
+
+        const months = Array(12).fill(0);
+        const topDepts = [];
+
+        (occRes.facets || []).forEach(f => {
+          const field = (f.field || "").toUpperCase();
+          if (field === "MONTH") {
+            (f.counts || []).forEach(c => {
+              const mIdx = parseInt(c.name, 10) - 1;
+              if (mIdx >= 0 && mIdx < 12) months[mIdx] = c.count;
+            });
+          } else if (field === "STATE_PROVINCE") {
+            (f.counts || []).forEach(c => {
+              const clean = (c.name || "").trim();
+              if (clean && clean.toLowerCase() !== "colombia" && clean.toLowerCase() !== "unknown") {
+                topDepts.push({ name: clean, count: c.count });
+              }
+            });
+          }
+        });
+
+        const payload = {
+          usageKey,
+          status,
+          totalCO: occRes.count || 0,
+          months,
+          topDepts: topDepts.slice(0, 3)
+        };
+
+        try { sessionStorage.setItem(cacheKey, JSON.stringify(payload)); } catch (e) {}
+        if (selectedSpeciesId === sp.id) {
+          renderGbifEcoBox(box, sp, payload);
+        }
+      } catch (err) {
+        box.innerHTML = `<div class="gbif-eco-bar"><span class="gbif-count-text">🏛️ Datos locales activos (API GBIF sin conexión)</span></div>`;
+      }
+    }
+
+    if (typeof selectSpeciesDistribution === "function") {
+      const _prevSelectSpeciesDist = selectSpeciesDistribution;
+      selectSpeciesDistribution = function(sp) {
+        _prevSelectSpeciesDist(sp);
+        loadGbifEcoMetrics(sp);
+      };
+    }
+
   </script>
 </body>
 </html>
