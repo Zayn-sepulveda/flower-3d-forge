@@ -32,6 +32,8 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
     <meta charset="UTF-8">
     <meta name=\"author\" content=\"Sain Alexis Sepúlveda Murillo\">
     <meta name=\"copyright\" content=\"Copyright (c) 2026 Sain Alexis Sepúlveda Murillo - GPLv3 / CC BY-NC-SA 4.0\">
+    <meta name=\"author\" content=\"Sain Alexis Sepúlveda Murillo\">
+    <meta name=\"copyright\" content=\"Copyright (c) 2026 Sain Alexis Sepúlveda Murillo - GPLv3 / CC BY-NC-SA 4.0\">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visor Botánico 3D - {sp_name}</title>
     <style>
