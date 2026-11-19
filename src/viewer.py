@@ -14,6 +14,18 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
     if foto_campo and not foto_campo.startswith('../') and not foto_campo.startswith(('http://', 'https://')):
         foto_campo = '../' + foto_campo.lstrip('/')
 
+    fam_lower = str((cfg.get('colecta') or cfg.get('taxonomia') or {}).get('familia', '')).strip().lower()
+    if fam_lower == 'asteraceae':
+        lbl_caliz, lbl_corola, lbl_reprod, lbl_ovario = 'Involucro', 'Lígulas', 'Disco/Páleas', 'Recept./Aquenios'
+    else:
+        lbl_caliz, lbl_corola, lbl_reprod, lbl_ovario = 'Cáliz', 'Corola', 'Reprod.', 'Ovario'
+
+    fam_lower = str((cfg.get('colecta') or cfg.get('taxonomia') or {}).get('familia', '')).strip().lower()
+    if fam_lower == 'asteraceae':
+        lbl_caliz, lbl_corola, lbl_reprod, lbl_ovario = 'Involucro', 'Lígulas', 'Disco/Páleas', 'Recept./Aquenios'
+    else:
+        lbl_caliz, lbl_corola, lbl_reprod, lbl_ovario = 'Cáliz', 'Corola', 'Reprod.', 'Ovario'
+
     html_content = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -119,10 +131,10 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
                 <button id="btn-reset" class="action-btn">🔄 Ensamblar</button>
             </div>
             <div class="whorl-toggles">
-                <label><input type="checkbox" class="whorl-cb" data-whorl="caliz" checked> Cáliz</label>
-                <label><input type="checkbox" class="whorl-cb" data-whorl="corola" checked> Corola</label>
-                <label><input type="checkbox" class="whorl-cb" data-whorl="reproductivo" checked> Reprod.</label>
-                <label><input type="checkbox" class="whorl-cb" data-whorl="ovario" checked> Ovario</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="caliz" checked> {lbl_caliz}</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="corola" checked> {lbl_corola}</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="reproductivo" checked> {lbl_reprod}</label>
+                <label><input type="checkbox" class="whorl-cb" data-whorl="ovario" checked> {lbl_ovario}</label>
             </div>
         </div>
     </div>
@@ -193,6 +205,17 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             "Ovulos_Placentacion_Parietal": {{ title: "Placentas Parietales y Óvulos", whorl: "Anatomía Interna", cat: "ovario", desc: "Cavidad unilocular con 3 cordones parietales y óvulos anátropos.", exp: [0, 68, 0], plate: [0, -15, 0] }},
             "Camara_Nectarifera_Interna": {{ title: "Cámara Nectarífera y Opérculo", whorl: "Anatomía Interna", cat: "ovario", desc: "Cavidad anular cerrada por el opérculo membranoso plicado y el toroide secretor.", exp: [0, -6, 0], plate: [-45, -15, 0] }},
             "Eje_Vascular_Interno": {{ title: "Sistema Vascular Central", whorl: "Anatomía Interna", cat: "ovario", desc: "Cilindro vascular que ramifica hacia los 5 estambres y las 3 placentas.", exp: [0, 15, 0], plate: [25, -15, 0] }},
+
+
+            // --- ASTERACEAE / ESPELETIINAE (Espeletia grandiflora) ---
+            "Pedunculo_Lanoso": {{ title: "Pedúnculo Floral Lanoso", whorl: "Eje de la Sinflorescencia", cat: "caliz", desc: "Pedúnculo cilíndrico grueso revestido por denso tomento lanoso blanco-ocráceo que aísla térmicamente el capítulo frente a las heladas del páramo.", exp: [0, -32, -12], plate: [0, -58, 0] }},
+            "Involucro_Filarias_Lanosas": {{ title: "Involucro Pluriseriado (Filarias)", whorl: "Involucro Protector (3–4 Series)", cat: "caliz", desc: "Filarias imbricadas ovado-lanceoladas cubiertas de indumento lanoso-velloso que protegen el capítulo en yema y antesis.", exp: [0, -18, -8], plate: [-56, -28, 0] }},
+            "Receptaculo_Parenquima": {{ title: "Receptáculo Carnoso Parenquimatoso", whorl: "Base del Capítulo (Sección Interna)", cat: "ovario", desc: "Receptáculo sólido ligeramente convexo de parénquima crema-verdoso que soporta las flores periféricas fértiles y el disco estaminado.", exp: [0, -6, 0], plate: [0, -18, 0] }},
+            "Plexo_Vascular_Capitulo": {{ title: "Plexo Vascular del Capítulo", whorl: "Anatomía Interna (Haces Vasculares)", cat: "ovario", desc: "Cilindro vascular central que asciende por el pedúnculo y se ramifica en haces hacia los aquenios periféricos y flores del disco.", exp: [0, -2, 10], plate: [56, -28, 0] }},
+            "Aquenios_Perifericos_Fertiles": {{ title: "Cipselas / Aquenios Periféricos (Epaposos)", whorl: "Frutos Fértiles (3.2–4.0 mm, sin Vilano)", cat: "ovario", desc: "Aquenios obovoides-trígonos glabros de color pardo oscuro a negro, formados exclusivamente en las flores liguladas femeninas y carentes de vilano.", exp: [0, 8, 8], plate: [-56, 24, 0] }},
+            "Flores_Liguladas_Femeninas": {{ title: "Flores Liguladas Radiales (Femeninas)", whorl: "Periferia del Capítulo (2–3 Series)", cat: "corola", desc: "Flores pistiladas fértiles con lígulas linear-oblongas amarillo ocre-dorado, ápice tridentado y estilo bífido exserto que atraen a abejorros (Bombus).", exp: [0, 18, 14], plate: [0, 44, 0] }},
+            "Paleas_Receptaculares": {{ title: "Páleas Receptaculares Escariosas", whorl: "Brácteas del Receptáculo", cat: "reproductivo", desc: "Escamas cóncavas (naviculares) escariosas de ápice pubescente que abrazan individualmente las flores tubulosas del disco.", exp: [0, 22, 16], plate: [56, 24, 0] }},
+            "Flores_Tubulosas_Disco": {{ title: "Flores Tubulosas del Disco (Estaminadas)", whorl: "Disco Central (Espiral de Fibonacci)", cat: "reproductivo", desc: "Flósculos funcionalmente masculinos con corola amarilla 5-lobada, sinantero pardo-negruzco exserto, presentación secundaria de polen y ovario estéril.", exp: [0, 32, 22], plate: [0, 14, 0] }},
 
             // --- MATERIALES GENÉRICOS DE RESPALDO ---
             "Mat_Caliz": {{ title: "Cáliz / Brácteas", whorl: "Cáliz", cat: "caliz", desc: "Verticilo externo de protección floral.", exp: [0, -25, 0], plate: [-50, 30, 0] }},
