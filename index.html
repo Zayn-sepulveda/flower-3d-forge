@@ -968,6 +968,118 @@
       flex-wrap: wrap;
       gap: 4px;
     }
+
+    /* === AJUSTE ESTÉTICO DE RUEDA EN ESCRITORIO Y SCROLLBAR LIMPIO === */
+    body.wheel-minimized .workspace {
+      grid-template-columns: 1fr 138px !important;
+    }
+    body.wheel-minimized .catalog-panel {
+      min-width: 0 !important;
+      padding: 10px 8px !important;
+      overflow: hidden !important;
+    }
+    body.wheel-minimized .catalog-status {
+      justify-content: center !important;
+      padding: 4px 2px 10px 2px !important;
+      margin-bottom: 4px !important;
+    }
+    body.wheel-minimized .catalog-mode-btn {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      max-width: 118px !important;
+      font-size: 0.71rem !important;
+      padding: 6px 8px !important;
+      text-align: center !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+    }
+    body.wheel-minimized .species-wheel-bar {
+      padding: 6px 2px 16px 2px !important;
+      gap: 10px !important;
+      height: calc(100vh - 150px) !important;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(223, 177, 91, 0.35) transparent;
+    }
+    .species-wheel-bar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .species-wheel-bar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .species-wheel-bar::-webkit-scrollbar-thumb {
+      background: rgba(223, 177, 91, 0.35);
+      border-radius: 999px;
+    }
+    body.wheel-minimized .wheel-item {
+      width: 110px !important;
+      box-sizing: border-box !important;
+    }
+    .wheel-item, .wheel-item img {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    /* === FICHA TRANSLÚCIDA AL PASAR CURSOR (PC) O SOSTENER DEDO (MÓVIL) === */
+    .wheel-preview-card {
+      position: fixed;
+      display: none;
+      z-index: 65;
+      width: min(320px, 88vw);
+      background: rgba(22, 15, 10, 0.68);
+      backdrop-filter: blur(11px);
+      -webkit-backdrop-filter: blur(11px);
+      border: 1px solid rgba(223, 177, 91, 0.48);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #f4ece1;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      pointer-events: none;
+    }
+    .wheel-preview-card.visible {
+      display: block;
+    }
+    .wp-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .wp-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid #dfb15b;
+      flex-shrink: 0;
+    }
+    .wp-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.08rem;
+      font-style: italic;
+      color: #f8efe4;
+      line-height: 1.15;
+    }
+    .wp-sub {
+      font-size: 0.7rem;
+      color: #dfb15b;
+      margin-top: 2px;
+    }
+    .wp-desc {
+      font-size: 0.74rem;
+      line-height: 1.45;
+      color: #ede0d1;
+    }
+    .wp-ref {
+      margin-top: 6px;
+      font-size: 0.65rem;
+      color: #cbb8a2;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 5px;
+    }
   </style>
 </head>
 <body>
@@ -1058,7 +1170,8 @@
       <div class="species-wheel-bar" id="species-wheel-bar"></div>
       <div id="cards-container" style="display:flex; flex-direction:column; gap:14px;"></div>
     </section>
-  </main>
+    </main>
+  <div id="wheel-preview-card" class="wheel-preview-card"></div>
 
   <script>
     // ============================================================================
@@ -1108,7 +1221,7 @@
         status: "Endémica",
         depts: ["Córdoba", "Antioquia"],
         altitude: "100 – 650 m s.n.m.",
-        morpho: "Espata cuculada coriácea vino-verdosa (80 mm); espádice péndulo (70 × 9.5 mm) sobre estípite de 3 mm.",
+        morpho: "Nombre común: Anturio del San Jorge. Hierba epífita o rupícola de bosque húmedo tropical, endémica de la cuenca del río San Jorge. Presenta hojas coriáceas en roseta e inflorescencia péndula con espata vino-verdosa y espádice cilíndrico polinizado por coleópteros.",
         reference: "Croat, T. B. (1991). Ann. Missouri Bot. Gard. 78(3): 539–855.",
         image: "images/anthurium_sanjorgense.jpg",
         modelUrl: "models/anthurium_sanjorgense.html"
@@ -1121,7 +1234,7 @@
         status: "Nativa",
         depts: ["Nariño", "Cauca", "Chocó", "Valle del Cauca"],
         altitude: "400 – 1200 m s.n.m.",
-        morpho: "Espata cordiforme bullada roja carmín (116 × 104 mm); espádice protógino (80 × 9.2 mm) con filotaxis espiral 137.5°.",
+        morpho: "Nombre común: Anturio rojo o Capote. Hierba epífita perenne de selvas nubladas andino-pacíficas. Se distingue por sus hojas acorazonadas de pecíolo largo y su vistosa espata cordiforme rojo carmín brillante que guía a los polinizadores hacia el espádice.",
         reference: "Linden (1877) Ill. Hort. 24: 43, Pl. 271; Elibox & Umaharan (2012) HortScience 47: 1234.",
         image: "images/anthurium_andraeanum.jpg",
         modelUrl: "models/anthurium_andraeanum.html"
@@ -1134,7 +1247,7 @@
         status: "Nativa",
         depts: ["Valle del Cauca", "Antioquia", "Huila", "Cundinamarca", "Caldas", "Risaralda", "Quindío", "Tolima", "Cauca", "Nariño", "Boyacá"],
         altitude: "1500 – 2600 m s.n.m.",
-        morpho: "Perianto blanco-rosado (88 mm Ø); corona en 5 series con filamentos bandeados blanco-púrpura (40 mm); androginóforo de 12 mm.",
+        morpho: "Nombre común: Granadilla. Bejuco trepador provisto de zarcillos axilares y hojas anchamente acorazonadas, propio de los Andes colombianos. Sus flores solitarias presentan brácteas foliáceas, perianto blanco-rosado y una corona bandeada en púrpura y blanco adaptada a abejorros.",
         reference: "Jussieu (1805) Ann. Mus. Hist. Nat. 6: 113; Ocampo Pérez et al. (2007) CIAT.",
         image: "images/passiflora_ligularis.jpg",
         modelUrl: "models/passiflora_ligularis.html"
@@ -1147,7 +1260,7 @@
         status: "Nativa",
         depts: ["Chocó", "Santander", "Meta", "Caquetá", "Antioquia", "Valle del Cauca", "Putumayo", "Amazonas", "Córdoba"],
         altitude: "50 – 1400 m s.n.m.",
-        morpho: "Flor escarlata adaptada a ornitofilia (120 mm Ø); filamentos de la corona rojos y blancos erectos; tubo calicino de 16 mm.",
+        morpho: "Nombre común: Pasiflora escarlata o Gulupa de monte. Liana trepadora de sotobosque húmedo tropical con hojas trilobuladas de margen aserrado. Produce llamativas flores solitarias de color rojo escarlata intenso con corona erecta roja y blanca, polinizadas por colibríes ermitaños.",
         reference: "Kunth (1817) Nov. Gen. Sp. 2: 138; Ulmer & MacDougal (2004) Passiflora.",
         image: "images/passiflora_vitifolia.jpg",
         modelUrl: "models/passiflora_vitifolia.html"
@@ -1160,7 +1273,7 @@
         status: "Endémica",
         depts: ["Cundinamarca", "Meta", "Boyacá"],
         altitude: "3100 – 4100 m s.n.m.",
-        morpho: "Capítulo radiado (55 mm Ø); involucro hemisférico lanuginoso; ~32 flores liguladas femeninas amarillas y ~120 flósculos del disco.",
+        morpho: "Nombre común: Frailejón mayor. Planta caulescente arrosetada emblemática de los páramos orientales, cubierta por un denso indumento lanuginoso que la protege del frío y regula el agua de alta montaña. Sus capítulos florales amarillos sustentan abejorros y colibríes altoandinos.",
         reference: "Humboldt & Bonpland (1809) Pl. Aequinoct. 2: 11; Mavárez (2021); Pouchon et al. (2018).",
         image: "images/espeletia_grandiflora.jpg",
         modelUrl: "models/espeletia_grandiflora.html"
@@ -1173,7 +1286,7 @@
         status: "Endémica",
         depts: ["Huila", "Tolima", "Cundinamarca"],
         altitude: "1200 – 2000 m s.n.m.",
-        morpho: "Flor zigomorfa resupinada (155 mm Ø); labelo tubular rizado con disco amarillo-oro y ápice púrpura carmesí; ginostemo de 28 mm.",
+        morpho: "Nombre común: Flor de Mayo (Flor Nacional de Colombia). Orquídea epífita con pseudobulbos y hojas coriáceas, nativa del bosque subandino del Alto Magdalena. Destaca por sus flores fragantes rosado-lila con labelo tubular rizado de garganta amarillo-oro y ápice carmesí.",
         reference: "Linden & Reichenbach f. (1860) Bot. Zeitung 18: 74; Sarmiento (2007).",
         image: "images/cattleya_trianae.jpg",
         modelUrl: "models/cattleya_trianae.html"
@@ -1186,7 +1299,7 @@
         status: "Nativa",
         depts: ["Putumayo", "Caquetá", "Amazonas"],
         altitude: "100 – 900 m s.n.m.",
-        morpho: "Inflorescencia péndula dística; brácteas cimbiformes rojas con margen amarillo y ápice verde (82 mm); flores tubulares ornitófilas.",
+        morpho: "Nombre común: Platanillo o Pico de loro. Hierba rizomatosa de gran porte con hojas oblongas similares al plátano, propia de selvas húmedas. Presenta una inflorescencia péndula en zig-zag con brácteas rojas de borde amarillo-verdoso, coevolucionada con colibríes de pico curvo.",
         reference: "Ruiz & Pavón (1802) Fl. Peruv. 3: 71, t. 305; Kress et al. (1999) Heliconia en Colombia.",
         image: "images/heliconia_rostrata.jpg",
         modelUrl: "models/heliconia_rostrata.html"
@@ -1553,10 +1666,71 @@
       } else {
         document.body.classList.toggle("wheel-minimized");
         const min = document.body.classList.contains("wheel-minimized");
-        if (btn) btn.textContent = min ? "📋 Ver Catálogo" : "🛞 Minimizar a Rueda";
+        if (btn) btn.textContent = min ? "📋 Catálogo" : "🛞 Minimizar a Rueda";
         setTimeout(() => window.dispatchEvent(new Event("resize")), 60);
         setTimeout(() => window.dispatchEvent(new Event("resize")), 260);
       }
+    };
+
+    let wheelHoldTimer = null;
+    let wheelHoldTriggered = false;
+
+    window.showWheelPreview = function(spId, anchorEl) {
+      const sp = SPECIES_DB.find(s => s.id === spId);
+      const card = document.getElementById("wheel-preview-card");
+      if (!sp || !card) return;
+
+      card.innerHTML = `
+        <div class="wp-head">
+          <img class="wp-thumb" src="${sp.image}" alt="${sp.species}">
+          <div>
+            <div class="wp-title">${sp.species}</div>
+            <div class="wp-sub">${sp.family} • ${sp.status}</div>
+          </div>
+        </div>
+        <div class="wp-desc">${sp.morpho}</div>
+        <div class="wp-ref"><strong>Fuente:</strong> ${sp.reference}</div>
+      `;
+      card.classList.add("visible");
+
+      if (window.innerWidth > 900 && anchorEl) {
+        const rect = anchorEl.getBoundingClientRect();
+        const ch = card.offsetHeight || 170;
+        const topPos = Math.min(window.innerHeight - ch - 16, Math.max(88, rect.top - 18));
+        card.style.left = "auto";
+        card.style.right = "150px";
+        card.style.top = topPos + "px";
+        card.style.transform = "none";
+      } else {
+        card.style.right = "auto";
+        card.style.left = "50%";
+        card.style.top = "16%";
+        card.style.transform = "translateX(-50%)";
+      }
+    };
+
+    window.hideWheelPreview = function() {
+      const card = document.getElementById("wheel-preview-card");
+      if (card) card.classList.remove("visible");
+    };
+
+    window.startWheelHold = function(e, spId, el) {
+      wheelHoldTriggered = false;
+      clearTimeout(wheelHoldTimer);
+      wheelHoldTimer = setTimeout(() => {
+        wheelHoldTriggered = true;
+        showWheelPreview(spId, el);
+      }, 220);
+    };
+
+    window.cancelWheelHold = function() {
+      clearTimeout(wheelHoldTimer);
+      hideWheelPreview();
+    };
+
+    window.endWheelHold = function() {
+      clearTimeout(wheelHoldTimer);
+      hideWheelPreview();
     };
 
     function renderSpeciesWheel() {
@@ -1574,21 +1748,34 @@
 
       wheel.innerHTML = list.map(sp => {
         const isAct = selectedSpeciesId === sp.id;
-        const vUrl = sp.viewerUrl || sp.viewer || ("models/" + sp.species.toLowerCase().replace(/\s+/g, "_") + ".html");
+        const vUrl = sp.viewerUrl || sp.modelUrl || ("models/" + sp.species.toLowerCase().replace(/\s+/g, "_") + ".html");
         return `
-          <div class="wheel-item ${isAct ? 'active' : ''}" onclick="handleWheelSelect('${sp.id}')">
+          <div class="wheel-item ${isAct ? 'active' : ''}"
+               onclick="handleWheelSelect('${sp.id}')"
+               onmouseenter="if(window.innerWidth > 900) showWheelPreview('${sp.id}', this)"
+               onmouseleave="if(window.innerWidth > 900) hideWheelPreview()"
+               ontouchstart="startWheelHold(event, '${sp.id}', this)"
+               ontouchmove="cancelWheelHold()"
+               ontouchend="endWheelHold()"
+               ontouchcancel="cancelWheelHold()"
+               oncontextmenu="event.preventDefault()">
             <div class="wheel-avatar-wrap">
-              <img src="${sp.image}" alt="${sp.species}">
+              <img src="${sp.image}" alt="${sp.species}" draggable="false">
             </div>
             <div class="wheel-name">${sp.shortName || sp.species}</div>
             <div class="wheel-common">${sp.commonName || ''}</div>
-            <button type="button" class="wheel-open-3d-btn" onclick="event.stopPropagation(); openAtlasModal('${vUrl}')">🔬 Abrir 3D</button>
+            <button type="button" class="wheel-open-3d-btn" onclick="event.stopPropagation(); hideWheelPreview(); openAtlasModal('${vUrl}')">🔬 Abrir 3D</button>
           </div>
         `;
       }).join("");
     }
 
     window.handleWheelSelect = function(spId) {
+      if (wheelHoldTriggered) {
+        wheelHoldTriggered = false;
+        return;
+      }
+      hideWheelPreview();
       const sp = SPECIES_DB.find(s => s.id === spId);
       if (!sp) return;
       selectSpeciesDistribution(sp);
@@ -1669,8 +1856,7 @@
                   <em>${sp.species}</em>
                   <span class="card-author">${sp.author}</span>
                 </div>
-                <div class="card-family">${sp.family} • ${sp.altitude}</div>
-                <div class="card-corology"><strong>Departamentos (${sp.depts.length}):</strong> ${sp.depts.join(", ")}</div>
+                <div class="card-family">${sp.family}</div>
                 <div class="card-corology"><strong>Descripción general:</strong> ${sp.morpho}</div>
                 <div class="card-ref"><strong>Fuente:</strong> ${sp.reference}</div>
               </div>
@@ -2168,6 +2354,30 @@
       selectSpeciesDistribution = function(sp) {
         _prevSelectSpeciesDist(sp);
         loadGbifEcoMetrics(sp);
+      };
+    }
+
+  
+    // === PUNTO 4: INICIAR EN MODO RUEDA EN COMPUTADOR (> 900px) ===
+    if (window.innerWidth > 900) {
+      document.body.classList.add("wheel-minimized");
+      const btnMode = document.getElementById("btn-toggle-wheel-mode");
+      if (btnMode) btnMode.textContent = "📋 Catálogo";
+      setTimeout(() => window.dispatchEvent(new Event("resize")), 80);
+      setTimeout(() => window.dispatchEvent(new Event("resize")), 320);
+    }
+
+    // === PUNTO 7: SUBIR AUTOMÁTICAMENTE AL MAPA AL SELECCIONAR DESDE EL CATÁLOGO MÓVIL ===
+    if (typeof selectSpeciesDistribution === "function") {
+      const _prevSelForMobileScroll = selectSpeciesDistribution;
+      selectSpeciesDistribution = function(sp) {
+        _prevSelForMobileScroll(sp);
+        if (window.innerWidth <= 900) {
+          const mapStage = document.querySelector(".map-stage");
+          if (mapStage && mapStage.getBoundingClientRect().top < -35) {
+            mapStage.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
       };
     }
 
