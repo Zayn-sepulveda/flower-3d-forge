@@ -200,13 +200,17 @@
         controls.enableDamping = true;
         controls.dampingFactor = 0.06;
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.78));
-        const dirLight1 = new THREE.DirectionalLight(0xfff8e7, 0.82);
-        dirLight1.position.set(60, 80, 90);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.46));
+        scene.add(new THREE.HemisphereLight(0xf6fff2, 0x221b2c, 0.44));
+        const dirLight1 = new THREE.DirectionalLight(0xfff8ec, 0.92);
+        dirLight1.position.set(55, 85, 95);
         scene.add(dirLight1);
-        const dirLight2 = new THREE.DirectionalLight(0x88bbff, 0.42);
-        dirLight2.position.set(-60, -40, -60);
+        const dirLight2 = new THREE.DirectionalLight(0x9ac4ff, 0.46);
+        dirLight2.position.set(-68, -32, -62);
         scene.add(dirLight2);
+        const dirLight3 = new THREE.DirectionalLight(0xfff4e0, 0.26);
+        dirLight3.position.set(0, -65, 50);
+        scene.add(dirLight3);
 
         const sagittalPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
 
@@ -382,6 +386,10 @@
             plateMode = !plateMode;
             this.classList.toggle('active', plateMode);
             if (plateMode) {
+                cutMode = false;
+                renderer.localClippingEnabled = false;
+                const cutBtn = document.getElementById('btn-cut');
+                if (cutBtn) cutBtn.classList.remove('active');
                 camera.position.set(0, 0, maxDim * 1.75);
                 controls.target.set(0, 0, 0);
             }

@@ -21,12 +21,12 @@ perianto:
     petalos_numero: 5
     fusion: dialipetala
     longitud_tubo_mm: 10.0
-    longitud_limbo_mm: 30.0
-    ancho_petalo_mm: 10.0
+    longitud_limbo_mm: 42.0
+    ancho_petalo_mm: 12.2
     diferenciacion_dorsoventral:
       factor_tamano_dorsal: 1.0
       factor_tamano_ventral: 1.0
-      curvatura_dorsal_grados: 68.0
+      curvatura_dorsal_grados: 40.0
     grosor_pared_mm: 1.0
     color_garganta_hex: '#4A0E4E'
     color_limbo_hex: '#FAF8FC'
@@ -35,7 +35,7 @@ androceo:
   fusion_filamentos: androginoforo
   filamento_longitud_mm: 18.0
   filamento_grosor_mm: 2.0
-  antera_longitud_mm: 6.5
+  antera_longitud_mm: 7.2
   color_filamento_hex: '#D8E6B8'
   color_antera_hex: '#E5C828'
 gineceo:
