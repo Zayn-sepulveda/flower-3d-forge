@@ -4,9 +4,9 @@ colecta:
   genero: Espeletia
   especie: Espeletia grandiflora
   localidad: Región Andina — Páramos de Chingaza, Sumapaz y Cruz Verde (Cundinamarca,
-    Meta) • 3100–4100 m s.n.m.
-  fecha: 'Humboldt & Bonpland (1809) Pl. Aequinoct. 2: 11; Mavárez (2021); Pouchon
-    et al. (2018)'
+    Boyacá, Meta) • 2120–4100 m s.n.m.
+  fecha: 'Humboldt & Bonpland (1808/1809) Pl. Aequinoct. 2: 11; Fagua & Gonzalez (2007);
+    Diazgranados & Barber (2017); Mavárez (2021)'
   foto_campo: images/espeletia_grandiflora.jpg
 arquitectura_floral:
   simetria: actinomorfa
@@ -15,35 +15,35 @@ arquitectura_floral:
 perianto:
   verticilos: diclamidea
   caliz:
-    sepalos_numero: 48
+    sepalos_numero: 44
     fusion: dialisepalo
-    longitud_tubo_mm: 28.0
-    color_hex: '#7F8F62'
+    longitud_tubo_mm: 16.5
+    color_hex: '#CFC8B4'
   corola:
-    petalos_numero: 42
+    petalos_numero: 74
     fusion: gamopetala
-    longitud_tubo_mm: 5.5
-    longitud_limbo_mm: 72.0
-    ancho_petalo_mm: 21.0
+    longitud_tubo_mm: 2.4
+    longitud_limbo_mm: 14.5
+    ancho_petalo_mm: 3.1
     diferenciacion_dorsoventral:
-      factor_tamano_dorsal: 1.15
-      factor_tamano_ventral: 0.88
-      curvatura_dorsal_grados: 25.0
-    grosor_pared_mm: 1.1
-    color_garganta_hex: '#C98A00'
-    color_limbo_hex: '#F5C400'
+      factor_tamano_dorsal: 1.0
+      factor_tamano_ventral: 1.0
+      curvatura_dorsal_grados: 32.0
+    grosor_pared_mm: 0.45
+    color_garganta_hex: '#B87812'
+    color_limbo_hex: '#E8B828'
 androceo:
   estambres_numero: 5
   fusion_filamentos: singenesico
-  filamento_longitud_mm: 4.2
-  filamento_grosor_mm: 0.6
-  antera_longitud_mm: 4.8
-  color_filamento_hex: '#4E3629'
-  color_antera_hex: '#6E4208'
+  filamento_longitud_mm: 2.2
+  filamento_grosor_mm: 0.35
+  antera_longitud_mm: 2.6
+  color_filamento_hex: '#D4A024'
+  color_antera_hex: '#3A2314'
 gineceo:
   posicion_ovario: infero
-  estilo_longitud_mm: 9.8
-  estilo_grosor_mm: 0.85
+  estilo_longitud_mm: 5.2
+  estilo_grosor_mm: 0.35
   estigma_lobulos: 2
-  color_ovario_hex: '#3D2012'
-  color_estilo_hex: '#F4D03F'
+  color_ovario_hex: '#3A2214'
+  color_estilo_hex: '#F2C738'
