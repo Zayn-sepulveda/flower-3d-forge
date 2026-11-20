@@ -375,6 +375,7 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
 
             const mat = new THREE.MeshStandardMaterial(matOpts);
             const mesh = new THREE.Mesh(geom, mat);
+            mesh.userData.natCenter = natCenter;
             const info = ANATOMY_DB[key] || {{
                 title: key.replace(/_/g, ' '),
                 whorl: "Estructura Floral",
@@ -574,17 +575,26 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
         const raycaster = new THREE.Raycaster();
         function raycastVisible(objs, recursive = false) {{
             const rawHits = raycaster.intersectObjects(objs, recursive);
+            const isSagittalCut = (
+                renderer.localClippingEnabled &&
+                typeof sagittalPlane !== 'undefined' &&
+                sagittalPlane.constant < 100
+            );
             const visHits = rawHits.filter(hit => {{
                 if (!hit.object || !hit.object.visible) return false;
+                if (isSagittalCut && hit.object.userData && hit.object.userData.natCenter) {{
+                    if (hit.object.userData.natCenter.x > 1.5) return false;
+                }}
                 const mat = hit.object.material;
+                const tol = isSagittalCut ? 0.05 : -1e-4;
                 if (renderer.localClippingEnabled && mat && Array.isArray(mat.clippingPlanes)) {{
                     for (let i = 0; i < mat.clippingPlanes.length; i++) {{
-                        if (mat.clippingPlanes[i].distanceToPoint(hit.point) < -1e-4) return false;
+                        if (mat.clippingPlanes[i].distanceToPoint(hit.point) < tol) return false;
                     }}
                 }}
                 if (Array.isArray(renderer.clippingPlanes) && renderer.clippingPlanes.length > 0) {{
                     for (let i = 0; i < renderer.clippingPlanes.length; i++) {{
-                        if (renderer.clippingPlanes[i].distanceToPoint(hit.point) < -1e-4) return false;
+                        if (renderer.clippingPlanes[i].distanceToPoint(hit.point) < tol) return false;
                     }}
                 }}
                 return true;

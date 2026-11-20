@@ -361,6 +361,10 @@ def build_orchidaceae_flower(cfg):
                     mix_b = 1.0 - (v / 0.14)
                     col = (1.0 - 0.40 * mix_b) * col + (0.40 * mix_b) * c_claw_cream
 
+                if grp_name.endswith("_Der"):
+                    px = max(0.08, px)
+                elif grp_name.endswith("_Izq"):
+                    px = min(-0.08, px)
                 vertices.append([px, py, pz])
                 colors.append(np.clip(col, 0.0, 1.0).tolist())
 
@@ -426,6 +430,10 @@ def build_orchidaceae_flower(cfg):
                     mix_c = 1.0 - (v / 0.14)
                     col = (1.0 - 0.50 * mix_c) * col + (0.50 * mix_c) * c_claw_cream
 
+                if grp_name.endswith("_Der"):
+                    px = max(0.08, px)
+                elif grp_name.endswith("_Izq"):
+                    px = min(-0.08, px)
                 vertices.append([px, py, pz])
                 colors.append(np.clip(col, 0.0, 1.0).tolist())
 
