@@ -342,6 +342,7 @@
 
             const mat = new THREE.MeshStandardMaterial(matOpts);
             const mesh = new THREE.Mesh(geom, mat);
+            mesh.userData.natCenter = natCenter;
             const info = ANATOMY_DB[key] || {
                 title: key.replace(/_/g, ' '),
                 whorl: "Estructura Floral",
@@ -539,6 +540,29 @@
         syncPanelIcons();
 
         const raycaster = new THREE.Raycaster();
+        function raycastVisible(objs, recursive = false) {
+            const rawHits = raycaster.intersectObjects(objs, recursive);
+            const visHits = rawHits.filter(hit => {
+                if (!hit.object || !hit.object.visible) return false;
+                const mat = hit.object.material;
+                if (renderer.localClippingEnabled && mat && Array.isArray(mat.clippingPlanes)) {
+                    for (let i = 0; i < mat.clippingPlanes.length; i++) {
+                        if (mat.clippingPlanes[i].distanceToPoint(hit.point) < 1e-3) return false;
+                    }
+                }
+                if (Array.isArray(renderer.clippingPlanes) && renderer.clippingPlanes.length > 0) {
+                    for (let i = 0; i < renderer.clippingPlanes.length; i++) {
+                        if (renderer.clippingPlanes[i].distanceToPoint(hit.point) < 1e-3) return false;
+                    }
+                }
+                return true;
+            });
+            if (typeof xrayMode !== 'undefined' && xrayMode && visHits.length > 1) {
+                const opaqueHits = visHits.filter(h => !h.object.material || !h.object.material.transparent || h.object.material.opacity > 0.5);
+                if (opaqueHits.length > 0) return opaqueHits;
+            }
+            return visHits;
+        }
         const mouse = new THREE.Vector2();
         const tooltip = document.getElementById('organ-tooltip');
         const ttTitle = document.getElementById('tt-title');
@@ -557,6 +581,9 @@
             tooltip.style.display = 'none';
         }
 
+        const _btnCutClearTooltip = document.getElementById('btn-cut');
+        if (_btnCutClearTooltip) _btnCutClearTooltip.addEventListener('click', () => { clearOrganHighlight(); });
+
         document.getElementById('tt-close-btn').addEventListener('click', e => {
             e.stopPropagation();
             clearOrganHighlight();
@@ -568,7 +595,7 @@
             raycaster.setFromCamera(mouse, camera);
 
             const visibleMeshes = interactMeshes.filter(m => m.visible && (!xrayMode || m.material.opacity > 0.5));
-            const intersects = raycaster.intersectObjects(visibleMeshes);
+            const intersects = raycastVisible(visibleMeshes);
 
             if (hoveredMesh) {
                 hoveredMesh.material.emissive.setHex(0x000000);
