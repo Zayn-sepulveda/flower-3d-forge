@@ -3,47 +3,55 @@ colecta:
   familia: Orchidaceae
   genero: Cattleya
   especie: Cattleya trianae
-  localidad: Región Andina — Valle del Alto Magdalena (Huila, Tolima, Cundinamarca)
-    • 1200–2000 m s.n.m.
+  localidad: Región Andina — Valle del Alto Magdalena (Huila, Tolima, Cundinamarca) — 1200–2000 m s.n.m.
   fecha: 'Linden & Reichenbach f. (1860) Bot. Zeitung 18: 74; Sarmiento (2007)'
   foto_campo: images/cattleya_trianae.jpg
 arquitectura_floral:
   simetria: zigomorfa
-  tipo_inflorescencia: racimo
-  disposicion: horizontal
+  tipo_inflorescencia: racimo_paucifloro
+  disposicion: resupinada_horizontal
 perianto:
-  verticilos: diclamidea
+  verticilos: diclamidea_zigomorfa
   caliz:
     sepalos_numero: 3
     fusion: dialisepalo
-    longitud_tubo_mm: 0.0
-    color_hex: '#DDA0DD'
+    sepalo_dorsal_largo_mm: 96.7
+    sepalo_dorsal_ancho_mm: 25.2
+    sepalo_lateral_largo_mm: 94.0
+    sepalo_lateral_ancho_mm: 24.0
+    angulo_despliegue_lateral_grados: 134.0
+    color_hex: '#C69BD8'
   corola:
     petalos_numero: 3
-    fusion: dialipetala
-    longitud_tubo_mm: 55.0
-    longitud_limbo_mm: 65.0
-    ancho_petalo_mm: 45.0
-    ancho_labelo_mm: 52.0
-    diferenciacion_dorsoventral:
-      factor_tamano_dorsal: 1.0
-      factor_tamano_ventral: 1.0
-      curvatura_dorsal_grados: 20.0
-    grosor_pared_mm: 1.2
-    color_garganta_hex: '#FFC300'
-    color_limbo_hex: '#900C3F'
+    fusion: dialipetala_labelo_convoluto
+    petalo_lateral_largo_mm: 101.4
+    petalo_lateral_ancho_mm: 66.1
+    labelo_largo_mm: 90.0
+    labelo_ancho_extendido_mm: 70.1
+    longitud_tubo_mm: 48.0
+    longitud_limbo_mm: 42.0
+    grosor_pared_mm: 0.65
+    color_petalo_hex: '#C69BD8'
+    color_garganta_hex: '#F2B705'
+    color_limbo_hex: '#9E135B'
+    color_macula_hex: '#9E135B'
+    color_borde_labelo_hex: '#DCBBE8'
 androceo:
   estambres_numero: 1
-  fusion_filamentos: ginostemo
-  filamento_longitud_mm: 28.0
-  filamento_grosor_mm: 7.0
-  antera_longitud_mm: 3.5
-  color_filamento_hex: '#F5EEF8'
-  color_antera_hex: '#F4D03F'
+  fusion_filamentos: ginostemo_columna
+  columna_longitud_libre_mm: 33.0
+  columna_ancho_mm: 10.7
+  polinios_numero: 4
+  color_filamento_hex: '#F5F0DC'
+  color_columna_hex: '#F5F0DC'
+  color_antera_hex: '#F5C518'
+  color_polinios_hex: '#F5C518'
 gineceo:
-  posicion_ovario: infero
-  estilo_longitud_mm: 28.0
-  estilo_grosor_mm: 6.0
-  estigma_lobulos: 1
-  color_ovario_hex: '#7DCEA0'
-  color_estilo_hex: '#F5EEF8'
+  posicion_ovario: infero_pedicelado
+  ovario_pedicelado_longitud_mm: 72.0
+  ovario_diametro_mm: 6.4
+  cuniculus_longitud_mm: 36.0
+  placentacion: parietal_trilocular_funcional
+  color_ovario_hex: '#6D8C46'
+  color_estilo_hex: '#F5F0DC'
+  color_ovulos_hex: '#F4F0DA'
