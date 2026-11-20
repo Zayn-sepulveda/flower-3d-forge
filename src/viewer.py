@@ -26,6 +26,11 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
     else:
         lbl_caliz, lbl_corola, lbl_reprod, lbl_ovario = 'Cáliz', 'Corola', 'Reprod.', 'Ovario'
 
+    if str(fam).strip().lower() == 'orchidaceae':
+        lbl_caliz = 'Sépalos'
+        lbl_corola = 'Pétalos / Labelo'
+        lbl_reprod = 'Ginostemio'
+        lbl_ovario = 'Ovario / Óvulos'
     html_content = f"""<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -170,17 +175,29 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
         const palette = {json.dumps(color_map)};
 
        const ANATOMY_DB = {{
-            // --- ORCHIDACEAE (Cattleya) ---
-            "Sepalo_Dorsal": {{ title: "Sépalo Dorsal", whorl: "Cáliz (Verticilo Externo)", cat: "caliz", desc: "Tépalo externo erecto (83 × 20 mm). Protege la yema floral antes de la antesis.", exp: [0, 42, -28], plate: [0, 58, 0] }},
-            "Sepalo_Lateral_Izq": {{ title: "Sépalo Lateral Izquierdo", whorl: "Cáliz (Verticilo Externo)", cat: "caliz", desc: "Sépalo lanceolado subfalcado descendente.", exp: [-35, -30, -28], plate: [-55, -48, 0] }},
-            "Sepalo_Lateral_Der": {{ title: "Sépalo Lateral Derecho", whorl: "Cáliz (Verticilo Externo)", cat: "caliz", desc: "Sépalo lanceolado subfalcado descendente.", exp: [35, -30, -28], plate: [55, -48, 0] }},
-            "Petalo_Lateral_Izq": {{ title: "Pétalo Lateral Izquierdo", whorl: "Corola (Perianto Interno)", cat: "corola", desc: "Pétalo romboidal ancho con margen ondulado-fimbriado (85 × 60 mm).", exp: [-48, 15, -8], plate: [-78, 18, 0] }},
-            "Petalo_Lateral_Der": {{ title: "Pétalo Lateral Derecho", whorl: "Corola (Perianto Interno)", cat: "corola", desc: "Pétalo romboidal ancho con margen ondulado-fimbriado (85 × 60 mm).", exp: [48, 15, -8], plate: [78, 18, 0] }},
-            "Labelo_Trilobulado": {{ title: "Labelo Trilobulado Convoluto", whorl: "Corola Modificada", cat: "corola", desc: "Pétalo medio especializado: tubo basal que envuelve la columna y limbo tricolor como plataforma de polinización.", exp: [0, -38, 42], plate: [0, -32, 10] }},
-            "Ginostemio_Columna": {{ title: "Ginostemio (Columna)", whorl: "Androceo + Gineceo Fusionados", cat: "reproductivo", desc: "Órgano reproductivo semicilíndrico arqueado (28 mm) característico de Orchidaceae.", exp: [0, 14, 26], plate: [-28, -52, 10] }},
-            "Antera_Polinios": {{ title: "Antera Apical y Polinios", whorl: "Androceo", cat: "reproductivo", desc: "Cápsula operculada terminal que aloja las masas de polen ceroso (polinios).", exp: [0, 22, 46], plate: [28, -52, 10] }},
-            "Ovario_Infero": {{ title: "Ovario Pedicelado Ínfero", whorl: "Gineceo (Receptáculo/Pedicelo)", cat: "ovario", desc: "Ovario ínfero 6-acanalado situado por debajo de la inserción del perianto y resupinado 180°.", exp: [0, -25, -45], plate: [-55, -85, 0] }},
-            "Ovulos_Placentacion": {{ title: "Placentas Parietales y Óvulos", whorl: "Gineceo Interno (Cavidad Ovárica)", cat: "ovario", desc: "Tres cordones placentarios parietales con miles de primordios seminales microscópicos dentro del ovario ínfero.", exp: [0, -10, -25], plate: [55, -85, 0] }},
+            // --- ORCHIDACEAE (Cattleya trianae - Morfoanatomia Teorica) ---
+            "Sepalo_Dorsal": {{ title: "Sépalo Dorsal", whorl: "Perianto Externo (Verticilo Calicino)", cat: "caliz", desc: "Tépalo externo abaxial erecto (96.7 × 25.2 mm; Triviño-Pineda & Saa, 2026) de lámina oblongo-lanceolada y ápice obtuso-subagudo. Protege los verticilos internos en la yema floral y equilibra la simetría zigomorfa tras la resupinación de 180°.", exp: [0, 62, -32], plate: [0, 94, 0] }},
+            "Sepalo_Lateral_Izq": {{ title: "Sépalo Lateral Izquierdo", whorl: "Perianto Externo (Verticilo Calicino)", cat: "caliz", desc: "Tépalo externo libre subfalcado (94.0 × 24.0 mm), desplegado lateralmente en ángulo obtuso detrás del labelo para enmarcar el corredor visual de aproximación del polinizador.", exp: [-58, -46, -32], plate: [-118, -58, 0] }},
+            "Sepalo_Lateral_Der": {{ title: "Sépalo Lateral Derecho", whorl: "Perianto Externo (Verticilo Calicino)", cat: "caliz", desc: "Tépalo externo libre subfalcado (94.0 × 24.0 mm), simétrico al sépalo lateral izquierdo; aporta estabilidad mecánica al perianto trímero resupinado.", exp: [58, -46, -32], plate: [118, -58, 0] }},
+            "Petalo_Lateral_Izq": {{ title: "Pétalo Lateral Izquierdo", whorl: "Perianto Interno (Verticilo Corolino)", cat: "corola", desc: "Tépalo interno ovado-rómbico ancho (101.4 × 66.1 mm; Triviño-Pineda & Saa, 2026) con margen distal ondulado y epidermis papilosa aterciopelada; actúa como reclamo óptico de largo alcance.", exp: [-72, 22, -10], plate: [-124, 42, 0] }},
+            "Petalo_Lateral_Der": {{ title: "Pétalo Lateral Derecho", whorl: "Perianto Interno (Verticilo Corolino)", cat: "corola", desc: "Tépalo interno ovado-rómbico ancho (101.4 × 66.1 mm) libre hasta la base; su amplitud laminar y pigmentación antociánica maximizan el contraste floral bajo el dosel forestal.", exp: [72, 22, -10], plate: [124, 42, 0] }},
+            "Labelo_Tubo_Garganta": {{ title: "Labelo: Tubo Convoluto y Garganta", whorl: "Perianto Interno Modificado (Labelo)", cat: "corola", desc: "Pétalo medio libre del ginostemio cuyos lóbulos laterales se enrollan formando un túnel cerrado. La garganta amarillo-ámbar con estrías magenta funciona como guía de néctar que dirige el dorso del polinizador hacia la antera.", exp: [0, -14, 34], plate: [0, 10, 0] }},
+            "Labelo_Lobulo_Frontal_Macula": {{ title: "Labelo: Lóbulo Medio y Mácula Carmesí", whorl: "Perianto Interno Modificado (Labelo)", cat: "corola", desc: "Porción distal desplegada y emarginada del labelo (90.0 × 70.1 mm extendido; Triviño-Pineda & Saa, 2026) con margen crispado y mácula púrpura-carmesí; opera como plataforma de aterrizaje para abejas euglosinas.", exp: [0, -52, 62], plate: [0, -76, 0] }},
+            "Columna_Ginostemio": {{ title: "Ginostemio (Columna Reproductiva)", whorl: "Androceo y Gineceo Fusionados", cat: "reproductivo", desc: "Estructura semicilíndrica arqueada y áptera (33.0 × 10.7 mm libres), formada por la concrescencia del estilo y los filamentos estaminales; posiciona los órganos sexuales en el techo de la cámara floral.", exp: [0, 22, 32], plate: [205, 32, 0] }},
+            "Antera_Polinios_4": {{ title: "Antera Apical y 4 Polinios Cerosos", whorl: "Androceo Fértil (Polinario)", cat: "reproductivo", desc: "Antera terminal operculada y bilocular que aloja cuatro polinios cerosos amarillo-dorado comprimidos en dos pares paralelos, carácter diagnóstico de Cattleya frente a géneros octopolínicos como Laelia.", exp: [0, 32, 56], plate: [205, -28, 0] }},
+            "Cavidad_Estigmatica": {{ title: "Cavidad Estigmática y Rostelo", whorl: "Gineceo Receptivo (Estigma)", cat: "reproductivo", desc: "Depresión cóncava con exudado mucilaginoso en la cara ventral de la columna, separada de la antera por el rostelo estéril para prevenir la autopolinización y captar polinios alógenos.", exp: [0, 10, 48], plate: [205, -82, 0] }},
+            "Ovario_Pedicelado_Pared": {{ title: "Ovario Ínfero Pedicelado", whorl: "Gineceo Basal (Pericarpo)", cat: "ovario", desc: "Ovario ínfero tricarpelar y hexacostillado resupinado 180° (~72 mm), situado bajo el perianto; madura en cápsula loculicida de tres valvas con semillas anemócoras sin endospermo (Arditti & Ghani, 2000).", exp: [0, -28, -58], plate: [-205, 32, 0] }},
+            "Cuniculus_Nectarifero": {{ title: "Cuniculus Nectarífero Interno", whorl: "Nectario Adnato (Cavidad Dorsal)", cat: "ovario", desc: "Cavidad longitudinal estrecha adnata al ovario pedicelado que desciende desde la base del labelo (Gamboa-Gaitán, 2015), sirviendo como conducto de atracción trófica para el aparato bucal del polinizador.", exp: [-26, -12, -46], plate: [-205, -32, 0] }},
+            "Cavidad_Ovarica_Ovulos": {{ title: "Lóculo Ovárico y Placentación Parietal", whorl: "Gineceo Interno (Óvulos)", cat: "ovario", desc: "Segunda cavidad longitudinal del ovario con tres placentas parietales cargadas de óvulos primordiales (Gamboa-Gaitán, 2015); tras la polinización desarrolla haces vasculares y material de obturación seminal.", exp: [26, -18, -46], plate: [-205, -88, 0] }},
+
+            // --- MATERIALES Y ESTRUCTURAS COMPLEMENTARIAS DEL ATLAS ---
+            "Mat_Caliz": {{ title: "Cáliz (Verticilo Externo)", whorl: "Perianto Externo", cat: "caliz", desc: "Conjunto de sépalos externos que protegen los verticilos reproductivos durante el desarrollo floral y sostienen la arquitectura basal de la flor.", exp: [0, -20, -30], plate: [0, 65, 0] }},
+            "Mat_CorolaGarganta": {{ title: "Tubo / Garganta de la Corola", whorl: "Perianto Interno", cat: "corola", desc: "Porción basal connata o tubular de la corola que canaliza el acceso hacia los nectarios y orienta el contacto con las anteras y el estigma.", exp: [0, 0, 20], plate: [0, 0, 0] }},
+            "Mat_CorolaLimbo": {{ title: "Limbo de la Corola", whorl: "Perianto Interno", cat: "corola", desc: "Expansión laminar distal de los pétalos que funciona como superficie de atracción visual y plataforma de aterrizaje para los agentes polinizadores.", exp: [0, 25, 35], plate: [0, -45, 0] }},
+            "Mat_Filamento": {{ title: "Filamentos Estaminales", whorl: "Androceo", cat: "reproductivo", desc: "Soportes vasculares del androceo que elevan las anteras a la altura óptima de transferencia polínica.", exp: [-20, 15, 25], plate: [110, 25, 0] }},
+            "Mat_Antera": {{ title: "Anteras (Tecas Polínicas)", whorl: "Androceo Fértil", cat: "reproductivo", desc: "Estructuras terminales bilobuladas donde ocurre la microsporogénesis y dehiscencia de los granos de polen.", exp: [20, 25, 30], plate: [110, -25, 0] }},
+            "Mat_Ovario": {{ title: "Ovario", whorl: "Gineceo Basal", cat: "ovario", desc: "Porción basal ensanchada del pistilo que encierra los lóculos carpelares y los óvulos tras la fecundación.", exp: [0, -25, -25], plate: [-110, 25, 0] }},
+            "Mat_Estilo": {{ title: "Estilo y Estigma", whorl: "Gineceo Distal", cat: "reproductivo", desc: "Tejido conductor estilar que conecta la superficie receptiva estigmática con la cavidad ovárica para el crecimiento del tubo polínico.", exp: [0, 30, 25], plate: [-110, -25, 0] }},
 
             // --- ARACEAE (Anthurium sanjorgense & Anthurium andraeanum) ---
             "Espata_Cuculada": {{ title: "Espata Cuculada", whorl: "Bráctea Modificada", cat: "caliz", desc: "Bráctea protectora lanceolada con gradiente vino a verde y acumen distal.", exp: [0, 45, -20], plate: [0, 65, 0] }},
@@ -343,9 +360,10 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             const natCenter = new THREE.Vector3();
             geom.boundingBox.getCenter(natCenter);
 
+            const isOrchidVelvet = /^(Sepalo_|Petalo_|Labelo_)/.test(key);
             const matOpts = {{
-                roughness: 0.42,
-                metalness: 0.05,
+                roughness: isOrchidVelvet ? 0.74 : 0.42,
+                metalness: isOrchidVelvet ? 0.01 : 0.05,
                 side: THREE.DoubleSide,
                 clippingPlanes: [sagittalPlane]
             }};
@@ -361,7 +379,7 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
                 title: key.replace(/_/g, ' '),
                 whorl: "Estructura Floral",
                 cat: "corola",
-                desc: "Órgano generado paramétricamente a partir de la ficha YAML.",
+                desc: "Estructura morfoanatómica diferenciada en el eje floral según el plan estructural y reproductivo de la familia.",
                 exp: [natCenter.x * 0.4, natCenter.y * 0.4, natCenter.z * 0.4],
                 plate: [natCenter.x * 1.2, natCenter.y * 1.2, 0]
             }};
@@ -445,7 +463,12 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             interactMeshes.forEach(m => {{
                 const k = m.userData.key;
                 const isInternal = (
-                    k === 'Ovulos_Placentacion' || 
+                    k === 'Ovulos_Placentacion' ||
+                    k === 'Cavidad_Ovarica_Ovulos' ||
+                    k === 'Cuniculus_Nectarifero' ||
+                    k === 'Cavidad_Estigmatica' ||
+                    k === 'Antera_Polinios_4' ||
+                    k === 'Columna_Ginostemio' || 
                     k === 'Ginostemio_Columna' || 
                     k === 'Antera_Polinios' ||
                     k === 'Ovulos_Placentacion_Parietal' || 
@@ -549,6 +572,29 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
         syncPanelIcons();
 
         const raycaster = new THREE.Raycaster();
+        function raycastVisible(objs, recursive = false) {{
+            const rawHits = raycaster.intersectObjects(objs, recursive);
+            const visHits = rawHits.filter(hit => {{
+                if (!hit.object || !hit.object.visible) return false;
+                const mat = hit.object.material;
+                if (renderer.localClippingEnabled && mat && Array.isArray(mat.clippingPlanes)) {{
+                    for (let i = 0; i < mat.clippingPlanes.length; i++) {{
+                        if (mat.clippingPlanes[i].distanceToPoint(hit.point) < -1e-4) return false;
+                    }}
+                }}
+                if (Array.isArray(renderer.clippingPlanes) && renderer.clippingPlanes.length > 0) {{
+                    for (let i = 0; i < renderer.clippingPlanes.length; i++) {{
+                        if (renderer.clippingPlanes[i].distanceToPoint(hit.point) < -1e-4) return false;
+                    }}
+                }}
+                return true;
+            }});
+            if (typeof xrayMode !== 'undefined' && xrayMode && visHits.length > 1) {{
+                const opaqueHits = visHits.filter(h => !h.object.material || !h.object.material.transparent || h.object.material.opacity > 0.5);
+                if (opaqueHits.length > 0) return opaqueHits;
+            }}
+            return visHits;
+        }}
         const mouse = new THREE.Vector2();
         const tooltip = document.getElementById('organ-tooltip');
         const ttTitle = document.getElementById('tt-title');
@@ -578,7 +624,7 @@ def export_interactive_viewer_html(cfg, obj_data, color_map, html_filepath):
             raycaster.setFromCamera(mouse, camera);
 
             const visibleMeshes = interactMeshes.filter(m => m.visible && (!xrayMode || m.material.opacity > 0.5));
-            const intersects = raycaster.intersectObjects(visibleMeshes);
+            const intersects = raycastVisible(visibleMeshes);
 
             if (hoveredMesh) {{
                 hoveredMesh.material.emissive.setHex(0x000000);
