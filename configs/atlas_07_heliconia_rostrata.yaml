@@ -1,48 +1,64 @@
 colecta:
-  id_muestra: COL-ATL-007 | Nativa de Colombia (Amazonía)
+  id_muestra: COL-ATL-007 | Nativa de Colombia (Amazonía y Piedemonte)
   familia: Heliconiaceae
   genero: Heliconia
   especie: Heliconia rostrata
-  localidad: Región Amazónica y Piedemonte Andino-Amazónico (Putumayo, Caquetá, Amazonas)
-    • 100–900 m s.n.m.
-  fecha: 'Ruiz & Pavón (1802) Fl. Peruv. 3: 71, t. 305; Kress et al. (1999)'
+  localidad: Región Amazónica y Piedemonte Andino-Amazónico (Putumayo, Caquetá, Amazonas) — 100–900 m s.n.m.
+  fecha: 'Ruiz & Pavón (1802) Fl. Peruv. 3: 71, t. 305; Kress et al. (1999); Cardoso & Hall (2018)'
   foto_campo: images/heliconia_rostrata.jpg
 arquitectura_floral:
   simetria: zigomorfa
-  tipo_inflorescencia: tirso_pendulo
-  disposicion: pendula
+  tipo_inflorescencia: tirso_pendulo_distico
+  disposicion: pendula_no_resupinada
+  pedunculo_largo_mm: 95.0
+  pedunculo_diametro_mm: 8.4
+  raquis_largo_mm: 295.0
+  entrenudo_basal_mm: 34.0
+  entrenudo_apical_mm: 22.0
+  bracteas_numero: 10
+  bractea_largo_basal_mm: 96.0
+  bractea_largo_apical_mm: 68.0
+  bractea_profundidad_mm: 34.0
+  bractea_angulo_divergencia_grados: 108.0
 perianto:
-  verticilos: bracteada
+  verticilos: homoclamideo_zigomorfo_tubular
   caliz:
-    sepalos_numero: 0
-    fusion: nulo
-    longitud_tubo_mm: 50.0
-    color_hex: '#B00020'
+    sepalos_numero: 3
+    fusion: 1_libre_2_fusionados_en_tubo
+    sepalo_dorsal_libre_largo_mm: 43.0
+    sepalo_dorsal_libre_ancho_mm: 6.5
+    sepalo_ventral_largo_mm: 38.0
+    color_hex: '#D11D24'
   corola:
-    petalos_numero: 14
-    fusion: cimbiforme
-    longitud_tubo_mm: 60.0
-    longitud_limbo_mm: 120.0
-    ancho_petalo_mm: 45.0
-    diferenciacion_dorsoventral:
-      factor_tamano_dorsal: 1.0
-      factor_tamano_ventral: 1.0
-      curvatura_dorsal_grados: 0.0
-    grosor_pared_mm: 3.0
-    color_garganta_hex: '#E6192B'
-    color_limbo_hex: '#FFD700'
+    petalos_numero: 3
+    fusion: tubo_perigonial_basal_9mm
+    longitud_tubo_mm: 9.0
+    longitud_limbo_mm: 44.0
+    grosor_pared_mm: 2.3
+    color_garganta_hex: '#F4F4EC'
+    color_limbo_hex: '#F5CE1B'
+    color_apice_hex: '#5D9B28'
 androceo:
   estambres_numero: 5
-  fusion_filamentos: libres
-  filamento_longitud_mm: 40.0
-  filamento_grosor_mm: 2.0
-  antera_longitud_mm: 12.0
-  color_filamento_hex: '#008B45'
-  color_antera_hex: '#FFFFFF'
+  estaminodios_numero: 1
+  fusion_filamentos: adnatos_base_tubo
+  filamento_longitud_mm: 36.0
+  antera_longitud_mm: 11.0
+  estaminodio_longitud_mm: 14.5
+  estaminodio_ancho_mm: 4.2
+  color_filamento_hex: '#F6F1DC'
+  color_antera_hex: '#E4C66E'
+  color_estaminodio_hex: '#FAF8F0'
 gineceo:
-  posicion_ovario: infero
-  estilo_longitud_mm: 50.0
-  estilo_grosor_mm: 3.0
-  estigma_lobulos: 1
-  color_ovario_hex: '#F5F5DC'
-  color_estilo_hex: '#FFFFFF'
+  posicion_ovario: infero_trilocular
+  ovario_longitud_mm: 8.0
+  ovario_diametro_mm: 4.8
+  estilo_longitud_mm: 38.0
+  estigma_lobulos: 3
+  fruto_tipo: esquizocarpo_drupaceo_azul
+  fruto_diametro_mm: 13.8
+  pirenos_numero: 3
+  color_ovario_hex: '#92B862'
+  color_estilo_hex: '#F4F2E4'
+  color_fruto_hex: '#18347A'
+  color_pirenos_hex: '#4B3423'
