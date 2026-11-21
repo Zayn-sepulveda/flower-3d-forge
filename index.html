@@ -1086,7 +1086,7 @@
     }
   </style>
 </head>
-<body>
+<body class="wheel-minimized">
 
   <div class="precolumbian-frieze"></div>
 
@@ -1168,7 +1168,7 @@
           <span id="catalog-sub">Modo: Vista General Neutra</span>
         </div>
         <button type="button" class="catalog-mode-btn" id="btn-toggle-wheel-mode" onclick="toggleCatalogWheelMode()">
-          🛞 Minimizar a Rueda
+          📋 Catálogo
         </button>
       </div>
       <div class="species-wheel-bar" id="species-wheel-bar"></div>
@@ -1408,7 +1408,7 @@
     const tooltip = document.getElementById("dept-tooltip");
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 600);
-    camera.position.set(0, 54, 46);
+    camera.position.set(2.0, 76, 68);
 
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -1418,8 +1418,9 @@
     controls.dampingFactor = 0.06;
     controls.maxPolarAngle = Math.PI * 0.44;
     controls.minDistance = 14;
-    controls.maxDistance = 110;
-    controls.target.set(0, 0, 2);
+    controls.maxDistance = 140;
+    controls.target.set(2.0, 0, 8.5);
+    controls.update();
 
     // Iluminación cálida de museo/expedición
     scene.add(new THREE.AmbientLight(0xf5e6d3, 0.72));
@@ -1922,8 +1923,8 @@
         document.getElementById("active-dept-title").textContent = "Territorio Colombiano — Estado Neutro";
         document.getElementById("active-dept-desc").innerHTML =
           "Selecciona un <strong>departamento en el mapa</strong> para elevar su relieve y descubrir sus especies, o elige una <strong>especie del catálogo</strong> para elevar todos los departamentos donde se distribuye con su medallón floral.";
-        targetCamLookAt.set(0, 0, 2);
-        targetCamPos.set(0, 54, 46);
+        targetCamLookAt.set(2.0, 0, 8.5);
+        targetCamPos.set(2.0, 76, 68);
         isAnimatingCam = true;
       } else {
         const spInDept = getSpeciesForDept(dNorm);
@@ -2104,6 +2105,9 @@
       camera.updateProjectionMatrix();
     }
     window.addEventListener("resize", resizeRenderer);
+    if (typeof ResizeObserver !== "undefined" && canvas.parentElement) {
+      new ResizeObserver(() => resizeRenderer()).observe(canvas.parentElement);
+    }
     resizeRenderer();
 
     // Animación continua: interpolación suave de altura (lerp) y color de cada departamento
@@ -2363,13 +2367,10 @@
     }
 
   
-    // === PUNTO 4: INICIAR EN MODO RUEDA EN COMPUTADOR (> 900px) ===
-    if (window.innerWidth > 900) {
-      document.body.classList.add("wheel-minimized");
+    // === PUNTO 4: MODO RUEDA DE FABRICA EN PC (SIN PARPADEO) Y BOTON MOVIL ===
+    if (window.innerWidth <= 900) {
       const btnMode = document.getElementById("btn-toggle-wheel-mode");
-      if (btnMode) btnMode.textContent = "📋 Catálogo";
-      setTimeout(() => window.dispatchEvent(new Event("resize")), 80);
-      setTimeout(() => window.dispatchEvent(new Event("resize")), 320);
+      if (btnMode) btnMode.textContent = "🛞 Solo Rueda";
     }
 
     // === PUNTO 7: SUBIR AUTOMÁTICAMENTE AL MAPA AL SELECCIONAR DESDE EL CATÁLOGO MÓVIL ===
